@@ -15,16 +15,34 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
+        <div class="w-full min-h-screen flex flex-row sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+            <div class="flex flex-col justify-center items-center gap-4 w-2/5 p-10 h-screen bg-custom-gradient-1 ">
+                <div class="w-fit rounded-xl bg-custom-gradient-2">
+                    <a href="/">
+                        <x-application-logo class="w-16 h-16 fill-current text-white" />
+                    </a>
+                </div>
+                <h2 class="font-sans font-black text-2xl text-white">Gestión Ventas</h2>
+                <p class="text-center text-blue-100">Administra ventas, clientes y rutas en un solo panel, simple y seguro.</p>
+                <div>
+                    <span>
+                        <svg class="text-white w-12 h-12">
+                            <use xlink:href="#check-circle"></use>
+                        </svg>
+                    </span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
-
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            
+            <div class="P-6 flex flex-col items-center justify-center w-3/5">
+                <div class="w-3/5 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+                    {{ $slot }}
+                </div>
             </div>
         </div>
     </body>
 </html>
+
+
