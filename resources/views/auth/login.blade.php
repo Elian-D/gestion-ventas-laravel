@@ -3,8 +3,8 @@
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <div class="text-center">
-        <h2 class="font-black text-2xl">Iniciar sesión</h2>
-        <h3 class="text-gray-400">Ingresa tus credenciales para continuar</h3>
+        <h2 class="font-black text-lg lg:text-2xl">Iniciar sesión</h2>
+        <h3 class="text-gray-400 text-xs lg:text-lg">Ingresa tus credenciales para continuar</h3>
     </div>
     <form method="POST" action="{{ route('login') }}">
         @csrf

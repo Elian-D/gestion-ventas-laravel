@@ -15,8 +15,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <div class="w-full min-h-screen flex flex-row sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div class="flex flex-col justify-center items-center gap-7 w-2/5 p-10 h-screen bg-custom-gradient-1 ">
+        <div class="w-full min-h-screen flex flex-col md:flex-row justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+            <div class="hidden lg:flex flex-col justify-center items-center gap-7 w-2/5 p-10 h-screen bg-custom-gradient-1 ">
                 <div class="w-fit p-4 rounded-2xl bg-custom-gradient-2">
                     <a href="/">
                         <x-fas-chart-line class="w-8 h-8 fill-current text-white" />
@@ -44,8 +44,8 @@
                 </div>
             </div>
             
-            <div class="P-6 flex flex-col items-center justify-center w-3/5">
-                <div class="flex flex-col gap-5 w-3/5 px-10 py-8 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full p-6 flex items-center justify-center lg:w-3/5">
+                <div class="flex flex-col gap-5 w-full px-10 py-8 bg-white shadow-md overflow-hidden sm:rounded-lg sm:w-3/5">
                     {{ $slot }}
                 </div>
             </div>
