@@ -45,7 +45,7 @@
             </div>
             
             <div class="P-6 flex flex-col items-center justify-center w-3/5">
-                <div class="w-3/5 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+                <div class="flex flex-col gap-5 w-3/5 px-10 py-8 bg-white shadow-md overflow-hidden sm:rounded-lg">
                     {{ $slot }}
                 </div>
             </div>
