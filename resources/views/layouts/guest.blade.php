@@ -16,23 +16,31 @@
     </head>
     <body class="font-sans text-gray-900 antialiased">
         <div class="w-full min-h-screen flex flex-row sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div class="flex flex-col justify-center items-center gap-4 w-2/5 p-10 h-screen bg-custom-gradient-1 ">
-                <div class="w-fit rounded-xl bg-custom-gradient-2">
+            <div class="flex flex-col justify-center items-center gap-7 w-2/5 p-10 h-screen bg-custom-gradient-1 ">
+                <div class="w-fit p-4 rounded-2xl bg-custom-gradient-2">
                     <a href="/">
-                        <x-application-logo class="w-16 h-16 fill-current text-white" />
+                        <x-fas-chart-line class="w-8 h-8 fill-current text-white" />
                     </a>
                 </div>
-                <h2 class="font-sans font-black text-2xl text-white">Gestión Ventas</h2>
+                <h2 class="font-bold text-2xl text-white">Gestión Ventas</h2>
                 <p class="text-center text-blue-100">Administra ventas, clientes y rutas en un solo panel, simple y seguro.</p>
-                <div>
-                    <span>
-                        <svg class="text-white w-12 h-12">
-                            <use xlink:href="#check-circle"></use>
-                        </svg>
+                <div class="flex gap-4">
+                    <span class="flex gap-1 items-center text-blue-100 font-base font-semibold"> 
+                        <x-heroicon-o-check-circle class="w-5 h-5" />
+                        Ventas
                     </span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
+                    <span class="flex gap-1 items-center text-blue-100 font-base font-semibold"> 
+                        <x-heroicon-o-check-circle class="w-5 h-5" />
+                        Clientes
+                    </span>
+                    <span class="flex gap-1 items-center text-blue-100 font-base font-semibold"> 
+                        <x-heroicon-o-check-circle class="w-5 h-5" />
+                        Reportes
+                    </span>
+                    <span class="flex gap-1 items-center text-blue-100 font-base font-semibold"> 
+                        <x-heroicon-o-check-circle class="w-5 h-5" />
+                        Rutas
+                    </span>
                 </div>
             </div>
             
