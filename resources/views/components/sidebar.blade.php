@@ -1,13 +1,189 @@
-<aside class="w-64 bg-white shadow h-screen ">
-    <div class="flex p-4 items-center justify-center gap-2 border-b border-gray-200">
-        <x-fas-chart-line class="w-5 h-5 fill-current text-black" />
-        <h2 class="text-xl font-black">Gestión Ventas</h2>
+<aside x-data="{ isHovered: false }"
+       
+       {{-- 1. ESCRITORIO: Manejo del Hover (Activado solo si NO está abierto y es PC) --}}
+       @mouseover="!isSidebarOpen && (window.innerWidth >= 640) ? isHovered = true : null"
+       @mouseleave="!isSidebarOpen && (window.innerWidth >= 640) ? isHovered = false : null"
+
+       {{-- CLASES BASE Y TRANSICIONES --}}
+       class="bg-white shadow-md border-r border-gray-100 transition-all duration-300 ease-in-out z-40"
+       
+       {{-- CLASES CONDICIONALES PARA EL ESTADO --}}
+       :class="{ 
+            // Manejo de ancho (PC: w-20 vs w-64. Móvil: solo w-64)
+            'w-64': isSidebarOpen || isHovered || (window.innerWidth < 640),
+            'w-20': !isSidebarOpen && !isHovered && (window.innerWidth >= 640),
+            
+            // Posición: Fijo en PC (z-10) para empujar el contenido; Fijo y flotante en Móvil (z-50)
+            // Se usa hidden en móvil para que el transition funcione correctamente
+            'fixed inset-y-0 left-0 z-10': (window.innerWidth >= 640), 
+            'sm:block': true, // Visible por defecto en PC
+
+            // ** EFECTO FLOTANTE PC ** (Prioridad Z-Index y Sombra en hover)
+            'z-50 shadow-2xl': isHovered,
+            
+            // MOVIL: Control de TRANSICIÓN LATERAL (flotante, sin empujar)
+            'fixed inset-y-0 left-0 w-64 z-50': (window.innerWidth < 640), // Fijo y alto z-index en móvil
+            'transform translate-x-0': isSidebarOpen && (window.innerWidth < 640), 
+            '-translate-x-full': !isSidebarOpen && (window.innerWidth < 640)
+       }"
+       
+       {{-- VISIBILIDAD MÓVIL/PC --}}
+       x-show="isSidebarOpen || (window.innerWidth >= 640)"
+       
+>
+    
+    <div class="flex p-5 items-center justify-start gap-3 border-b border-gray-100">
+        <x-fas-chart-line class="w-5 h-5 fill-current text-indigo-500 flex-shrink-0" /> 
+        <a href="/dashboard" class="text-lg font-bold text-gray-800 tracking-tight whitespace-nowrap overflow-hidden" 
+           {{-- Muestra el texto si está abierto por click O por hover --}}
+           x-show="isSidebarOpen || isHovered"
+           x-transition:enter="transition ease-out duration-300"
+           x-transition:enter-start="opacity-0 translate-x-10"
+           x-transition:enter-end="opacity-100 translate-x-0">
+            Gestión <span class="text-indigo-600">Ventas</span>
+        </a>
     </div>
 
-    <nav class="space-y-2 p-4">
-        <a href="/dashboard" class="block p-2 hover:bg-gray-100 rounded">Dashboard</a>
-        <a href="/clientes" class="block p-2 hover:bg-gray-100 rounded">Clientes</a>
-        <a href="/ventas" class="block p-2 hover:bg-gray-100 rounded">Ventas</a>
-        <a href="/productos" class="block p-2 hover:bg-gray-100 rounded">Productos</a>
+    <nav class="space-y-1.5 p-4">
+        
+        <a href="/dashboard" class="group">
+            <span class="flex items-center gap-3 p-2 rounded-lg text-gray-600 font-medium text-sm 
+                         hover:bg-indigo-50 hover:text-indigo-600 transition-all duration-300">
+                <x-heroicon-s-home class="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors flex-shrink-0" />
+                {{-- Muestra el texto si está abierto por click O por hover --}}
+                <span :class="{ 'opacity-100': isSidebarOpen || isHovered, 'opacity-0': !isSidebarOpen && !isHovered }" 
+                      class="overflow-hidden whitespace-nowrap transition-opacity duration-300">Dashboard</span>
+            </span>
+        </a>
+
+        <hr class="my-2 border-gray-100">
+
+        <div x-data="{ open: false }" class="w-full">
+            {{-- El submenú solo se puede abrir/cerrar si el sidebar está completamente expandido (click o hover) --}}
+            <button @click="if (isSidebarOpen || isHovered) open = !open" 
+                    :class="{'bg-indigo-50 text-indigo-600': open, 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600': !open}"
+                    class="flex items-center justify-between gap-2 p-2 rounded-lg w-full font-medium text-sm transition-all duration-300">
+                
+                <div class="flex items-center gap-3">
+                    <x-heroicon-s-user-group :class="{'text-indigo-500': open, 'text-gray-400': !open}" class="w-5 h-5 transition-colors flex-shrink-0" />
+                    {{-- Muestra el texto si está abierto por click O por hover --}}
+                    <span :class="{ 'opacity-100': isSidebarOpen || isHovered, 'opacity-0': !isSidebarOpen && !isHovered }" 
+                          class="overflow-hidden whitespace-nowrap transition-opacity duration-300">Clientes</span>
+                </div>
+
+                {{-- Muestra la flecha si está abierto por click O por hover --}}
+                <svg x-show="isSidebarOpen || isHovered"
+                     :class="{ 'rotate-90': open }" 
+                     class="w-4 h-4 transition-transform duration-300 text-gray-400 flex-shrink-0" 
+                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+
+            </button>
+
+            {{-- El submenú solo se despliega si está abierto por click O por hover --}}
+            <div x-show="open && (isSidebarOpen || isHovered)" 
+                 class="overflow-hidden transition-all duration-300 ease-in-out" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 max-h-0"
+                 x-transition:enter-end="opacity-100 max-h-screen"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 max-h-screen"
+                 x-transition:leave-end="opacity-0 max-h-0">
+                
+                <div class="py-1 pl-10 pr-2 space-y-0.5">
+                    <a href="/clientes/crear" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Crear Nuevo</a>
+                    <a href="/clientes" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Listar Clientes</a>
+                    <a href="/clientes/editar" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Gestionar</a>
+                    <a href="/clientes/papelera" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Papelera</a>
+                </div>
+            </div>
+        </div>
+        
+        {{-- ... Repetir la lógica para Rutas, Ventas y Usuarios ... --}}
+        
+        <div x-data="{ open: false }" class="w-full">
+            <button @click="if (isSidebarOpen || isHovered) open = !open" 
+                    :class="{'bg-indigo-50 text-indigo-600': open, 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600': !open}"
+                    class="flex items-center justify-between gap-2 p-2 rounded-lg w-full font-medium text-sm transition-all duration-300">
+                
+                <div class="flex items-center gap-3">
+                    <x-heroicon-s-map :class="{'text-indigo-500': open, 'text-gray-400': !open}" class="w-5 h-5 transition-colors flex-shrink-0" />
+                    <span :class="{ 'opacity-100': isSidebarOpen || isHovered, 'opacity-0': !isSidebarOpen && !isHovered }" 
+                          class="overflow-hidden whitespace-nowrap transition-opacity duration-300">Rutas</span>
+                </div>
+
+                <svg x-show="isSidebarOpen || isHovered" :class="{ 'rotate-90': open }" class="w-4 h-4 transition-transform duration-300 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+
+            </button>
+            <div x-show="open && (isSidebarOpen || isHovered)" class="overflow-hidden transition-all duration-300 ease-in-out" 
+                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen" 
+                 x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0">
+                <div class="py-1 pl-10 pr-2 space-y-0.5">
+                    <a href="/rutas/crear" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Crear Ruta</a>
+                    <a href="/rutas" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Ver Rutas</a>
+                    <a href="/rutas/asignar" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Asignar</a>
+                </div>
+            </div>
+        </div>
+
+        <div x-data="{ open: false }" class="w-full">
+            <button @click="if (isSidebarOpen || isHovered) open = !open" 
+                    :class="{'bg-indigo-50 text-indigo-600': open, 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600': !open}"
+                    class="flex items-center justify-between gap-2 p-2 rounded-lg w-full font-medium text-sm transition-all duration-300">
+                
+                <div class="flex items-center gap-3">
+                    <x-heroicon-s-shopping-bag :class="{'text-indigo-500': open, 'text-gray-400': !open}" class="w-5 h-5 transition-colors flex-shrink-0" />
+                    <span :class="{ 'opacity-100': isSidebarOpen || isHovered, 'opacity-0': !isSidebarOpen && !isHovered }" 
+                          class="overflow-hidden whitespace-nowrap transition-opacity duration-300">Ventas</span>
+                </div>
+
+                <svg x-show="isSidebarOpen || isHovered" :class="{ 'rotate-90': open }" class="w-4 h-4 transition-transform duration-300 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+
+            </button>
+            <div x-show="open && (isSidebarOpen || isHovered)" class="overflow-hidden transition-all duration-300 ease-in-out" 
+                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen" 
+                 x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0">
+                
+                <div class="py-1 pl-10 pr-2 space-y-0.5">
+                    <a href="/ventas/crear" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Nueva Venta</a>
+                    <a href="/ventas" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Historial</a>
+                    <a href="/ventas/pendientes" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Pendientes</a>
+                </div>
+            </div>
+        </div>
+        
+        <div x-data="{ open: false }" class="w-full">
+            <button @click="if (isSidebarOpen || isHovered) open = !open" 
+                    :class="{'bg-indigo-50 text-indigo-600': open, 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600': !open}"
+                    class="flex items-center justify-between gap-2 p-2 rounded-lg w-full font-medium text-sm transition-all duration-300">
+                
+                <div class="flex items-center gap-3">
+                    <x-heroicon-s-users :class="{'text-indigo-500': open, 'text-gray-400': !open}" class="w-5 h-5 transition-colors flex-shrink-0" />
+                    <span :class="{ 'opacity-100': isSidebarOpen || isHovered, 'opacity-0': !isSidebarOpen && !isHovered }" 
+                          class="overflow-hidden whitespace-nowrap transition-opacity duration-300">Usuarios</span>
+                </div>
+
+                <svg x-show="isSidebarOpen || isHovered" :class="{ 'rotate-90': open }" class="w-4 h-4 transition-transform duration-300 text-gray-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+
+            </button>
+            <div x-show="open && (isSidebarOpen || isHovered)" class="overflow-hidden transition-all duration-300 ease-in-out" 
+                 x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen" 
+                 x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0">
+                
+                <div class="py-1 pl-10 pr-2 space-y-0.5">
+                    <a href="/usuarios/crear" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Crear Usuario</a>
+                    <a href="/usuarios" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Gestión de Roles</a>
+                    <a href="/usuarios/reporte" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Reporte</a>
+                </div>
+            </div>
+        </div>
+
     </nav>
 </aside>
