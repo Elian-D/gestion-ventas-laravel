@@ -1,15 +1,13 @@
 <x-app-layout>
-    
-    <x-slot name="header">
-        <h1 class="font-semibold text-2xl text-gray-800 leading-tight">
-            {{ __('Crear Nuevo Rol') }}
-        </h1>
-    </x-slot>
 
     <div class="py-6 sm:py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             {{-- Tarjeta/Contenedor del Formulario --}}
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-8">
+
+                {{-- TÍTULO MINIMALISTA AÑADIDO AQUÍ --}}
+                <h2 class="text-xl font-medium text-gray-700 mb-6 border-b pb-3">{{ __('Crear Nuevo Rol') }}</h2>
+                {{-- Se redujo a text-xl y font-medium, con una línea sutil de separación. --}}
                 
                 <form action="{{ route('roles.store') }}" method="POST">
                     @csrf

@@ -211,8 +211,8 @@
                             
                             <div class="py-1 pl-4 pr-1 space-y-0.5">
                                 {{-- Enlaces del Nivel 2 --}}
-                                <a href="/roles" class="block pl-6 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition">Roles</a>
-                                <a href="/permisos" class="block pl-6 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition">Permisos</a>
+                                <a href="/admin/roles" class="block pl-6 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition">Lista de Roles</a>
+                                <a href="/admin/roles/create" class="block pl-6 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition">Crear Roles</a>
                             </div>
                         </div>
                         

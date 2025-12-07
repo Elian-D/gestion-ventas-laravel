@@ -1,10 +1,6 @@
 <x-app-layout>
     
-    <x-slot name="header">
-        <h1 class="font-semibold text-2xl text-gray-800 leading-tight">
-            {{ __('Gestión de Roles') }}
-        </h1>
-    </x-slot>
+    {{-- Eliminamos el x-slot:header para integrar el título en el contenido --}}
 
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -17,9 +13,9 @@
                     </div>
                 @endif
                 
-                {{-- TÍTULO AÑADIDO (Roles) --}}
-                <h2 class="text-xl font-bold text-gray-800 mb-4">{{ __('Roles') }}</h2>
-                
+                {{-- TÍTULO MINIMALISTA --}}
+                <h2 class="text-xl font-medium text-gray-700 mb-6 border-b pb-3">{{ __('Gestión de Roles') }}</h2>
+
                 {{-- 2. BARRA DE HERRAMIENTAS (Búsqueda y Creación) --}}
                 <div class="flex flex-col md:flex-row justify-between items-center mb-6 space-y-4 md:space-y-0">
                     
@@ -47,8 +43,8 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8/12">Nombre</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-3/12">Acciones</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-7/12">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4/12">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -56,30 +52,36 @@
                                 <tr class="hover:bg-gray-50 transition duration-150">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $role->id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $role->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-3">
+                                    
+                                    {{-- ACCIONES COMPACTAS: Solo Íconos --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center space-x-2">
                                         
-                                        {{-- Botón Editar --}}
+                                        {{-- Botón Editar (Ícono) --}}
                                         <a href="{{ route('roles.edit', $role) }}" 
-                                           class="text-indigo-600 hover:text-indigo-900 transition flex items-center">
-                                            <x-heroicon-s-pencil class="w-4 h-4" />
+                                           title="Editar Rol"
+                                           class="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-100 transition duration-150">
+                                            <x-heroicon-s-pencil class="w-5 h-5" />
                                         </a>
                                         
-                                        {{-- Botón Eliminar con Formulario --}}
+                                        {{-- Botón Asignar Permisos (Ícono) --}}
+                                        <a href="{{ route('roles.permissions.edit', $role) }}"
+                                           title="Asignar Permisos"
+                                           class="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-100 transition duration-150">
+                                            <x-heroicon-s-shield-check class="w-5 h-5" />
+                                        </a>
+
+                                        {{-- Botón Eliminar con Formulario (Ícono) --}}
                                         <form action="{{ route('roles.destroy', $role) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('¿Seguro que quieres eliminar el rol: {{ $role->name }}?')"
-                                                    class="text-red-600 hover:text-red-900 transition flex items-center">
-                                                <x-heroicon-s-trash class="w-4 h-4" />
+                                            <button 
+                                                type="button"
+                                                @click="$dispatch('open-modal', 'confirm-role-deletion-{{ $role->id }}')"
+                                                title="Eliminar Rol"
+                                                class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition duration-150">
+                                                <x-heroicon-s-trash class="w-5 h-5" />
                                             </button>
                                         </form>
-
-                                        <a href="{{ route('roles.permissions.edit', $role) }}"
-                                        class="text-green-600 hover:text-green-900 transition flex items-center">
-                                            <x-heroicon-s-shield-check class="w-4 h-4 mr-1" />
-                                            Permisos
-                                        </a>
-
                                         
                                     </td>
                                 </tr>
@@ -100,4 +102,40 @@
             </div>
         </div>
     </div>
+    {{-- Al final de roles/index.blade.php --}}
+
+@foreach($roles as $role)
+    <x-modal name="confirm-role-deletion-{{ $role->id }}" :show="$errors->roleDeletion->isNotEmpty()" maxWidth="md">
+        <form method="post" action="{{ route('roles.destroy', $role) }}" class="p-6">
+            @csrf
+            @method('delete')
+
+            {{-- Título y Mensaje de Advertencia --}}
+            <h2 class="text-lg font-medium text-gray-900">
+                {{ __('¿Estás seguro de que quieres eliminar este rol?') }}
+            </h2>
+
+            <p class="mt-1 text-sm text-gray-600">
+                {{ __('Esta acción es irreversible. Estás a punto de eliminar el rol: ') }}
+                <span class="font-bold text-red-600">{{ $role->name }}</span>.
+                {{ __('Asegúrate de que no hay usuarios asignados a este rol antes de proceder.') }}
+            </p>
+
+            {{-- Área de Botones del Modal --}}
+            <div class="mt-6 flex justify-end">
+                
+                {{-- Botón Cancelar --}}
+                <x-secondary-button x-on:click="$dispatch('close')">
+                    {{ __('Cancelar') }}
+                </x-secondary-button>
+
+                {{-- Botón Eliminar (Rojo) --}}
+                <x-danger-button class="ms-3">
+                    <x-heroicon-s-trash class="w-4 h-4 mr-2" />
+                    {{ __('Eliminar Rol') }}
+                </x-danger-button>
+            </div>
+        </form>
+    </x-modal>
+@endforeach
 </x-app-layout>

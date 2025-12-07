@@ -1,15 +1,15 @@
 <x-app-layout>
-    
-    <x-slot name="header">
-        <h1 class="font-semibold text-2xl text-gray-800 leading-tight">
-            {{ __('Editar Rol:') }} <span class="text-indigo-600">{{ $role->name }}</span>
-        </h1>
-    </x-slot>
 
     <div class="py-6 sm:py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             {{-- Tarjeta/Contenedor del Formulario --}}
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-8">
+                
+                {{-- TÍTULO MINIMALISTA AÑADIDO AQUÍ --}}
+                <h2 class="text-xl font-medium text-gray-700 mb-6 border-b pb-3">
+                    {{ __('Editar Rol: ') }} <span class="text-indigo-600 font-semibold">{{ $role->name }}</span>
+                </h2>
+                {{-- Se usa text-xl, font-medium y una línea sutil para el minimalismo. --}}
                 
                 <form action="{{ route('roles.update', $role) }}" method="POST">
                     @csrf
