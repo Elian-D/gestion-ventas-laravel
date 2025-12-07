@@ -13,7 +13,7 @@ class RoleController extends Controller
     {
         $search = $request->query('search');
         $roles = Role::when($search, function($query, $search) {
-                        return $query->where('id', 'like', "%{$search}%");
+                        return $query->where('name', 'like', "%{$search}%");
                     })
                     ->orderBy('id')
                     ->paginate(10)
