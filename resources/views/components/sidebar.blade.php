@@ -157,7 +157,10 @@
             </div>
         </div>
         
+{{-- ... (Otros módulos como Ventas o Rutas) ... --}}
+        
         <div x-data="{ open: false }" class="w-full">
+            {{-- BOTÓN PRINCIPAL: USUARIOS --}}
             <button @click="if (isSidebarOpen || isHovered) open = !open" 
                     :class="{'bg-indigo-50 text-indigo-600': open, 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600': !open}"
                     class="flex items-center justify-between gap-2 p-2 rounded-lg w-full font-medium text-sm transition-all duration-300">
@@ -173,14 +176,49 @@
                 </svg>
 
             </button>
+            
+            {{-- CONTENIDO NIVEL 1 --}}
             <div x-show="open && (isSidebarOpen || isHovered)" class="overflow-hidden transition-all duration-300 ease-in-out" 
                  x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen" 
                  x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0">
                 
                 <div class="py-1 pl-10 pr-2 space-y-0.5">
+                    
+                    {{-- Enlaces Directos del Nivel 1 (menos enlaces) --}}
                     <a href="/usuarios/crear" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Crear Usuario</a>
-                    <a href="/usuarios" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Gestión de Roles</a>
-                    <a href="/usuarios/reporte" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Reporte</a>
+                    <a href="/usuarios/reporte" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Reporte de Actividad</a>
+
+                    {{-- DROPDOWN ANIDADO (NIVEL 2) para Roles y Permisos --}}
+                    <div x-data="{ subOpen: false }" class="w-full">
+                        
+                        <button @click="subOpen = !subOpen" 
+                                :class="{'bg-gray-100 text-indigo-600': subOpen, 'text-gray-700 hover:bg-gray-100': !subOpen}"
+                                class="flex items-center justify-between px-3 py-1.5 w-full text-xs font-medium rounded transition">
+                            
+                            <span>
+                                Seguridad y Accesos
+                            </span>
+
+                            <svg :class="{ 'rotate-90': subOpen }" class="w-3 h-3 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        
+                        {{-- CONTENIDO NIVEL 2 --}}
+                        <div x-show="subOpen" class="overflow-hidden"
+                            x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 max-h-0" x-transition:enter-end="opacity-100 max-h-screen" 
+                            x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 max-h-screen" x-transition:leave-end="opacity-0 max-h-0">
+                            
+                            <div class="py-1 pl-4 pr-1 space-y-0.5">
+                                {{-- Enlaces del Nivel 2 --}}
+                                <a href="/roles" class="block pl-6 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition">Roles</a>
+                                <a href="/permisos" class="block pl-6 py-1 text-xs text-gray-600 hover:bg-gray-50 rounded transition">Permisos</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    {{-- FIN: DROPDOWN ANIDADO --}}
+
                 </div>
             </div>
         </div>

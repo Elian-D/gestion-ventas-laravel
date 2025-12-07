@@ -73,6 +73,13 @@
                                                 <x-heroicon-s-trash class="w-4 h-4" />
                                             </button>
                                         </form>
+
+                                        <a href="{{ route('roles.permissions.edit', $role) }}"
+                                        class="text-green-600 hover:text-green-900 transition flex items-center">
+                                            <x-heroicon-s-shield-check class="w-4 h-4 mr-1" />
+                                            Permisos
+                                        </a>
+
                                         
                                     </td>
                                 </tr>
