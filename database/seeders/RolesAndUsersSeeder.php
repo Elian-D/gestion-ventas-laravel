@@ -21,7 +21,7 @@ class RolesAndUsersSeeder extends Seeder
         $rolesCreate = Permission::firstOrCreate(['name' => 'roles create']);
         $rolesEdit = Permission::firstOrCreate(['name' => 'roles edit']);
         $rolesDelete = Permission::firstOrCreate(['name' => 'roles delete']);
-
+        $rolesAssign = Permission::firstOrCreate(['name' => 'roles assign']);
         // ROLES
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $normalRole = Role::firstOrCreate(['name' => 'normal']);
@@ -33,6 +33,7 @@ class RolesAndUsersSeeder extends Seeder
             $rolesCreate,
             $rolesEdit,
             $rolesDelete,
+            $rolesAssign,
         ]);
 
         // Asignar permisos al rol normal (solo ver dashboard)
