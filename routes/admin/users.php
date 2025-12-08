@@ -3,34 +3,36 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 
-Route::get('/users', [UserController::class, 'index'])
-    ->middleware('permission:users index')
+Route::middleware('permission:users index')
+    ->get('/users', [UserController::class, 'index'])
     ->name('users.index');
 
-Route::get('/users', [UserController::class, 'create'])
-    ->middleware('permission:users create')
+Route::middleware('permission:users create')
+    ->get('/users/create', [UserController::class, 'create'])
     ->name('users.create');
 
-Route::get('/users', [UserController::class, 'store'])
-    ->middleware('permission:users create')
+Route::middleware('permission:users create')
+    ->post('/users', [UserController::class, 'store'])
     ->name('users.store');
 
-Route::get('/users', [UserController::class, 'edit'])
-    ->middleware('permission:users edit')
+Route::middleware('permission:users edit')
+    ->get('/users/{user}/edit', [UserController::class, 'edit'])
     ->name('users.edit');
 
-Route::get('/users', [UserController::class, 'update'])
-    ->middleware('permission:users edit')
+Route::middleware('permission:users edit')
+    ->put('/users/{user}', [UserController::class, 'update'])
     ->name('users.update');
 
-Route::get('/users', [UserController::class, 'destroy'])
-    ->middleware('permission:users delete')
+Route::middleware('permission:users delete')
+    ->delete('/users/{user}', [UserController::class, 'destroy'])
     ->name('users.destroy');
 
-Route::get('/users/{user}/roles', [UserController::class, 'editRoles'])
-    ->middleware('permission:users assign')
-    ->name('users.roles');
+// Editar roles
+Route::middleware('permission:users assign')
+    ->get('/users/{user}/roles', [UserController::class, 'editRoles'])
+    ->name('users.roles.edit');
 
-Route::get('/users', [UserController::class, 'updateRoles'])
-    ->middleware('permission:users assign')
-    ->name('users.roles');
+// Actualizar roles
+Route::middleware('permission:users assign')
+    ->put('/users/{user}/roles', [UserController::class, 'updateRole'])
+    ->name('users.roles.update');
