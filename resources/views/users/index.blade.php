@@ -34,89 +34,58 @@
                     </a>
                 </div>
 
-                {{-- 3. TABLA ESTILIZADA Y RESPONSIVE --}}
-                {{-- El contenedor overflow-x-auto asegura que, si la tabla se desborda, se pueda hacer scroll horizontalmente en móvil --}}
-                <div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50 hidden md:table-header-group">
-                            <tr>
-                                {{-- Asegúrate de que todas las TH tengan 'md:table-cell' o 'hidden' en móvil --}}
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-4/12">Nombre y Email</th>                                
-                                <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Creado</th>
-                                <th class="hidden lg:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">Actualizado</th>
-                                
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/12">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200 md:table-row-group">
-                            @forelse($users as $user)
-                                {{-- En móvil, cada TR es un DIV/Tarjeta. En MD+, vuelve a ser un TR normal. --}}
-                                <tr class="block md:table-row hover:bg-gray-50 transition duration-150 p-4 border-b border-gray-200 md:border-b-0">
-                                    
-                                    {{-- ID (Solo visible en desktop) --}}
-                                    <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-1/12">{{ $user->id }}</td>
-                                    
-                                    {{-- Nombre & Email (El cuerpo de la Tarjeta en móvil) --}}
-                                    <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-full md:w-4/12">
-                                        <div class="font-bold text-gray-900 text-base mb-1 md:font-normal md:text-sm">{{ $user->name }}</div>
-                                        <div class="text-sm text-gray-500 md:text-gray-600">{{ $user->email }}</div>
-                                    </td>
+                {{-- 3. TABLA ESTILIZADA Y RESPONSIVE (USANDO COMPONENTE) --}}
+                {{-- La magia: El componente solo provee la estructura <table>/<thead>/<tbody> --}}
+                <x-data-table :items="$users" :headers="['ID', 'Nombre y Email', 'Creado', 'Actualizado']">
+                    
+                    {{-- El ciclo va AQUÍ, y el resultado de cada iteración (el <tr> completo) es el contenido del $slot --}}
+                    @forelse($users as $user)
+                        <tr class="block md:table-row hover:bg-gray-50 transition duration-150 p-4 border-b border-gray-200 md:border-b-0">
+                            
+                            {{-- Columna 1: ID --}}
+                            <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-1/12">{{ $user->id }}</td>
+                            
+                            {{-- Columna 2: Nombre y Email (Cuerpo de la Card en móvil) --}}
+                            <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-full md:w-4/12">
+                                <div class="font-bold text-gray-900 text-base mb-1 md:font-normal md:text-sm">{{ $user->name }}</div>
+                                <div class="text-sm text-gray-500 md:text-gray-600">{{ $user->email }}</div>
+                            </td>
+                            
+                            {{-- Columna 3: Creado (Oculto en lg-) --}}
+                            <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->created_at->format('d/m/Y') }}</td>
+                            
+                            {{-- Columna 4: Actualizado (Oculto en lg-) --}}
+                            <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->updated_at->format('d/m/Y') }}</td>
 
-                                    {{-- Fechas (Solo visible en desktop grande) --}}
-                                    <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->created_at->format('d/m/Y') }}</td>
-                                    <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->updated_at->format('d/m/Y') }}</td>
+                            {{-- CELDA DE ACCIONES --}}
+                            <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium w-full md:w-auto">
+                                <div class="flex items-center space-x-2">
+                                    {{-- Botón Editar --}}
+                                    <a href="{{ route('users.edit', $user) }}" title="Editar Usuario" class="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-100"><x-heroicon-s-pencil class="w-5 h-5" /></a>
                                     
-                                    {{-- ACCIONES COMPACTAS (Mejoramos la disposición en móvil) --}}
-                                    <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium w-full md:w-2/12">
-                                        {{-- En móvil: flex-col y items-start. En MD+: flex-row y items-center --}}
-                                        <div class="flex items-center space-x-2">
-                                            
-                                            {{-- Botón Editar (Ícono) --}}
-                                            <a href="{{ route('users.edit', $user) }}" 
-                                            title="Editar Usuario"
-                                            class="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-100 transition duration-150">
-                                                <x-heroicon-s-pencil class="w-5 h-5" />
-                                            </a>
-                                            
-                                            {{-- Botón Asignar Roles (Ícono mejorado) --}}
-                                            <a href="{{ route('users.roles.edit', $user) }}"
-                                            title="Asignar Roles y Permisos"
-                                            class="text-teal-600 hover:text-teal-900 p-1 rounded-md hover:bg-teal-100 transition duration-150">
-                                                {{-- Cambio: Uso de 'key' en lugar de 'shield-check' para Roles/Permisos --}}
-                                                <x-heroicon-s-key class="w-5 h-5" />
-                                            </a>
+                                    {{-- Botón Roles --}}
+                                    <a href="{{ route('users.roles.edit', $user) }}" title="Asignar Roles y Permisos" class="text-teal-600 hover:text-teal-900 p-1 rounded-md hover:bg-teal-100"><x-heroicon-s-key class="w-5 h-5" /></a>
 
-                                            {{-- Botón Eliminar con Formulario (Ícono) --}}
-                                            <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline-block" x-data>
-                                                @csrf
-                                                @method('DELETE')
-                                                <button 
-                                                    type="button"
-                                                    @click="$dispatch('open-modal', 'confirm-user-deletion-{{ $user->id }}')"
-                                                    title="Eliminar Usuario"
-                                                    class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100 transition duration-150">
-                                                    <x-heroicon-s-trash class="w-5 h-5" />
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                    
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500 text-sm">No se encontraron usuarios.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    {{-- Botón Eliminar (Disparador del Modal) --}}
+                                    <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline-block" x-data>
+                                        @csrf @method('DELETE')
+                                        <button type="button" @click="$dispatch('open-modal', 'confirm-user-deletion-{{ $user->id }}')" 
+                                            title="Eliminar Usuario"
+                                            class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100">
+                                            <x-heroicon-s-trash class="w-5 h-5" />
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                         {{-- Si no hay usuarios, agregamos una fila de "No hay datos" --}}
+                         <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500 text-sm">No se encontraron usuarios.</td>
+                        </tr>
+                    @endforelse
 
-                {{-- 4. PAGINACIÓN --}}
-                <div class="mt-6">
-                    {{ $users->links() }}
-                </div>
-
+                </x-data-table>
             </div>
         </div>
     </div>
