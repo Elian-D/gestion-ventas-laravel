@@ -17,7 +17,7 @@ class RoleSeeder extends Seeder
         // Creación de roles
 
         $admin = Role::firstOrCreate(['name' => 'admin']);
-        $user = Role::firstOrCreate(['name' => 'user']);
+        $user = Role::firstOrCreate(['name' => 'Usuario Genérico']);
 
         // Asignar todos los permisos al rol admin
         $admin->syncPermissions(Permission::all());

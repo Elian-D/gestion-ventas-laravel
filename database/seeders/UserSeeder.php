@@ -35,6 +35,6 @@ class UserSeeder extends Seeder
 
         // Asignacion de roles
         $admin->assignRole('admin');
-        $normal->assignRole('user');
+        $normal->assignRole('Usuario Genérico');
     }
 }

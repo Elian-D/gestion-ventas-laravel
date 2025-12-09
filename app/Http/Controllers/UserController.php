@@ -35,16 +35,25 @@ class UserController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        //Crear usuario
-        User::create([
+        // Crear usuario
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
 
+        // Asignar rol por defecto a usuario
+        $user->assignRole('Usuario Genérico');
+
+        
+
         return redirect()
             ->route('users.index')
             ->with('success', 'Usuario creado correctamente');
+    }
+
+    public function edit(User $user){
+        return view('users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
@@ -103,8 +112,4 @@ class UserController extends Controller
             ->route('users.index')
             ->with('success', 'Rol actualizado correctamente.');
     }
-
-
-
-
 }
