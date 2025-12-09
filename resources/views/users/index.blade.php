@@ -36,7 +36,7 @@
 
                 {{-- 3. TABLA ESTILIZADA Y RESPONSIVE (USANDO COMPONENTE) --}}
                 {{-- La magia: El componente solo provee la estructura <table>/<thead>/<tbody> --}}
-                <x-data-table :items="$users" :headers="['ID', 'Nombre y Email', 'Creado', 'Actualizado']">
+                <x-data-table :items="$users" :headers="['ID', 'Nombre y Email', 'Rol', 'Creado', 'Actualizado']">
                     
                     {{-- El ciclo va AQUÍ, y el resultado de cada iteración (el <tr> completo) es el contenido del $slot --}}
                     @forelse($users as $user)
@@ -51,10 +51,14 @@
                                 <div class="text-sm text-gray-500 md:text-gray-600">{{ $user->email }}</div>
                             </td>
                             
-                            {{-- Columna 3: Creado (Oculto en lg-) --}}
+                            {{-- Columna 3: Rol (Oculto en lg-) --}}
+                            <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-2/12">{{ $user->roles->pluck('name')->join(', ') ?: 'Sin rol' }}</td>
+
+                            
+                            {{-- Columna 4: Creado (Oculto en lg-) --}}
                             <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->created_at->format('d/m/Y') }}</td>
                             
-                            {{-- Columna 4: Actualizado (Oculto en lg-) --}}
+                            {{-- Columna 5: Actualizado (Oculto en lg-) --}}
                             <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->updated_at->format('d/m/Y') }}</td>
 
                             {{-- CELDA DE ACCIONES --}}

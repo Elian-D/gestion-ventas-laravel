@@ -11,12 +11,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $search = $request->query('search');
-        $users = User::when($search, function($query, $search) {
-                        return $query->where('name', 'like', "%{$search}%");
-                    })
-                    ->orderBy('id')
-                    ->paginate(10)
-                    ->withQueryString();
+        // Trae todos los usuarios, ordenados por id
+        $users = User::with('roles')   // Carga los roles en la misma consulta
+            ->when($search, function($query, $search) {
+                return $query->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('id')
+            ->paginate(10)
+            ->withQueryString();
+
 
         return view('users.index', compact('users', 'search'));
     }
