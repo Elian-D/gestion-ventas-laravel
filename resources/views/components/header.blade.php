@@ -26,14 +26,18 @@
                                     <span class="mr-2 font-bold hidden sm:inline">{{ Auth::user()->name }}</span>
                                     
                                     <div class="w-9 h-9 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-transparent hover:border-indigo-400 transition-colors duration-200">
-                                        <img src="URL_DEL_AVATAR" alt="Avatar" class="w-full h-full object-cover">
-                                        {{-- Si usas iniciales: 
-                                        <span class="text-sm font-semibold text-gray-600">
-                                            {{ substr(Auth::user()->name, 0, 1) }}
-                                        </span>
-                                        --}}
+                                        
+                                        {{-- Lógica para AVATAR DE INICIALES --}}
+                                        @if (Auth::user()->avatar_url) {{-- Asumiendo que tienes un campo 'avatar_url' para la imagen real --}}
+                                            <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover">
+                                        @else
+                                            {{-- Usamos el método que creaste en el modelo User --}}
+                                            <span class="text-sm font-semibold text-gray-600">
+                                                {{ Auth::user()->getInitials() }}
+                                            </span>
+                                        @endif
+                                        
                                     </div>
-
                                     <div class="ms-1">
                                         <svg class="fill-current h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />

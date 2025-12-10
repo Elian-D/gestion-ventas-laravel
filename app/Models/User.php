@@ -46,4 +46,34 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Obtiene las iniciales del usuario (máximo dos letras) para el avatar.
+     * Ej: "Elian David" -> "ED"
+     * Ej: "Juan" -> "J"
+     *
+     * @return string
+     */
+    public function getInitials(): string
+    {
+        // Limpia el nombre y reemplaza múltiples espacios por uno solo
+        $name = trim(preg_replace('/\s+/', ' ', $this->name));
+        
+        // Divide el nombre en palabras
+        $parts = explode(' ', $name);
+        
+        $initials = '';
+        
+        // Toma la primera letra de la primera palabra
+        if (isset($parts[0])) {
+            $initials .= strtoupper(substr($parts[0], 0, 1));
+        }
+        
+        // Si hay una segunda palabra, toma también su primera letra
+        if (isset($parts[1])) {
+            $initials .= strtoupper(substr($parts[1], 0, 1));
+        }
+        
+        return $initials;
+    }
 }

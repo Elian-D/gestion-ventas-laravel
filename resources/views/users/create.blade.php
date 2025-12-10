@@ -49,79 +49,74 @@
                         @enderror
                     </div>
 
-                    {{-- 3. CAMPO: Contraseña (MODIFICADO con Alpine.js y Botón) --}}
-                    <div class="mb-6" x-data="{ show: false }"> {{-- Inicializa el estado 'show' a false --}}
-                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña (Mín. 8 caracteres):</label>
+                {{-- CONTENEDOR PRINCIPAL para el estado 'show' compartido --}}
+                    <div x-data="{ show: false }"> 
                         
-                        <div class="relative">
-                            <input :type="show ? 'text' : 'password'" {{-- El tipo cambia basado en 'show' --}}
-                                    name="password" 
-                                    id="password" 
-                                    placeholder="********"
-                                    required
-                                    minlength="8"
-                                    class="w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 pl-4 pr-12 {{-- pr-12 para dejar espacio al botón --}}
-                                            focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50
-                                            @error('password') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                        {{-- 3. CAMPO: Contraseña (Con el botón de control) --}}
+                        <div class="mb-6"> 
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña (Mín. 8 caracteres):</label>
                             
-                            {{-- Botón para mostrar/ocultar la contraseña --}}
-                            <button type="button" 
-                                    @click="show = !show" {{-- Alterna el estado 'show' --}}
-                                    class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                    title="Mostrar/Ocultar Contraseña">
+                            <div class="relative">
+                                {{-- INPUT: Referencia el estado 'show' del padre --}}
+                                <input :type="show ? 'text' : 'password'"
+                                        name="password" 
+                                        id="password" 
+                                        placeholder="Escribe una contraseña segura"
+                                        required
+                                        minlength="8"
+                                        class="w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 pl-4 pr-12
+                                                focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50
+                                                @error('password') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                                
+                                {{-- Botón para mostrar/ocultar la contraseña (ÚNICO BOTÓN) --}}
+                                <button type="button" 
+                                        @click="show = !show" {{-- Alterna el estado 'show' del padre --}}
+                                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                        title="Mostrar/Ocultar Contraseña">
                                     
-                                <template x-if="!show">
-                                    {{-- Ícono de Ojo Cerrado (Contraseña oculta) --}}
-                                    <x-heroicon-s-eye-slash class="w-5 h-5" />
-                                </template>
+                                    <template x-if="!show">
+                                        {{-- Ícono de Ojo Cerrado (Contraseña oculta) --}}
+                                        <x-heroicon-s-eye-slash class="w-5 h-5" />
+                                    </template>
 
-                                <template x-if="show">
-                                    {{-- Ícono de Ojo Abierto (Contraseña visible) --}}
-                                    <x-heroicon-s-eye class="w-5 h-5" />
-                                </template>
-                            </button>
+                                    <template x-if="show">
+                                        {{-- Ícono de Ojo Abierto (Contraseña visible) --}}
+                                        <x-heroicon-s-eye class="w-5 h-5" />
+                                    </template>
+                                </button>
+                            </div>
+
+                            @error('password') 
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p> 
+                            @enderror
                         </div>
 
-                        @error('password') 
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p> 
-                        @enderror
-                    </div>
+                        {{-- 4. CAMPO: Confirmar Contraseña (Sin botón de control) --}}
+                        <div class="mb-6"> 
+                            <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña:</label>
+                            
+                            <div class="relative">
+                                {{-- INPUT: Referencia el mismo estado 'show' del padre --}}
+                                <input :type="show ? 'text' : 'password'"
+                                        name="password_confirmation" 
+                                        id="password_confirmation" 
+                                        placeholder="Repite la contraseña"
+                                        required
+                                        minlength="8"
+                                        class="w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 pl-4 pr-12
+                                                focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50
+                                                @error('password') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                                
+                                {{-- ELIMINAMOS EL BOTÓN Y EL @error('password_confirmation') DE AQUÍ --}}
+                            </div>
 
-                    {{-- 4. CAMPO: Confirmar Contraseña (MODIFICADO con Alpine.js y Botón) --}}
-                    <div class="mb-6" x-data="{ show: false }"> {{-- Inicializa el estado 'show' a false --}}
-                        <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña:</label>
-                        
-                        <div class="relative">
-                            <input :type="show ? 'text' : 'password'" {{-- El tipo cambia basado en 'show' --}}
-                                    name="password_confirmation" 
-                                    id="password_confirmation" 
-                                    placeholder="********"
-                                    required
-                                    minlength="8"
-                                    class="w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 pl-4 pr-12 {{-- pr-12 para dejar espacio al botón --}}
-                                            focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50
-                                            @error('password') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
-                                            
-                            {{-- Botón para mostrar/ocultar la contraseña --}}
-                            <button type="button" 
-                                    @click="show = !show" {{-- Alterna el estado 'show' --}}
-                                    class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
-                                    title="Mostrar/Ocultar Contraseña">
-                                    
-                                <template x-if="!show">
-                                    {{-- Ícono de Ojo Cerrado (Contraseña oculta) --}}
-                                    <x-heroicon-s-eye-slash class="w-5 h-5" />
-                                </template>
-
-                                <template x-if="show">
-                                    {{-- Ícono de Ojo Abierto (Contraseña visible) --}}
-                                    <x-heroicon-s-eye class="w-5 h-5" />
-                                </template>
-                            </button>
+                            {{-- El error de confirmación se sigue mostrando aquí, usando @error('password') --}}
+                            @error('password') 
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p> 
+                            @enderror
                         </div>
-                        
-                        {{-- Nota: El error de password_confirmation se captura bajo @error('password') debido a la regla 'confirmed'. --}}
-                    </div>
+                    </div> 
+                    {{-- FIN del CONTENEDOR PRINCIPAL (show compartido) --}}
 
                     {{-- Botones de Acción (Sin cambios) --}}
                     <div class="flex justify-end space-x-4 pt-4 border-t border-gray-100">
