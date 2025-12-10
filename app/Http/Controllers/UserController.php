@@ -65,7 +65,6 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|unique:users,name,' . $user->id,
             'email' => 'required|string|email|unique:users,email,' . $user->id,
-            'current_password' => ['nullable', 'string', 'current_password'], // valida contraseña actual si se envía
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],       // nueva contraseña opcional
         ]);
 
