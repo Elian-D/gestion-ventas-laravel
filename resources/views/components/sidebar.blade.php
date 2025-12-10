@@ -185,8 +185,8 @@
                 <div class="py-1 pl-10 pr-2 space-y-0.5">
                     
                     {{-- Enlaces Directos del Nivel 1 (menos enlaces) --}}
-                    <a href="/admin/users/create" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Lista de Usuarios</a>
-                    <a href="/admin/users" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Crear Usuario</a>
+                    <a href="/admin/users" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Lista de Usuarios</a>
+                    <a href="/admin/users/create" class="block px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded transition">Crear Usuario</a>
 
                     {{-- DROPDOWN ANIDADO (NIVEL 2) para Roles y Permisos --}}
                     <div x-data="{ subOpen: false }" class="w-full">
