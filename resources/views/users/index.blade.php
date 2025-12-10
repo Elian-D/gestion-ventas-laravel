@@ -36,7 +36,7 @@
 
                 {{-- 3. TABLA ESTILIZADA Y RESPONSIVE (USANDO COMPONENTE) --}}
                 {{-- La magia: El componente solo provee la estructura <table>/<thead>/<tbody> --}}
-                <x-data-table :items="$users" :headers="['ID', 'Nombre y Email', 'Rol', 'Creado', 'Actualizado']">
+                <x-data-table :items="$users" :headers="['ID', 'Avatar' , 'Nombre y Email', 'Rol', 'Creado', 'Actualizado']">
                     
                     {{-- El ciclo va AQUÍ, y el resultado de cada iteración (el <tr> completo) es el contenido del $slot --}}
                     @forelse($users as $user)
@@ -44,21 +44,36 @@
                             
                             {{-- Columna 1: ID --}}
                             <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-1/12">{{ $user->id }}</td>
+                            {{-- Columna 2: Avatar --}}
+                            <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 w-1/12 ">
+                                    <div class="w-9 h-9 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-transparent hover:border-indigo-400 transition-colors duration-200">
+                                        
+                                        {{-- Lógica para AVATAR DE INICIALES --}}
+                                        @if ( $user->avatar_url)
+                                            <img src="{{ Auth::user()->avatar_url }}" alt="Avatar" class="w-full h-full object-cover">
+                                        @else
+                                            <span class="text-sm font-semibold text-gray-600">
+                                                {{ $user->getInitials() }}
+                                            </span>
+                                        @endif
+                                        
+                                    </div>
+                            </td>
                             
-                            {{-- Columna 2: Nombre y Email (Cuerpo de la Card en móvil) --}}
-                            <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-full md:w-4/12">
+                            {{-- Columna 3: Nombre y Email (Cuerpo de la Card en móvil) --}}
+                            <td class="block md:table-cell px-6 py-4  text-sm text-gray-600 w-full md:w-3/12">
                                 <div class="font-bold text-gray-900 text-base mb-1 md:font-normal md:text-sm">{{ $user->name }}</div>
                                 <div class="text-sm text-gray-500 md:text-gray-600">{{ $user->email }}</div>
                             </td>
                             
-                            {{-- Columna 3: Rol (Oculto en lg-) --}}
-                            <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-2/12">{{ $user->roles->pluck('name')->join(', ') ?: 'Sin rol' }}</td>
+                            {{-- Columna 4: Rol (Oculto en lg-) --}}
+                            <td class="hidden md:table-cell px-6 py-4  text-sm text-gray-600 w-2/12">{{ $user->roles->pluck('name')->join(', ') ?: 'Sin rol' }}</td>
 
                             
-                            {{-- Columna 4: Creado (Oculto en lg-) --}}
+                            {{-- Columna 5: Creado (Oculto en lg-) --}}
                             <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->created_at->format('d/m/Y') }}</td>
                             
-                            {{-- Columna 5: Actualizado (Oculto en lg-) --}}
+                            {{-- Columna 6: Actualizado (Oculto en lg-) --}}
                             <td class="hidden lg:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600 w-1/12">{{ $user->updated_at->format('d/m/Y') }}</td>
 
                             {{-- CELDA DE ACCIONES --}}
