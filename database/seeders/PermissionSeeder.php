@@ -29,5 +29,9 @@ class PermissionSeeder extends Seeder
         $usersEdit = Permission::firstOrCreate(['name' => 'users edit']);
         $usersDelete = Permission::firstOrCreate(['name' => 'users delete']);
         $usersAssign = Permission::firstOrCreate(['name' => 'users assign']);
+
+        // PERMISOS Config
+        $configIndex = Permission::firstOrCreate(['name' => 'view configuration']);
+        $configDocuments = Permission::firstOrCreate(['name' => 'configure documents']);
     }
 }
