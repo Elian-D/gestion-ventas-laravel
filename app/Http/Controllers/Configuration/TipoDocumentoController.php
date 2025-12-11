@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Configuration;
 
+use App\Http\Controllers\Controller;
 use App\Models\TipoDocumento;
 use Illuminate\Http\Request;
 
