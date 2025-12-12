@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+|--------------------------------------------------------------------------
+| Estilos personalizados para la barra de desplazamiento (Scrollbar)
+|--------------------------------------------------------------------------
+*/
+
+/* 1. Ocultar la barra de desplazamiento por defecto (Webkit: Chrome, Safari) */
+.custom-scroll::-webkit-scrollbar {
+    width: 6px; /* Define un ancho base para permitir el área de hover */
+    height: 6px;
+}
+
+/* Oculta la parte "track" y el "thumb" por defecto, haciéndolos transparentes */
+.custom-scroll::-webkit-scrollbar-thumb,
+.custom-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    border: none;
+}
+
+
+/* 2. Mostrar y estilizar la barra de desplazamiento al hacer HOVER sobre el CONTENEDOR */
+/* Cuando el elemento con .custom-scroll recibe :hover */
+.custom-scroll:hover::-webkit-scrollbar-thumb {
+    /* Color sutil al hacer hover: ejemplo un gris medio/oscuro (#9ca3af) o el gris claro que tenías (#d1d5db) */
+    background-color: #9ca3af; 
+    border-radius: 3px;
+}
+
+/* 3. Estilos para navegadores basados en Firefox (sin efecto hover nativo simple) */
+.custom-scroll {
+    /* Por defecto, hacemos el scrollbar lo más delgado y transparente posible */
+    scrollbar-width: thin; /* 'thin' es más sutil */
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease; /* Añadimos transición para suavizar el cambio */
+}
+
+/* Al hacer HOVER en el elemento, aplicamos el color al scrollbar de Firefox */
+.custom-scroll:hover {
+    /* Color sutil al hacer hover: #9ca3af (el mismo que usamos en Webkit) */
+    scrollbar-color: #9ca3af transparent; 
+}
