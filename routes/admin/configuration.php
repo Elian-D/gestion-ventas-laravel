@@ -5,6 +5,13 @@ use Illuminate\Support\Facades\Route;
 
 
 
+Route::middleware(['permission:view configuration'])
+    ->get('config', function () {
+        return view('configuration.index');
+    })
+    ->name('config.index');
+
+
 // Rutas de documentos
 Route::middleware(['auth', 'permission:manage documents'])->group(function () {
     Route::resource('tipos-documentos', TipoDocumentoController::class);
