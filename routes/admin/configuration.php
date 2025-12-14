@@ -13,8 +13,15 @@ Route::middleware(['permission:view configuration'])
 
 
 // Rutas de documentos
-Route::middleware(['auth', 'permission:manage documents'])->group(function () {
-    Route::resource('tipos-documentos', TipoDocumentoController::class);
+Route::middleware(['auth', 'permission:configure documents'])->group(function () {
+    Route::resource('tipos-documentos', TipoDocumentoController::class)
+    ->parameters([
+        'tipos-documentos' => 'tipoDocumento'
+    ]);
+    
+    Route::patch('tipos-documentos/{tipoDocumento}/estado',[TipoDocumentoController::class, 'toggleEstado'])
+    ->name('tipos-documentos.toggle');
+
 });
 
 // Rutas de ubicación
