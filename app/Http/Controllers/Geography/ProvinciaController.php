@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Geography;
 
 use App\Http\Controllers\Controller;
-use App\Models\Provincia;
+use App\Models\Geography\Provincia;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -114,7 +114,7 @@ class ProvinciaController extends Controller {
     }
 
     // Métodos abstractos que el trait necesita
-    protected function getModelClass(): string { return \App\Models\Provincia::class; }
+    protected function getModelClass(): string { return \App\Models\Geography\Provincia::class; }
     protected function getViewFolder(): string { return 'provincias'; }
     protected function getRouteIndex(): string { return 'provincias.index'; }
     protected function getRouteEliminadas(): string { return 'provincias.eliminadas'; }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Geography;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +14,8 @@ class Sector extends Model
      * Atributos que se pueden asignar masivamente
      */
     protected $fillable = ['municipio_id', 'nombre', 'estado'];
+
+    protected $table = 'sectores';
 
     /**
      * Relación con el municipio al que pertenece

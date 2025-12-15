@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Geography;
 
 use App\Http\Controllers\Controller;
-use App\Models\Municipio;
-use App\Models\Provincia;
+use App\Models\Geography\Municipio;
+use App\Models\Geography\Provincia;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -144,7 +144,7 @@ class MunicipioController extends Controller
     }
 
     // Métodos abstractos que el trait necesita
-    protected function getModelClass(): string { return \App\Models\Municipio::class; }
+    protected function getModelClass(): string { return \App\Models\Geography\Municipio::class; }
     protected function getViewFolder(): string { return 'municipios'; }
     protected function getRouteIndex(): string { return 'municipios.index'; }
     protected function getRouteEliminadas(): string { return 'municipios.eliminadas'; }

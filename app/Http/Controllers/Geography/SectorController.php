@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Geography;
 
 use App\Http\Controllers\Controller;
-use App\Models\Municipio;
-use App\Models\Sector;
+use App\Models\Geography\Municipio;
+use App\Models\Geography\Sector;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -144,7 +144,7 @@ class SectorController extends Controller
     }
 
     // Métodos abstractos que el trait necesita
-    protected function getModelClass(): string { return \App\Models\Sector::class; }
+    protected function getModelClass(): string { return \App\Models\Geography\Sector::class; }
     protected function getViewFolder(): string { return 'sectores'; }
     protected function getRouteIndex(): string { return 'sectores.index'; }
     protected function getRouteEliminadas(): string { return 'sectores.eliminadas'; }

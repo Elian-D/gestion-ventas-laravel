@@ -73,7 +73,7 @@
                     </x-sidebar.item>
                 </x-sidebar.group>
 
-                
+                                
                 {{-- GRUPO 3: Configuración --}}
                 <x-sidebar.group>
                     <x-sidebar.title>Configuración</x-sidebar.title>
@@ -81,7 +81,30 @@
                     <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
                         Configuración
                     </x-sidebar.item>
+
+                    {{-- Ubicaciones --}}
+                    <x-sidebar.dropdown 
+                        id="ubicaciones" 
+                        icon="heroicon-s-map-pin" 
+                        :activeRoutes="['provincias', 'municipios', 'sectores']"
+                    >
+                        Ubicaciones
+                        <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/provincias">
+                                Provincias
+                            </x-sidebar.subitem>
+
+                            <x-sidebar.subitem href="/admin/municipios">
+                                Municipios
+                            </x-sidebar.subitem>
+
+                            <x-sidebar.subitem href="/admin/sectores">
+                                Sectores
+                            </x-sidebar.subitem>
+                        </x-slot>
+                    </x-sidebar.dropdown>
                 </x-sidebar.group>
+
 
             </x-sidebar.layout>
 
