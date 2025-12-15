@@ -79,11 +79,6 @@
                         </tr>
                     @endforelse
                 </x-data-table>
-
-                {{-- 4. PAGINACIÓN (Asegúrate que $roles es una colección paginada) --}}
-                <div class="mt-6">
-                    {{ $roles->links() }}
-                </div>
             </div>
         </div>
     </div>

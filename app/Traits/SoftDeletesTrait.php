@@ -20,18 +20,18 @@ trait SoftDeletesTrait
     if ($relationCheck && $item->$relationCheck()->exists()) {
         return redirect()
             ->route($this->getRouteIndex())
-            ->with('error', $this->getEntityName() . ' "' . $item->nombre . '" tiene relaciones. No se puede eliminar.');
+            ->with('error', $this->getEntityName() . ' "' . $item->nombre . '" tiene relaciones. No se puede mover a la papelera.');
     }
 
     try {
         $item->delete(); // Soft delete
         return redirect()
             ->route($this->getRouteIndex())
-            ->with('success', $this->getEntityName() . ' "' . $item->nombre . '" eliminada correctamente.');
+            ->with('success', $this->getEntityName() . ' "' . $item->nombre . '" movida a la papelera correctamente.');
     } catch (\Exception $e) {
         return redirect()
             ->route($this->getRouteIndex())
-            ->with('error', 'Error al eliminar ' . $this->getEntityName() . '. Contacte soporte.');
+                ->with('error', 'Error al mover a la papelera ' . $this->getEntityName() . '. Contacte soporte.');
     }
 }
 

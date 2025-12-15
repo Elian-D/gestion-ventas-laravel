@@ -21,126 +21,127 @@
                 Tipos de Documento
             </h2>
 
-            {{-- TOOLBAR --}}
+            {{-- Toolbar --}}
             <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
 
-                {{-- BUSCADOR + FILTROS --}}
-                <form method="GET" class="flex flex-col gap-3 w-full md:w-2/3">
+                <form method="GET" class="w-full md:w-2/3 space-y-3">
+                    <div class="flex gap-2 items-center">
 
-                    {{-- BUSCADOR --}}
-                    <div class="flex gap-2">
-                        <input type="text"
-                            name="search"
-                            value="{{ $search }}"
-                            placeholder="Buscar tipo de documento..."
-                            class="w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                        {{-- Buscador --}}
+                        <input type="text" name="search" value="{{ $search }}" placeholder="Buscar tipo de documento..."
+                               class="w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
 
                         <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
                             <x-heroicon-s-magnifying-glass class="w-5 h-5" />
                         </button>
-                    </div>
 
-                    {{-- FILTROS --}}
-                    <div class="flex items-center gap-3">
-                        <span class="text-sm font-medium text-gray-600">
-                            Filtros:
-                        </span>
+                        {{-- Dropdown filtros (Se mantiene la misma lógica) --}}
+                        <div x-data="{ open: false }" class="relative">
+                            <button type="button" @click="open = !open"
+                                     class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-100">
+                                <x-heroicon-s-funnel class="w-4 h-4" />
+                                Filtros
+                                <x-heroicon-s-chevron-down class="w-4 h-4" />
+                            </button>
 
-                        <div class="flex gap-2 bg-gray-100 p-1 rounded-lg">
-                            {{-- Todos --}}
-                            <a href="{{ route('tipos-documentos.index') }}"
-                            class="flex items-center gap-1 px-3 py-1 rounded-md text-sm
-                                    {{ !$estado
-                                            ? 'bg-indigo-600 text-white shadow'
-                                            : 'text-gray-600 hover:bg-white' }}">
-                                <x-heroicon-s-squares-2x2 class="w-4 h-4" />
-                                Todos
-                            </a>
-                            {{-- Activos --}}
-                            <a href="{{ route('tipos-documentos.index', ['estado' => 'activo']) }}"
-                            class="flex items-center gap-1 px-3 py-1 rounded-md text-sm
-                                    {{ $estado === 'activo'
-                                            ? 'bg-green-600 text-white shadow'
-                                            : 'text-gray-600 hover:bg-white' }}">
-                                <x-heroicon-s-check-circle class="w-4 h-4" />
-                                Activos
-                            </a>
+                            <div x-show="open" @click.outside="open = false" x-transition
+                                 class="absolute right-0 z-20 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-4 space-y-4">
 
-                            {{-- Inactivos --}}
-                            <a href="{{ route('tipos-documentos.index', ['estado' => 'inactivo']) }}"
-                            class="flex items-center gap-1 px-3 py-1 rounded-md text-sm
-                                    {{ $estado === 'inactivo'
-                                            ? 'bg-yellow-500 text-white shadow'
-                                            : 'text-gray-600 hover:bg-white' }}">
-                                <x-heroicon-s-pause-circle class="w-4 h-4" />
-                                Inactivos
-                            </a>
+                                {{-- Estado --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                                    <select name="estado" class="w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Todos</option>
+                                        <option value="activo" {{ $estado === 'activo' ? 'selected' : '' }}>Activos</option>
+                                        <option value="inactivo" {{ $estado === 'inactivo' ? 'selected' : '' }}>Inactivos</option>
+                                    </select>
+                                </div>
+
+                                {{-- Acciones --}}
+                                <div class="flex justify-end gap-2 pt-2 border-t">
+                                    <a href="{{ route('tipos-documentos.index') }}"
+                                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-100">
+                                        Limpiar
+                                    </a>
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                                        Aplicar filtros
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
 
-                {{-- BOTÓN NUEVO --}}
-                <x-primary-button
-                    class="bg-green-600 hover:bg-green-700 self-start md:self-center"
-                    x-data
-                    x-on:click="$dispatch('open-modal', 'crear-documento')">
-                    + Nuevo Documento
-                </x-primary-button>
+                {{-- Acciones --}}
+                <div class="flex gap-2 self-start md:self-center">
+                    {{-- BOTÓN NUEVO --}}
+                    <x-primary-button
+                        class="bg-green-600 hover:bg-green-700 self-start md:self-center"
+                        x-data
+                        x-on:click="$dispatch('open-modal', 'crear-documento')">
+                        <x-heroicon-s-plus class="w-5 h-5 mr-2" />
+                        Nuevo Documento
+                    </x-primary-button>
+                </div>
             </div>
 
-
-            {{-- TABLA --}}
+            {{-- TABLA RESPONSIVA --}}
             <x-data-table
                 :items="$tipoDocumento"
-                :headers="['Nombre', 'Estado', 'Creado', 'Actualizado']">
+                :headers="['Nombre', 'Estado', 'Creado', 'Actualizado', 'Acciones']">
 
                 @forelse($tipoDocumento as $documento)
-                    <tr class="hover:bg-gray-50">
+                    {{-- Fila responsiva: Card en móvil, Fila de tabla en md+ --}}
+                    <tr class="block md:table-row hover:bg-gray-50 transition duration-150 p-4 border-b border-gray-200 md:border-b-0">
 
-                        {{-- NOMBRE --}}
-                        <td class="px-6 py-4">
-                            {{ $documento->nombre }}
+                        {{-- COLUMNA 1: NOMBRE + ESTADO EN MÓVIL --}}
+                        <td class="block md:table-cell px-6 py-4 text-sm text-gray-600 w-full md:w-4/12">
+                            <div class="font-bold text-gray-900 text-base mb-1 md:font-normal md:text-sm flex items-center gap-2">
+                                {{ $documento->nombre }}
+                                {{-- Estado visible en móvil, oculto en desktop (Se muestra en su columna dedicada) --}}
+                                <span class="md:hidden">
+                                    @if($documento->estado)
+                                        <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">Activo</span>
+                                    @else
+                                        <span class="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">Inactivo</span>
+                                    @endif
+                                </span>
+                            </div>
                         </td>
 
-                        {{-- ESTADO --}}
-                        <td class="px-6 py-4">
+                        {{-- COLUMNA 2: ESTADO (Oculto en móvil, visible en md+) --}}
+                        <td class="hidden md:table-cell px-6 py-4 text-sm text-gray-600 w-2/12">
                             @if($documento->estado)
-                                <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                                    Activo
-                                </span>
+                                <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">Activo</span>
                             @else
-                                <span class="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">
-                                    Inactivo
-                                </span>
+                                <span class="px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">Inactivo</span>
                             @endif
                         </td>
                         
-
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                        {{-- COLUMNA 3: CREADO (Oculto en móvil, visible en md+) --}}
+                        <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-gray-600 w-2/12">
                             {{ $documento->created_at->format('d/m/Y') }}
                         </td>
 
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                        {{-- COLUMNA 4: ACTUALIZADO (Oculto en móvil, visible en md+) --}}
+                        <td class="hidden md:table-cell px-6 py-4 whitespace-nowrap text-gray-600 w-2/12">
                             {{ $documento->updated_at->format('d/m/Y') }}
                         </td>
 
-                        {{-- ACCIONES --}}
-                        <td class="px-6 py-4">
-                            <div class="flex gap-2">
+                        {{-- COLUMNA 5: ACCIONES (Visible en móvil y desktop) --}}
+                        <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium w-full md:w-2/12">
+                            <div class="flex gap-2 mt-2 md:mt-0">
 
                                 {{-- TOGGLE ESTADO --}}
                                 <form action="{{ route('tipos-documentos.toggle', $documento) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
-
                                     <button class="text-sm px-3 py-1 rounded
                                         {{ $documento->estado ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
                                         {{ $documento->estado ? 'Desactivar' : 'Activar' }}
                                     </button>
                                 </form>
 
-
-                                
                                 {{-- BOTÓN EDITAR --}}
                                 @if($documento->estado)
                                     <button
@@ -153,42 +154,27 @@
                                 @endif
 
                                 {{-- ELIMINAR --}}
-                                <form action="{{ route('tipos-documentos.destroy', $documento) }}" method="POST" class="inline-block" x-data>
-                                    @csrf @method('DELETE')
-                                    <button type="button" @click="$dispatch('open-modal', 'confirm-document-deletion-{{ $documento->id }}')" 
-                                        title="Eliminar Documento"
-                                        class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100">
-                                        <x-heroicon-s-trash class="w-5 h-5" />
-                                    </button>
-                                </form>
-
-
-
-
+                                <button type="button" @click="$dispatch('open-modal', 'confirm-document-deletion-{{ $documento->id }}')" 
+                                    title="Eliminar Documento"
+                                    class="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-100">
+                                    <x-heroicon-s-trash class="w-5 h-5" />
+                                </button>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="text-center py-6 text-gray-500">
+                        <td colspan="5" class="text-center py-6 text-gray-500">
                             No hay tipos de documento registrados.
                         </td>
                     </tr>
                 @endforelse
 
             </x-data-table>
-
-            {{-- PAGINACIÓN --}}
-            <div class="mt-6">
-                {{ $tipoDocumento->links() }}
-            </div>
-
         </div>
     </div>
 
-<!-- MODALES -->
-    <!-- Modal para crear -->
-    <x-modal name="crear-documento" :show="false" maxWidth="md">
+<x-modal name="crear-documento" :show="false" maxWidth="md">
         <form action="{{ route('tipos-documentos.store') }}" method="POST" class="p-6">
             @csrf
 
@@ -238,7 +224,6 @@
         </script>
     @endif
 
-    <!-- Modal de editar -->
     @foreach($tipoDocumento as $documento)
     <x-modal name="edit-tipo-documento-{{ $documento->id }}" :show="false" maxWidth="md">
         <form method="POST" action="{{ route('tipos-documentos.update', $documento) }}" class="p-6">
@@ -286,7 +271,6 @@
     </x-modal>
     @endforeach
 
-    <!-- Modal de eliminar -->
     @foreach($tipoDocumento as $documento)
         <x-modal name="confirm-document-deletion-{{ $documento->id }}" :show="false" maxWidth="md">
             <form method="post" action="{{ route('tipos-documentos.destroy', $documento) }}" class="p-6">
@@ -295,11 +279,11 @@
 
                 {{-- Título y Mensaje de Advertencia --}}
                 <h2 class="text-lg font-medium text-gray-900">
-                    {{ __('¿Estás seguro de que quieres eliminar a este usuario?') }}
+                    {{ __('¿Estás seguro de que quieres eliminar este tipo de documento?') }}
                 </h2>
 
                 <p class="mt-1 text-sm text-gray-600">
-                    {{ __('Esta acción es irreversible. Estás a punto de eliminar al usuario: ') }}
+                    {{ __('Esta acción es irreversible. Estás a punto de eliminar el tipo de documento: ') }}
                     <span class="font-bold text-red-600">{{ $documento->nombre }}</span>.
                 </p>
 
