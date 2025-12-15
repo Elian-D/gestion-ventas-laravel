@@ -88,7 +88,7 @@
             {{-- TABLA RESPONSIVA --}}
             <x-data-table
                 :items="$tipoDocumento"
-                :headers="['Nombre', 'Estado', 'Creado', 'Actualizado', 'Acciones']">
+                :headers="['Nombre', 'Estado', 'Creado', 'Actualizado']">
 
                 @forelse($tipoDocumento as $documento)
                     {{-- Fila responsiva: Card en móvil, Fila de tabla en md+ --}}
@@ -263,7 +263,7 @@
                     Cancelar
                 </x-secondary-button>
 
-                <x-primary-button>
+                <x-primary-button class="bg-green-600 hover:bg-green-700 self-start md:self-center">
                     Guardar cambios
                 </x-primary-button>
             </div>
