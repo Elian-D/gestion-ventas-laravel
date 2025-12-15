@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\Permissions\GeographyPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            EstadosClienteSeeder::class,
         ]);
     }
 }

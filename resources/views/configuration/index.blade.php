@@ -15,6 +15,16 @@
             </p>
         </a>
 
+        <a href="{{ route('configuration.estados.index') }}"
+           class="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
+            <h2 class="text-lg font-medium text-gray-800">
+                Estados de clientes
+            </h2>
+            <p class="text-sm text-gray-500 mt-2">
+                Configura los estados de los clientes.
+            </p>
+        </a>
+
         {{-- FUTURAS TARJETAS --}}
     </div>
 </x-config-layout>

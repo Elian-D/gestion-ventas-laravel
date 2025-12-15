@@ -9,6 +9,26 @@ export default {
         './resources/views/**/*.blade.php',
     ],
 
+    // ====================================================================
+    // SAFELIST AGREGADO PARA INCLUIR CLASES DINÁMICAS DE COLOR
+    // ====================================================================
+    safelist: [
+        {
+            // Patrones para las clases de fondo de los selectores de color (bg-X-600)
+            pattern: /bg-(green|indigo|red|yellow|gray|blue|purple)-600/,
+        },
+        {
+            // Patrones para las clases de anillo/borde del selector activo (ring-X-500)
+            pattern: /ring-(green|indigo|red|yellow|gray|blue|purple)-500/,
+        },
+        {
+            // Patrones para las clases de texto y fondo de la vista previa del badge
+            // (bg-X-100 y text-X-800)
+            pattern: /(bg|text)-(green|indigo|red|yellow|gray|blue|purple)-(100|800)/,
+        },
+    ],
+    // ====================================================================
+    
     theme: {
         extend: {
             fontFamily: {

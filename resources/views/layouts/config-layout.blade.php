@@ -42,6 +42,10 @@
             <x-sidebar.item href="{{ route('tipos-documentos.index') }}" icon="heroicon-s-identification">
                 Tipos de documentos
             </x-sidebar.item>
+            
+            <x-sidebar.item href="{{ route('configuration.estados.index') }}" icon="heroicon-s-user">
+                Estados de clientes
+            </x-sidebar.item>
 
             {{-- FUTUROS --}}
             {{-- <x-sidebar.item href="#">Estados de clientes</x-sidebar.item> --}}

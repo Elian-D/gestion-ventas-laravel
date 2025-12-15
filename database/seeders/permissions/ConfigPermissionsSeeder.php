@@ -11,5 +11,6 @@ class ConfigPermissionsSeeder extends Seeder
     {
         Permission::firstOrCreate(['name' => 'view configuration']);
         Permission::firstOrCreate(['name' => 'configure documents']);
+        Permission::firstOrCreate(['name' => 'configure client-states']);
     }
 }
