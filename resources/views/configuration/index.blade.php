@@ -5,7 +5,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-        <a href="{{ route('tipos-documentos.index') }}"
+        <a href="{{ route('configuration.documentos.index') }}"
            class="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
             <h2 class="text-lg font-medium text-gray-800">
                 Tipos de documentos
