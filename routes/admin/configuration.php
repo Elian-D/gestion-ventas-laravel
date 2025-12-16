@@ -13,15 +13,39 @@ Route::middleware(['permission:view configuration'])
     ->name('config.index');
 
 
-// Rutas de documentos
-Route::middleware(['auth', 'permission:configure documents'])->group(function () {
-    Route::resource('tipos-documentos', TipoDocumentoController::class)
-    ->parameters([
-        'tipos-documentos' => 'tipoDocumento'
-    ]);
+// Agrupa las rutas bajo el prefijo 'admin' y aplica middlewares
+Route::middleware(['auth', 'permission:configure documents'])->prefix('admin')->group(function () {
     
-    Route::patch('tipos-documentos/{tipoDocumento}/estado',[TipoDocumentoController::class, 'toggleEstado'])
-    ->name('tipos-documentos.toggle');
+    // Ruta para listar los elementos eliminados (Papelera)
+    Route::get('tipos-documentos/eliminados', [TipoDocumentoController::class, 'eliminadas'])
+        ->name('configuration.documentos.eliminados');
+    
+
+    // Rutas RESTful para la vista principal (Index, Store, Update, Destroy)
+    Route::resource('tipos-documentos', TipoDocumentoController::class)
+        ->parameters([
+            // Laravel usará el nombre 'tipoDocumento' en las URLs en lugar de 'tipos-documentos'
+            'tipos-documentos' => 'tipoDocumento' 
+        ])
+        // Le añadimos el prefijo de nombre de ruta 'configuration.documentos.'
+        ->names('configuration.documentos'); 
+
+    // Rutas personalizadas (Toggle, Papelera y Restauración/Eliminación definitiva)
+
+    // Ruta para cambiar el estado (Activo/Inactivo)
+    Route::patch('tipos-documentos/{tipoDocumento}/estado', [TipoDocumentoController::class, 'toggleEstado'])
+        ->name('configuration.documentos.toggle');
+
+
+    // Ruta para restaurar un elemento eliminado
+    // Nota: Usamos 'id' aquí para poder buscar elementos eliminados con withTrashed() en el controlador
+    Route::patch('tipos-documentos/{id}/restaurar', [TipoDocumentoController::class, 'restaurar'])
+        ->name('configuration.documentos.restaurar');
+
+    // Ruta para eliminar definitivamente un elemento
+    // Nota: Usamos 'id' aquí por la misma razón que en 'restaurar'
+    Route::delete('tipos-documentos/{id}/borrar', [TipoDocumentoController::class, 'borrarDefinitivo'])
+        ->name('configuration.documentos.borrarDefinitivo');
 
 });
 

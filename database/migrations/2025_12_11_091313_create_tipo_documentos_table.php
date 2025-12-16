@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre')->unique();
             $table->boolean('estado')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

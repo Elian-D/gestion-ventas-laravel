@@ -39,7 +39,7 @@
                 Panel de configuración
             </x-sidebar.item>
 
-            <x-sidebar.item href="{{ route('tipos-documentos.index') }}" icon="heroicon-s-identification">
+            <x-sidebar.item href="{{ route('configuration.documentos.index') }}" icon="heroicon-s-identification">
                 Tipos de documentos
             </x-sidebar.item>
             

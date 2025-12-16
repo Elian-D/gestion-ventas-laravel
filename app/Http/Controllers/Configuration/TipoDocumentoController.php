@@ -3,42 +3,32 @@
 namespace App\Http\Controllers\Configuration;
 
 use App\Http\Controllers\Controller;
-use App\Models\TipoDocumento;
+use App\Models\Configuration\TipoDocumento;
+use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 
 class TipoDocumentoController extends Controller
 {
-/**
-     * Muestra el listado de tipos de documento y prepara la vista única.
+    use SoftDeletesTrait;
+    /**
+     * Muestra el listado de documentos con filtros y paginación
      */
-    public function index(Request $request)
-    {
-        
+    public function index(Request $request) {
+        // Obtener parámetros de búsqueda y filtro de estado de la solicitud
         $search = $request->query('search'); 
         $estado = $request->query('estado'); 
 
-        // 2. Construir la consulta base
+        // Construir query con filtros dinámicos, ordenar por nombre y paginar
         $tipoDocumento = TipoDocumento::query()
-            // El método query() inicializa el constructor de consultas de Eloquent para el modelo TipoDocumento.
+            ->when($search, fn($q) => $q->where('nombre', 'like', "%{$search}%"))
+            ->when($estado === 'activo', fn($q) => $q->activo())
+            ->when($estado === 'inactivo', fn($q) => $q->inactivo())
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
 
-            // 3. Aplicar filtro de búsqueda por nombre (si existe)
-            ->when($search, function ($query, $search) {
-                return $query->where('nombre', 'like', "%{$search}%");
-            })
-            // 4. Aplicar filtro por estado (si existe)
-            ->when($estado !== null && $estado !== 'todos', function ($query) use ($estado) {
-                $estadoBooleano = ($estado === 'activo'); 
-                
-                return $query->where('estado', $estadoBooleano);
-            })
-            // 5. Ordenar el resultado
-            ->orderBy('nombre', 'asc') 
-            // 6. Paginación y mantenimiento de Query Strings
-            ->paginate(10) 
-            ->withQueryString(); 
-
-        // 7. Enviar datos a la vista
-        return view('configuration.tipo_documentos', compact('tipoDocumento', 'search', 'estado'));
+        // Retornar vista con documentos y parámetros de filtrado
+        return view('configuration.documentos.index', compact('tipoDocumento', 'search', 'estado'));
     }
 
     /**
@@ -60,7 +50,7 @@ class TipoDocumentoController extends Controller
 
         // 3. Redirección (Necesario en CRUDs)
         return redirect()
-            ->route('tipos-documentos.index')
+            ->route('configuration.documentos.index')
             ->with('success', 'Tipo de documento "' . $documento->nombre . '" creado exitosamente.');
     }
 
@@ -83,7 +73,7 @@ class TipoDocumentoController extends Controller
 
         // 4. Redirección y mensaje de éxito
         return redirect()
-            ->route('tipos-documentos.index')
+            ->route('configuration.documentos.index')
             ->with('success', 'Tipo de documento "' . $tipoDocumento->nombre . '" actualizado exitosamente.');
     }
 
@@ -91,7 +81,7 @@ class TipoDocumentoController extends Controller
     $tipoDocumento->toggleEstado();
 
     return redirect()
-        ->route('tipos-documentos.index')
+        ->route('configuration.documentos.index')
         ->with(
             'success',
             'Estado actualizado para "' . $tipoDocumento->nombre . '".'
@@ -99,47 +89,16 @@ class TipoDocumentoController extends Controller
     }
 
 
-    /**
-     * Elimina el TipoDocumento si no tiene relaciones (o desactiva la eliminación por defecto).
-     *
-     * @param \App\Models\TipoDocumento $tipoDocumento
-     * @return \Illuminate\Http\RedirectResponse
-     */
+    // Elimina el Tipo documento si no tiene relaciones (o desactiva la eliminación por defecto).
     public function destroy(TipoDocumento $tipoDocumento)
     {
-        // ----------------------------------------------------------------------
-        // 1. LÓGICA DE PROTECCIÓN (Preparado para Cliente)
-        // ----------------------------------------------------------------------
-
-        /*
-        // TODO: Descomentar y ajustar cuando el modelo Cliente exista y tenga la relación.
-        if ($tipoDocumento->clientes()->exists()) {
-            // Si la relación con clientes existe, no permitimos la eliminación.
-            return redirect()
-                ->route('tipos-documentos.index')
-                ->with('error', 'Clientes usando el documento "' . $tipoDocumento->nombre . '". No es posible eliminar. Por favor, desactive el documento.');
-        }
-        */
-        
-        // ----------------------------------------------------------------------
-        // 2. ELIMINACIÓN FÍSICA
-        // ----------------------------------------------------------------------
-
-        // Si pasa la comprobación (o si está comentada como ahora), procedemos a borrar.
-        try {
-            $nombreEliminado = $tipoDocumento->nombre; // Guardamos el nombre antes de borrar para el mensaje
-            $tipoDocumento->delete(); // Ejecuta la eliminación del registro en la DB
-
-            // 3. Redirección y mensaje de éxito
-            return redirect()
-                ->route('tipos-documentos.index')
-                ->with('success', 'Tipo de documento "' . $nombreEliminado . '" ha sido eliminado definitivamente.');
-
-        } catch (\Exception $e) {
-            // En caso de que falle la eliminación por cualquier otra razón (ej. restricción de clave foránea no detectada)
-            return redirect()
-                ->route('tipos-documentos.index')
-                ->with('error', 'Error al intentar eliminar el documento "' . $tipoDocumento->nombre . '". Contacte a soporte.');
-        }
+        return $this->destroyTrait($tipoDocumento, null);
     }
+
+    // Métodos abstractos que el trait necesita
+    protected function getModelClass(): string { return \App\Models\Configuration\TipoDocumento::class; }
+    protected function getViewFolder(): string { return 'configuration.documentos'; }
+    protected function getRouteIndex(): string { return 'configuration.documentos.index'; }
+    protected function getRouteEliminadas(): string { return 'configuration.documentos.eliminados'; }
+    protected function getEntityName(): string { return 'Tipo Documento'; }
 }

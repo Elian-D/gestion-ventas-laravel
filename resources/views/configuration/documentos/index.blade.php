@@ -59,7 +59,7 @@
 
                                 {{-- Acciones --}}
                                 <div class="flex justify-end gap-2 pt-2 border-t">
-                                    <a href="{{ route('tipos-documentos.index') }}"
+                                    <a href="{{ route('configuration.documentos.index') }}"
                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-100">
                                         Limpiar
                                     </a>
@@ -74,6 +74,18 @@
 
                 {{-- Acciones --}}
                 <div class="flex gap-2 self-start md:self-center">
+                    
+                    {{-- PAPELERA --}}
+                    <a href="{{ route('configuration.documentos.eliminados') }}"
+                    class="inline-flex items-center px-4 py-2
+                            border border-gray-300 rounded-md
+                            text-sm font-medium text-gray-700
+                            bg-white hover:bg-gray-100
+                            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400">
+                        <x-heroicon-s-trash class="w-5 h-5 mr-2" />
+                        Papelera
+                    </a>
+
                     {{-- BOTÓN NUEVO --}}
                     <x-primary-button
                         class="bg-green-600 hover:bg-green-700 self-start md:self-center"
@@ -133,7 +145,7 @@
                             <div class="flex gap-2 mt-2 md:mt-0">
 
                                 {{-- TOGGLE ESTADO --}}
-                                <form action="{{ route('tipos-documentos.toggle', $documento) }}" method="POST">
+                                <form action="{{ route('configuration.documentos.toggle', $documento) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
                                     <button class="text-sm px-3 py-1 rounded
@@ -175,7 +187,7 @@
     </div>
 
 <x-modal name="crear-documento" :show="false" maxWidth="md">
-        <form action="{{ route('tipos-documentos.store') }}" method="POST" class="p-6">
+        <form action="{{ route('configuration.documentos.store') }}" method="POST" class="p-6">
             @csrf
 
             {{-- Título --}}
@@ -226,7 +238,7 @@
 
     @foreach($tipoDocumento as $documento)
     <x-modal name="edit-tipo-documento-{{ $documento->id }}" :show="false" maxWidth="md">
-        <form method="POST" action="{{ route('tipos-documentos.update', $documento) }}" class="p-6">
+        <form method="POST" action="{{ route('configuration.documentos.update', $documento) }}" class="p-6">
             @csrf
             @method('PUT')
 
@@ -273,18 +285,25 @@
 
     @foreach($tipoDocumento as $documento)
         <x-modal name="confirm-document-deletion-{{ $documento->id }}" :show="false" maxWidth="md">
-            <form method="post" action="{{ route('tipos-documentos.destroy', $documento) }}" class="p-6">
+            <form method="post" action="{{ route('configuration.documentos.destroy', $documento) }}" class="p-6">
                 @csrf
                 @method('delete')
 
-                {{-- Título y Mensaje de Advertencia --}}
                 <h2 class="text-lg font-medium text-gray-900">
-                    {{ __('¿Estás seguro de que quieres eliminar este tipo de documento?') }}
+                    ¿Enviar documento a la papelera?
                 </h2>
 
-                <p class="mt-1 text-sm text-gray-600">
-                    {{ __('Esta acción es irreversible. Estás a punto de eliminar el tipo de documento: ') }}
-                    <span class="font-bold text-red-600">{{ $documento->nombre }}</span>.
+                <p class="mt-2 text-sm text-gray-600">
+                    El estado
+                    <span class="font-semibold text-gray-900">
+                        {{ $documento->nombre }}
+                    </span>
+                    será movida a la
+                    <span class="font-semibold text-yellow-600">papelera</span>.
+                </p>
+
+                <p class="mt-1 text-sm text-gray-500">
+                    Esta acción se puede revertir desde la papelera.
                 </p>
 
                 {{-- Área de Botones del Modal --}}
