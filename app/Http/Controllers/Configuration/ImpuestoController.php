@@ -41,7 +41,7 @@ class ImpuestoController extends Controller
         $request->validate([
             'nombre' => 'required|string|unique:impuestos,nombre',
             'tipo' => 'required|in:' . Impuesto::TIPO_PORCENTAJE . ',' . Impuesto::TIPO_FIJO,
-            'valor' => 'required|numeric|min:0',
+            'valor' => 'required|numeric|min:0|max:999999.99',
             'es_incluido' => 'nullable|boolean',
         ]);
 
@@ -70,7 +70,7 @@ class ImpuestoController extends Controller
         $request->validate([
             'nombre' => 'required|string|unique:impuestos,nombre,' . $impuesto->id,
             'tipo' => 'required|in:' . Impuesto::TIPO_PORCENTAJE . ',' . Impuesto::TIPO_FIJO,
-            'valor' => 'required|numeric|min:0',
+            'valor' => 'required|numeric|min:0|max:999999.99',
             'es_incluido' => 'nullable|boolean',
         ]);
         
