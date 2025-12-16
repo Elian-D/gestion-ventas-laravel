@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\ConfigurationSeeders\TipoDocumentoSeeder::class,
             \Database\Seeders\ConfigurationSeeders\EstadosClienteSeeder::class,
             \Database\Seeders\ConfigurationSeeders\DiaSemanaSeeder::class,
+            \Database\Seeders\ConfigurationSeeders\TipoPagoSeeder::class,
         ]);
     }
 }
