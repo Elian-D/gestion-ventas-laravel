@@ -73,5 +73,26 @@
             </p>
         </a>
 
+        <!-- Tipos de pago -->
+        <a href="{{ route('configuration.pagos.index') }}"
+        class="group bg-white border border-gray-200 p-6 rounded-xl
+                shadow-sm hover:shadow-lg transition-all">
+
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-lg bg-sky-100 text-sky-600
+                            group-hover:bg-sky-600 group-hover:text-white transition">
+                    <x-heroicon-s-currency-dollar class="w-6 h-6" />
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800">
+                    Tipos de pago
+                </h2>
+            </div>
+
+            <p class="mt-4 text-sm text-gray-500">
+                Administra los métodos y formas de pago del sistema.
+            </p>
+        </a>
+
     </div>
 </x-config-layout>

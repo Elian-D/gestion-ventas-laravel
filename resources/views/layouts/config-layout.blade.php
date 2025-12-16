@@ -51,9 +51,11 @@
                 Días de semana
             </x-sidebar.item>
 
-            {{-- FUTUROS --}}
-            {{-- <x-sidebar.item href="#">Estados de clientes</x-sidebar.item> --}}
-            {{-- <x-sidebar.item href="#">Días de semana</x-sidebar.item> --}}
+            <x-sidebar.item href="{{ route('configuration.pagos.index') }}" icon="heroicon-s-currency-dollar">
+                Tipos de pagos
+            </x-sidebar.item>
+
+            
         </x-sidebar.group>
 
         <x-sidebar.group>
