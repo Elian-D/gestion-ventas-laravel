@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\ConfigurationSeeders\TipoPagoSeeder::class,
             // \Database\Seeders\ConfigurationSeeders\ConfiguracionGeneralSeeder::class,
             \Database\Seeders\ConfigurationSeeders\MonedaSeeder::class,
+            \Database\Seeders\ConfigurationSeeders\ImpuestoSeeder::class,
         ]);
     }
 }
