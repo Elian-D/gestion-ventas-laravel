@@ -14,5 +14,6 @@ class ConfigPermissionsSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'configure payments']);
         Permission::firstOrCreate(['name' => 'configure client-states']);
         Permission::firstOrCreate(['name' => 'configure dias-semana']);
+        Permission::firstOrCreate(['name' => 'configure taxes']);
     }
 }
