@@ -17,12 +17,12 @@
 
             {{-- Título --}}
             <h2 class="text-xl font-semibold text-gray-800 mb-6 border-b pb-3">
-                Provincias Eliminadas
+                Sectores Eliminados
             </h2>
 
             {{-- Toolbar --}}
             <div class="flex mb-6">
-                <a href="{{ route('provincias.index') }}"
+                <a href="{{ route('geography.sectores.index') }}"
                 class="inline-flex items-center px-4 py-2
                         border border-gray-300 rounded-md
                         text-sm font-medium text-gray-700
@@ -39,21 +39,21 @@
                 :items="$items"
                 :headers="['Nombre', 'Eliminado']"> {{-- Añadí 'Acciones' al header --}}
 
-                @forelse($items as $provincia)
+                @forelse($items as $sector)
                     {{-- La magia responsiva: block en móvil, table-row en md+ --}}
                     <tr class="block md:table-row hover:bg-gray-50 transition duration-150 p-4 border-b border-gray-200 md:border-b-0">
 
                         {{-- COLUMNA 1: NOMBRE (El cuerpo principal de la tarjeta en móvil) --}}
                         <td class="block md:table-cell px-6 py-4 font-semibold text-gray-900 md:font-normal md:text-sm">
                              <div class="font-bold text-base mb-1 md:font-normal md:text-sm">
-                                {{ $provincia->nombre }}
+                                {{ $sector->nombre }}
                             </div>
                         </td>
 
                         {{-- COLUMNA 2: FECHA DE ELIMINACIÓN (Visible en móvil como información secundaria) --}}
                         <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-500 md:text-gray-600">
                             <span class="md:hidden font-bold text-gray-700 mr-2">Eliminado:</span>
-                            {{ $provincia->deleted_at->format('d/m/Y') }}
+                            {{ $sector->deleted_at->format('d/m/Y') }}
                         </td>
 
                         {{-- COLUMNA 3: ACCIONES (Visible en móvil y desktop) --}}
@@ -61,7 +61,7 @@
                             <div class="flex gap-2 mt-2 md:mt-0"> {{-- Ajuste de margen en móvil --}}
 
                                 {{-- Restaurar --}}
-                                <form action="{{ route('provincias.restaurar', $provincia->id) }}" method="POST">
+                                <form action="{{ route('geography.sectores.restaurar', $sector->id) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
                                     <button class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200">
@@ -71,10 +71,10 @@
 
 
                                 {{-- Eliminar Definitivamente --}}
-                                <form action="{{ route('provincias.borrarDefinitivo', $provincia->id) }}" method="POST" x-data>
+                                <form action="{{ route('geography.sectores.borrarDefinitivo', $sector->id) }}" method="POST" x-data>
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" @click="$dispatch('open-modal', 'confirm-delete-{{ $provincia->id }}')"
+                                    <button type="button" @click="$dispatch('open-modal', 'confirm-delete-{{ $sector->id }}')"
                                         class="px-3 py-1 text-sm bg-red-100 text-red-800 rounded hover:bg-red-200">
                                         Eliminar
                                     </button>
@@ -87,7 +87,7 @@
                     <tr>
                         {{-- Aumentamos el colspan a 3 para cubrir las columnas Nombre, Eliminado y Acciones --}}
                         <td colspan="3" class="text-center py-6 text-gray-500">
-                            No hay provincias eliminadas.
+                            No hay sectores eliminadas.
                         </td>
                     </tr>
                 @endforelse
@@ -97,19 +97,19 @@
     </div>
 
     {{-- Modales para eliminación definitiva --}}
-    @foreach($items as $provincia)
-        <x-modal name="confirm-delete-{{ $provincia->id }}" :show="false" maxWidth="md">
-            <form action="{{ route('provincias.borrarDefinitivo', $provincia->id) }}" method="POST" class="p-6">
+    @foreach($items as $sector)
+        <x-modal name="confirm-delete-{{ $sector->id }}" :show="false" maxWidth="md">
+            <form action="{{ route('geography.sectores.borrarDefinitivo', $sector->id) }}" method="POST" class="p-6">
                 @csrf
                 @method('DELETE')
 
                 <h2 class="text-lg font-medium text-gray-900">
-                    ¿Eliminar definitivamente la provincia?
+                    ¿Eliminar definitivamente el sector?
                 </h2>
 
                 <p class="mt-1 text-sm text-gray-600">
-                    Esta acción no se puede deshacer. Provincia: 
-                    <span class="font-bold text-red-600">{{ $provincia->nombre }}</span>.
+                    Esta acción no se puede deshacer. Sector: 
+                    <span class="font-bold text-red-600">{{ $sector->nombre }}</span>.
                 </p>
 
                 <div class="mt-6 flex justify-end">

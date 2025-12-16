@@ -90,15 +90,15 @@
                     >
                         Ubicaciones
                         <x-slot name="submenu">
-                            <x-sidebar.subitem href="/admin/provincias">
+                            <x-sidebar.subitem href="/admin/geography/provincias">
                                 Provincias
                             </x-sidebar.subitem>
 
-                            <x-sidebar.subitem href="/admin/municipios">
+                            <x-sidebar.subitem href="/admin/geography/municipios">
                                 Municipios
                             </x-sidebar.subitem>
 
-                            <x-sidebar.subitem href="/admin/sectores">
+                            <x-sidebar.subitem href="/admin/geography/sectores">
                                 Sectores
                             </x-sidebar.subitem>
                         </x-slot>

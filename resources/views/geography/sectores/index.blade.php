@@ -71,7 +71,7 @@
 
                                 {{-- Acciones --}}
                                 <div class="flex justify-end gap-2 pt-2 border-t">
-                                    <a href="{{ route('sectores.index') }}"
+                                    <a href="{{ route('geography.sectores.index') }}"
                                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-100">
                                         Limpiar
                                     </a>
@@ -86,12 +86,12 @@
 
                 {{-- Acciones --}}
                 <div class="flex gap-2 self-start md:self-center">
-                    <a href="{{ route('sectores.eliminadas') }}"
+                    <a href="{{ route('geography.sectores.eliminadas') }}"
                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-100">
                         <x-heroicon-s-trash class="w-5 h-5 mr-2" />
                         Papelera
                     </a>
-                    <a href="{{ route('sectores.create') }}"
+                    <a href="{{ route('geography.sectores.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
                         <x-heroicon-s-plus class="w-5 h-5 mr-2" />
                         Nuevo Sector
@@ -154,7 +154,7 @@
                         <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium w-full md:w-auto">
                             <div class="flex gap-2 mt-2 md:mt-0">
                                 {{-- Toggle Estado --}}
-                                <form action="{{ route('sectores.toggle', $sector) }}" method="POST">
+                                <form action="{{ route('geography.sectores.toggle', $sector) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
                                     <button class="text-sm px-3 py-1 rounded {{ $sector->estado ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800' }}">
@@ -163,7 +163,7 @@
                                 </form>
 
                                 {{-- Editar --}}
-                                <a href="{{ route('sectores.edit', $sector) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
+                                <a href="{{ route('geography.sectores.edit', $sector) }}" class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
                                     <x-heroicon-s-pencil class="w-5 h-5" />
                                 </a>
 
@@ -187,7 +187,7 @@
     {{-- Modal de papelera --}}
     @foreach($sectores as $sector)
         <x-modal name="confirm-delete-{{ $sector->id }}" :show="false" maxWidth="md">
-            <form action="{{ route('sectores.destroy', $sector) }}" method="POST" class="p-6">
+            <form action="{{ route('geography.sectores.destroy', $sector) }}" method="POST" class="p-6">
                 @csrf
                 @method('DELETE')
                 <h2 class="text-lg font-medium text-gray-900">¿Enviar sector a la papelera?</h2>

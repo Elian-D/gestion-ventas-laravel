@@ -38,7 +38,7 @@ class MunicipioController extends Controller
         // Aquí cargamos las provincias activas para el select del filtro
         $provincias = Provincia::activo()->orderBy('nombre')->get();
 
-        return view('municipios.index', compact('municipios', 'search', 'estado', 'provincia_id', 'provincias'));
+        return view('geography.municipios.index', compact('municipios', 'search', 'estado', 'provincia_id', 'provincias'));
     }
 
     /**
@@ -47,7 +47,7 @@ class MunicipioController extends Controller
     public function create()
     {   
         $provincias = Provincia::activo()->orderBy('nombre')->get();
-        return view('municipios.create', compact('provincias'));
+        return view('geography.municipios.create', compact('provincias'));
     }
 
     /**
@@ -78,7 +78,7 @@ class MunicipioController extends Controller
 
 
         return redirect()
-            ->route('municipios.index')
+            ->route('geography.municipios.index')
             ->with('success', 'Municipio "' . $municipio->nombre . '" creado exitosamente.');
     }
 
@@ -88,7 +88,7 @@ class MunicipioController extends Controller
     public function edit(Municipio $municipio)
     {
         $provincias = Provincia::activo()->orderBy('nombre')->get();
-        return view('municipios.edit', compact('municipio','provincias'));
+        return view('geography.municipios.edit', compact('municipio','provincias'));
     }
 
     /**
@@ -122,7 +122,7 @@ class MunicipioController extends Controller
 
         // 4. Redirección y mensaje de éxito
         return redirect()
-            ->route('municipios.index')
+            ->route('geography.municipios.index')
             ->with('success', 'Municipio "' . $municipio->nombre . '" actualizado exitosamente.');
     }
 
@@ -130,7 +130,7 @@ class MunicipioController extends Controller
         $municipio->toggleEstado();
 
         return redirect()
-            ->route('municipios.index')
+            ->route('geography.municipios.index')
             ->with(
                 'success',
                 'Estado actualizado para "' . $municipio->nombre . '".'
@@ -145,8 +145,8 @@ class MunicipioController extends Controller
 
     // Métodos abstractos que el trait necesita
     protected function getModelClass(): string { return \App\Models\Geography\Municipio::class; }
-    protected function getViewFolder(): string { return 'municipios'; }
-    protected function getRouteIndex(): string { return 'municipios.index'; }
-    protected function getRouteEliminadas(): string { return 'municipios.eliminadas'; }
+    protected function getViewFolder(): string { return 'geography.municipios'; }
+    protected function getRouteIndex(): string { return 'geography.municipios.index'; }
+    protected function getRouteEliminadas(): string { return 'geography.municipios.eliminadas'; }
     protected function getEntityName(): string { return 'Municipio'; }
 }

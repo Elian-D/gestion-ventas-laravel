@@ -22,7 +22,7 @@
 
             {{-- Toolbar --}}
             <div class="flex mb-6">
-                <a href="{{ route('municipios.index') }}"
+                <a href="{{ route('geography.municipios.index') }}"
                 class="inline-flex items-center px-4 py-2
                         border border-gray-300 rounded-md
                         text-sm font-medium text-gray-700
@@ -61,7 +61,7 @@
                             <div class="flex gap-2 mt-2 md:mt-0"> {{-- Ajuste de margen en móvil --}}
 
                                 {{-- Restaurar --}}
-                                <form action="{{ route('municipios.restaurar', $municipio->id) }}" method="POST">
+                                <form action="{{ route('geography.municipios.restaurar', $municipio->id) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
                                     <button class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded hover:bg-green-200">
@@ -71,7 +71,7 @@
 
 
                                 {{-- Eliminar Definitivamente --}}
-                                <form action="{{ route('municipios.borrarDefinitivo', $municipio->id) }}" method="POST" x-data>
+                                <form action="{{ route('geography.municipios.borrarDefinitivo', $municipio->id) }}" method="POST" x-data>
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" @click="$dispatch('open-modal', 'confirm-delete-{{ $municipio->id }}')"
@@ -99,7 +99,7 @@
     {{-- Modales para eliminación definitiva --}}
     @foreach($items as $municipio)
         <x-modal name="confirm-delete-{{ $municipio->id }}" :show="false" maxWidth="md">
-            <form action="{{ route('municipios.borrarDefinitivo', $municipio->id) }}" method="POST" class="p-6">
+            <form action="{{ route('geography.municipios.borrarDefinitivo', $municipio->id) }}" method="POST" class="p-6">
                 @csrf
                 @method('DELETE')
 

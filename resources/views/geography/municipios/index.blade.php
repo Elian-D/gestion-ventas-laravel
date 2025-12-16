@@ -85,7 +85,7 @@
 
                                 {{-- Acciones --}}
                                 <div class="flex justify-end gap-2 pt-2 border-t">
-                                    <a href="{{ route('municipios.index') }}"
+                                    <a href="{{ route('geography.municipios.index') }}"
                                         class="inline-flex items-center px-4 py-2
                                                 border border-gray-300 rounded-md
                                                 text-sm font-medium text-gray-700
@@ -110,7 +110,7 @@
                 <div class="flex gap-2 self-start md:self-center">
 
                     {{-- PAPELERA --}}
-                    <a href="{{ route('municipios.eliminadas') }}"
+                    <a href="{{ route('geography.municipios.eliminadas') }}"
                     class="inline-flex items-center px-4 py-2
                             border border-gray-300 rounded-md
                             text-sm font-medium text-gray-700
@@ -120,7 +120,7 @@
                     </a>
 
                     {{-- NUEVO --}}
-                    <a href="{{ route('municipios.create') }}"
+                    <a href="{{ route('geography.municipios.create') }}"
                     class="inline-flex items-center px-4 py-2
                             bg-green-600 text-white rounded-md
                             hover:bg-green-700">
@@ -182,7 +182,7 @@
                             <div class="flex gap-2 mt-2 md:mt-0">
 
                                 {{-- Toggle Estado --}}
-                                <form action="{{ route('municipios.toggle', $municipio) }}" method="POST">
+                                <form action="{{ route('geography.municipios.toggle', $municipio) }}" method="POST">
                                     @csrf
                                     @method('PATCH')
                                     <button class="text-sm px-3 py-1 rounded
@@ -192,7 +192,7 @@
                                 </form>
 
                                 {{-- Editar --}}
-                                <a href="{{ route('municipios.edit', $municipio) }}"
+                                <a href="{{ route('geography.municipios.edit', $municipio) }}"
                                    class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-100">
                                     <x-heroicon-s-pencil class="w-5 h-5" />
                                 </a>
@@ -221,7 +221,7 @@
     {{-- Modal de advertencia para papelera --}}
     @foreach($municipios as $municipio)
         <x-modal name="confirm-delete-{{ $municipio->id }}" :show="false" maxWidth="md">
-            <form action="{{ route('municipios.destroy', $municipio) }}" method="POST" class="p-6">
+            <form action="{{ route('geography.municipios.destroy', $municipio) }}" method="POST" class="p-6">
                 @csrf
                 @method('DELETE')
 

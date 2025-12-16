@@ -3,13 +3,10 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-8">
-                <h2 class="text-xl font-medium text-gray-700 mb-6 border-b pb-3">
-                    {{ __('Editar Sector: ') }} <span class="text-indigo-600 font-semibold">{{ $sector->nombre }}</span>
-                </h2>
+                <h2 class="text-xl font-medium text-gray-700 mb-6 border-b pb-3">{{ __('Crear Nuevo Sector') }}</h2>
 
-                <form action="{{ route('sectores.update', $sector) }}" method="POST">
+                <form action="{{ route('geography.sectores.store') }}" method="POST">
                     @csrf
-                    @method('PUT')
 
                     {{-- Nombre del Sector --}}
                     <div class="mb-6">
@@ -17,9 +14,9 @@
                         <input type="text" 
                                name="nombre" 
                                id="nombre" 
-                               value="{{ old('nombre', $sector->nombre) }}"
+                               value="{{ old('nombre') }}"
                                placeholder="Ej: Centro, Barrio Norte"
-                               class="w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-4
+                               class="w-full border-gray-300 rounded-md shadow-sm text-base py-2.5 px-4 
                                       focus:border-indigo-500 focus:ring focus:ring-indigo-500 focus:ring-opacity-50
                                       @error('nombre') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
                         @error('nombre') 
@@ -36,7 +33,7 @@
                                        @error('municipio_id') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
                             <option value="">Seleccione un municipio</option>
                             @foreach($municipios as $municipio)
-                                <option value="{{ $municipio->id }}" {{ old('municipio_id', $sector->municipio_id) == $municipio->id ? 'selected' : '' }}>
+                                <option value="{{ $municipio->id }}" {{ old('municipio_id') == $municipio->id ? 'selected' : '' }}>
                                     {{ $municipio->nombre }} ({{ $municipio->provincia->nombre ?? '-' }})
                                 </option>
                             @endforeach
@@ -48,14 +45,14 @@
 
                     {{-- Botones --}}
                     <div class="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-                        <a href="{{ route('sectores.index') }}" 
+                        <a href="{{ route('geography.sectores.index') }}" 
                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150">
                             Cancelar
                         </a>
                         <button type="submit"
                                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150">
                             <x-heroicon-s-check class="w-5 h-5 mr-2 -ml-1" />
-                            Actualizar Sector
+                            Guardar Sector
                         </button>
                     </div>
                 </form>

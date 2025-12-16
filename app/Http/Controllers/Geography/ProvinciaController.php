@@ -30,7 +30,7 @@ class ProvinciaController extends Controller {
             ->withQueryString();
 
         // Retornar vista con provincias y parámetros de filtrado
-        return view('provincias.index', compact('provincias', 'search', 'estado'));
+        return view('geography.provincias.index', compact('provincias', 'search', 'estado'));
     }
 
 
@@ -39,7 +39,7 @@ class ProvinciaController extends Controller {
      */
     public function create()
     {
-        return view('provincias.create');
+        return view('geography.provincias.create');
     }
 
     /**
@@ -58,7 +58,7 @@ class ProvinciaController extends Controller {
 
         //
         return redirect()
-            ->route('provincias.index')
+            ->route('geography.provincias.index')
             ->with('success', 'Provincia "' . $provincia->nombre . '" creada exitosamente.');
 
     }
@@ -68,7 +68,7 @@ class ProvinciaController extends Controller {
      */
     public function edit(Provincia $provincia)
     {
-        return view('provincias.edit', compact('provincia'));
+        return view('geography.provincias.edit', compact('provincia'));
     }
 
     /**
@@ -92,7 +92,7 @@ class ProvinciaController extends Controller {
 
         // 4. Redirección y mensaje de éxito
         return redirect()
-            ->route('provincias.index')
+            ->route('geography.provincias.index')
             ->with('success', 'Provincia "' . $provincia->nombre . '" actualizada exitosamente.');
     }
 
@@ -100,7 +100,7 @@ class ProvinciaController extends Controller {
         $provincia->toggleEstado();
 
         return redirect()
-            ->route('provincias.index')
+            ->route('geography.provincias.index')
             ->with(
                 'success',
                 'Estado actualizado para "' . $provincia->nombre . '".'
@@ -115,8 +115,8 @@ class ProvinciaController extends Controller {
 
     // Métodos abstractos que el trait necesita
     protected function getModelClass(): string { return \App\Models\Geography\Provincia::class; }
-    protected function getViewFolder(): string { return 'provincias'; }
-    protected function getRouteIndex(): string { return 'provincias.index'; }
-    protected function getRouteEliminadas(): string { return 'provincias.eliminadas'; }
+    protected function getViewFolder(): string { return 'geography.provincias'; }
+    protected function getRouteIndex(): string { return 'geography.provincias.index'; }
+    protected function getRouteEliminadas(): string { return 'geography.provincias.eliminadas'; }
     protected function getEntityName(): string { return 'Provincia'; }
 }

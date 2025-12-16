@@ -38,7 +38,7 @@ class SectorController extends Controller
         // Aquí cargamos los Municipios activas para el select del filtro
         $municipios = Municipio::activo()->orderBy('nombre')->get();
 
-        return view('sectores.index', compact('sectores', 'search', 'estado', 'municipio_id', 'municipios'));
+        return view('geography.sectores.index', compact('sectores', 'search', 'estado', 'municipio_id', 'municipios'));
     }
 
     /**
@@ -47,7 +47,7 @@ class SectorController extends Controller
     public function create()
     {   
         $municipios = Municipio::activo()->orderBy('nombre')->get();
-        return view('sectores.create', compact('municipios'));
+        return view('geography.sectores.create', compact('municipios'));
     }
 
     /**
@@ -78,7 +78,7 @@ class SectorController extends Controller
 
 
         return redirect()
-            ->route('sectores.index')
+            ->route('geography.sectores.index')
             ->with('success', 'Sector "' . $sector->nombre . '" creado exitosamente.');
     }
 
@@ -88,7 +88,7 @@ class SectorController extends Controller
     public function edit(Sector $sector)
     {
         $municipios = Municipio::activo()->orderBy('nombre')->get();
-        return view('sectores.edit', compact('sector','municipios'));
+        return view('geography.sectores.edit', compact('sector','municipios'));
     }
 
     /**
@@ -122,7 +122,7 @@ class SectorController extends Controller
 
         // 4. Redirección y mensaje de éxito
         return redirect()
-            ->route('sectores.index')
+            ->route('geography.sectores.index')
             ->with('success', 'Sector "' . $sector->nombre . '" actualizado exitosamente.');
     }
 
@@ -130,7 +130,7 @@ class SectorController extends Controller
         $sector->toggleEstado();
 
         return redirect()
-            ->route('sectores.index')
+            ->route('geography.sectores.index')
             ->with(
                 'success',
                 'Estado actualizado para "' . $sector->nombre . '".'
@@ -145,8 +145,8 @@ class SectorController extends Controller
 
     // Métodos abstractos que el trait necesita
     protected function getModelClass(): string { return \App\Models\Geography\Sector::class; }
-    protected function getViewFolder(): string { return 'sectores'; }
-    protected function getRouteIndex(): string { return 'sectores.index'; }
-    protected function getRouteEliminadas(): string { return 'sectores.eliminadas'; }
+    protected function getViewFolder(): string { return 'geography.sectores'; }
+    protected function getRouteIndex(): string { return 'geography.sectores.index'; }
+    protected function getRouteEliminadas(): string { return 'geography.sectores.eliminadas'; }
     protected function getEntityName(): string { return 'Sector'; }
 }

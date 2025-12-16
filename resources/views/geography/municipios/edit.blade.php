@@ -10,7 +10,7 @@
                     Editar Municipio: <span class="text-indigo-600 font-semibold">{{ $municipio->nombre }}</span>
                 </h2>
 
-                <form action="{{ route('municipios.update', $municipio) }}" method="POST">
+                <form action="{{ route('geography.municipios.update', $municipio) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -51,7 +51,7 @@
 
                     {{-- Botones --}}
                     <div class="flex justify-end space-x-4 pt-4 border-t border-gray-100">
-                        <a href="{{ route('municipios.index') }}" 
+                        <a href="{{ route('geography.municipios.index') }}" 
                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 text-sm font-medium">
                             Cancelar
                         </a>
