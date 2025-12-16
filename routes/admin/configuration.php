@@ -3,6 +3,7 @@
 use App\Http\Controllers\Configuration\TipoDocumentoController;
 use App\Http\Controllers\Configuration\EstadosClienteController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Configuration\DiaSemanaController;
 
 
 
@@ -14,7 +15,7 @@ Route::middleware(['permission:view configuration'])
 
 
 // Agrupa las rutas bajo el prefijo 'admin' y aplica middlewares
-Route::middleware(['auth', 'permission:configure documents'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'permission:configure documents'])->group(function () {
     
     // Ruta para listar los elementos eliminados (Papelera)
     Route::get('tipos-documentos/eliminados', [TipoDocumentoController::class, 'eliminadas'])
@@ -50,7 +51,7 @@ Route::middleware(['auth', 'permission:configure documents'])->prefix('admin')->
 });
 
 // Agrupa las rutas bajo el prefijo 'admin' y aplica middlewares
-Route::middleware(['auth', 'permission:configure client-states'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'permission:configure client-states'])->group(function () {
     
     // Ruta para listar los elementos eliminados (Papelera)
     Route::get('estados-clientes/eliminados', [EstadosClienteController::class, 'eliminadas'])
@@ -81,4 +82,15 @@ Route::middleware(['auth', 'permission:configure client-states'])->prefix('admin
     Route::delete('estados-clientes/{id}/borrar', [EstadosClienteController::class, 'borrarDefinitivo'])
         ->name('configuration.estados.borrarDefinitivo');
 
+});
+
+Route::middleware('permission:configure dias semana')->group(function () {
+
+    // Index
+    Route::get('dias-semana', [DiaSemanaController::class, 'index'])
+        ->name('configuration.dias.index');
+
+    // Toggle estado
+    Route::patch('dias-semana/{diaSemana}/estado', [DiaSemanaController::class, 'toggleEstado'])
+        ->name('configuration.dias.toggle');
 });
