@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Configuration;
 
-use App\Models\EstadosCliente;
+use App\Models\Configuration\EstadosCliente;
 use App\Http\Controllers\Controller;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
@@ -123,7 +123,7 @@ class EstadosClienteController extends Controller
     }
 
     // Métodos abstractos que el trait necesita
-    protected function getModelClass(): string { return \App\Models\EstadosCliente::class; }
+    protected function getModelClass(): string { return \App\Models\Configuration\EstadosCliente::class; }
     protected function getViewFolder(): string { return 'configuration.estados'; }
     protected function getRouteIndex(): string { return 'configuration.estados.index'; }
     protected function getRouteEliminadas(): string { return 'configuration.estados.eliminados'; }

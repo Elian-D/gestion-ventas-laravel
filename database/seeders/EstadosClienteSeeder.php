@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\EstadosCliente; // Asegúrate de importar tu modelo
+use App\Models\Configuration\EstadosCliente; // Asegúrate de importar tu modelo
 use Illuminate\Database\Seeder;
 
 class EstadosClienteSeeder extends Seeder
