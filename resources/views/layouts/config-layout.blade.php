@@ -35,7 +35,7 @@
         <x-sidebar.group>
             <x-sidebar.title>Configuración</x-sidebar.title>
 
-            <x-sidebar.item href="{{ route('config.index') }}" icon="heroicon-s-cog-6-tooth">
+            <x-sidebar.item href="{{ route('configuration.index') }}" icon="heroicon-s-cog-6-tooth">
                 Panel de configuración
             </x-sidebar.item>
 
