@@ -1,30 +1,77 @@
 <x-config-layout>
-    <h1 class="text-2xl font-semibold text-gray-800 mb-6">
-        Panel de Configuración
-    </h1>
+    <div class="mb-10">
+        <h1 class="text-3xl font-bold text-gray-800">
+            Panel de Configuración
+        </h1>
+        <p class="text-gray-500 mt-2">
+            Administra las configuraciones generales del sistema
+        </p>
+    </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
+        <!-- Tipos de documentos -->
         <a href="{{ route('configuration.documentos.index') }}"
-           class="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
-            <h2 class="text-lg font-medium text-gray-800">
-                Tipos de documentos
-            </h2>
-            <p class="text-sm text-gray-500 mt-2">
-                Configura los tipos de documentos del sistema.
+           class="group bg-white border border-gray-200 p-6 rounded-xl
+                  shadow-sm hover:shadow-lg transition-all">
+
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-lg bg-indigo-100 text-indigo-600
+                            group-hover:bg-indigo-600 group-hover:text-white transition">
+                    <x-heroicon-s-identification class="w-6 h-6" />
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800">
+                    Tipos de documentos
+                </h2>
+            </div>
+
+            <p class="mt-4 text-sm text-gray-500">
+                Configura los tipos de documentos utilizados en el sistema.
             </p>
         </a>
 
+        <!-- Estados de clientes -->
         <a href="{{ route('configuration.estados.index') }}"
-           class="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
-            <h2 class="text-lg font-medium text-gray-800">
-                Estados de clientes
-            </h2>
-            <p class="text-sm text-gray-500 mt-2">
-                Configura los estados de los clientes.
+           class="group bg-white border border-gray-200 p-6 rounded-xl
+                  shadow-sm hover:shadow-lg transition-all">
+
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-lg bg-emerald-100 text-emerald-600
+                            group-hover:bg-emerald-600 group-hover:text-white transition">
+                    <x-heroicon-s-user class="w-6 h-6" />
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800">
+                    Estados de clientes
+                </h2>
+            </div>
+
+            <p class="mt-4 text-sm text-gray-500">
+                Define y administra los estados de los clientes.
             </p>
         </a>
 
-        {{-- FUTURAS TARJETAS --}}
+        <!-- Días de la semana -->
+        <a href="{{ route('configuration.dias.index') }}"
+           class="group bg-white border border-gray-200 p-6 rounded-xl
+                  shadow-sm hover:shadow-lg transition-all">
+
+            <div class="flex items-center gap-4">
+                <div class="p-3 rounded-lg bg-amber-100 text-amber-600
+                            group-hover:bg-amber-600 group-hover:text-white transition">
+                    <x-heroicon-s-calendar-days class="w-6 h-6" />
+                </div>
+
+                <h2 class="text-lg font-semibold text-gray-800">
+                    Días de la semana
+                </h2>
+            </div>
+
+            <p class="mt-4 text-sm text-gray-500">
+                Configura los estados y disponibilidad de los días.
+            </p>
+        </a>
+
     </div>
 </x-config-layout>

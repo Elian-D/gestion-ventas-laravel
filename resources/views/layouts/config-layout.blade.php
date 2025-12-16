@@ -47,6 +47,10 @@
                 Estados de clientes
             </x-sidebar.item>
 
+            <x-sidebar.item href="{{ route('configuration.dias.index') }}" icon="heroicon-s-calendar-days">
+                Días de semana
+            </x-sidebar.item>
+
             {{-- FUTUROS --}}
             {{-- <x-sidebar.item href="#">Estados de clientes</x-sidebar.item> --}}
             {{-- <x-sidebar.item href="#">Días de semana</x-sidebar.item> --}}

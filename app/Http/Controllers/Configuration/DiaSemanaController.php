@@ -21,7 +21,7 @@ class DiaSemanaController extends Controller
             ->when($search, fn($q) => $q->where('nombre', 'like', "%{$search}%"))
             ->when($estado === 'activo', fn($q) => $q->activo())
             ->when($estado === 'inactivo', fn($q) => $q->inactivo())
-            ->orderBy('nombre')
+            ->orderBy('orden')
             ->paginate(10)
             ->withQueryString();
 
