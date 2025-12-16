@@ -1,6 +1,7 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\ConfigurationSeeders;
+
 
 use App\Models\Configuration\EstadosCliente; // Asegúrate de importar tu modelo
 use Illuminate\Database\Seeder;

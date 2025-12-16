@@ -16,15 +16,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            \Database\Seeders\Permissions\DashboardPermissionsSeeder::class,
-            \Database\Seeders\Permissions\RolesPermissionsSeeder::class,
-            \Database\Seeders\Permissions\UsersPermissionsSeeder::class,
-            \Database\Seeders\Permissions\ConfigPermissionsSeeder::class,
-            \Database\Seeders\Permissions\GeographyPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\DashboardPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\RolesPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\UsersPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\ConfigPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\GeographyPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
-            EstadosClienteSeeder::class,
-            TipoDocumentoSeeder::class,
+            \Database\Seeders\ConfigurationSeeders\TipoDocumentoSeeder::class,
+            \Database\Seeders\ConfigurationSeeders\EstadosClienteSeeder::class,
+            \Database\Seeders\ConfigurationSeeders\DiaSemanaSeeder::class,
         ]);
     }
 }

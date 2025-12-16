@@ -1,6 +1,7 @@
 <?php
 
-namespace Database\Seeders\Permissions;
+namespace Database\Seeders\PermissionSeeder;
+
 
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
