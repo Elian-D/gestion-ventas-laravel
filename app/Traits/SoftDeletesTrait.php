@@ -20,7 +20,7 @@ trait SoftDeletesTrait
     if ($relationCheck && $item->$relationCheck()->exists()) {
         return redirect()
             ->route($this->getRouteIndex())
-            ->with('error', $this->getEntityName() . ' "' . $item->nombre . '" tiene relaciones. No se puede mover a la papelera.');
+            ->with('error', $this->getEntityName() . ' "' . $item->nombre . '" tiene relaciones. No se puede mover a la papelera, desactive el '.$this->getEntityName(). ' en su lugar.');
     }
 
     try {

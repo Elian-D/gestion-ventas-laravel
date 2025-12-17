@@ -7,6 +7,7 @@ use App\Models\Configuration\ConfiguracionGeneral;
 use App\Models\Configuration\Impuesto;
 use App\Models\Configuration\Moneda;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ConfiguracionGeneralController extends Controller
 {
@@ -29,6 +30,8 @@ class ConfiguracionGeneralController extends Controller
 
     public function update(Request $request)
     {
+        $configuracionGeneral = ConfiguracionGeneral::actual() ?? new ConfiguracionGeneral(); // Obtener o crear una instancia
+
         $validated = $request->validate([
             'nombre_empresa' => 'required|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -43,7 +46,24 @@ class ConfiguracionGeneralController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('logos', 'public');
+            
+            // 1. Eliminar logo anterior (si existe)
+            if ($configuracionGeneral->logo) {
+                Storage::disk('public')->delete($configuracionGeneral->logo);
+            }
+            
+            // 2. Almacenar el nuevo logo en 'config' dentro del disco 'public'
+            // El resultado será una ruta como 'config/nombre_hash.png'
+            $validated['logo'] = $request->file('logo')->store('config', 'public');
+        } else {
+            // Si no se sube un nuevo archivo, conservar el existente
+            if (!$configuracionGeneral->exists) {
+                 // Si es la primera creación y no hay logo, se queda null
+                 $validated['logo'] = null;
+            } else {
+                // Si estamos actualizando, conservamos el logo anterior si no se subió uno nuevo
+                $validated['logo'] = $configuracionGeneral->logo;
+            }
         }
 
         ConfiguracionGeneral::updateOrCreate(['id' => 1], $validated);

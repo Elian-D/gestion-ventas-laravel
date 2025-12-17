@@ -107,7 +107,7 @@ class ImpuestoController extends Controller
     // Elimina el Impuesto si no tiene relaciones (o desactiva la eliminación por defecto).
     public function destroy(Impuesto $impuesto)
     {
-        return $this->destroyTrait($impuesto, null);
+        return $this->destroyTrait($impuesto, 'configuraciones');
     }
 
     // Métodos abstractos que el trait necesita
