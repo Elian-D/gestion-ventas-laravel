@@ -29,46 +29,84 @@
 >
 <div class="flex min-h-screen bg-gray-100">
 
-    {{-- SIDEBAR CONFIGURACIÓN --}}
-    <x-sidebar.layout>
+{{-- SIDEBAR CONFIGURACIÓN --}}
+<x-sidebar.layout>
 
-        <x-sidebar.group>
-            <x-sidebar.title>Configuración</x-sidebar.title>
+    {{-- ===== SISTEMA ===== --}}
+    <x-sidebar.group>
+        <x-sidebar.title>Sistema</x-sidebar.title>
 
-            <x-sidebar.item href="{{ route('configuration.index') }}" icon="heroicon-s-cog-6-tooth">
-                Panel de configuración
-            </x-sidebar.item>
+        <x-sidebar.item
+            href="/dashboard"
+            icon="heroicon-s-arrow-left">
+            Volver al sistema
+        </x-sidebar.item>
+    </x-sidebar.group>
+    
+    {{-- ===== GENERAL ===== --}}
+    <x-sidebar.group>
+        <x-sidebar.title>General</x-sidebar.title>
 
-            <x-sidebar.item href="{{ route('configuration.documentos.index') }}" icon="heroicon-s-identification">
-                Tipos de documentos
-            </x-sidebar.item>
-            
-            <x-sidebar.item href="{{ route('configuration.estados.index') }}" icon="heroicon-s-user">
-                Estados de clientes
-            </x-sidebar.item>
+        <x-sidebar.item
+            href="{{ route('configuration.index') }}"
+            icon="heroicon-s-cog-6-tooth">
+            Panel de configuración
+        </x-sidebar.item>
 
-            <x-sidebar.item href="{{ route('configuration.dias.index') }}" icon="heroicon-s-calendar-days">
-                Días de semana
-            </x-sidebar.item>
+        <x-sidebar.item
+            href="{{ route('configuration.general.edit') }}"
+            icon="heroicon-s-adjustments-horizontal">
+            Datos generales
+        </x-sidebar.item>
+    </x-sidebar.group>
 
-            <x-sidebar.item href="{{ route('configuration.pagos.index') }}" icon="heroicon-s-currency-dollar">
-                Tipos de pagos
-            </x-sidebar.item>
-            
-            <x-sidebar.item href="{{ route('configuration.impuestos.index') }}" icon="heroicon-s-receipt-percent">
-                Impuestos
-            </x-sidebar.item>
+    {{-- ===== CLIENTES & DOCUMENTOS ===== --}}
+    <x-sidebar.group>
+        <x-sidebar.title>Clientes y Documentos</x-sidebar.title>
 
-            
-        </x-sidebar.group>
+        <x-sidebar.item
+            href="{{ route('configuration.documentos.index') }}"
+            icon="heroicon-s-identification">
+            Tipos de documentos
+        </x-sidebar.item>
 
-        <x-sidebar.group>
-            <x-sidebar.item href="/dashboard" icon="heroicon-s-arrow-left">
-                Volver al sistema
-            </x-sidebar.item>
-        </x-sidebar.group>
+        <x-sidebar.item
+            href="{{ route('configuration.estados.index') }}"
+            icon="heroicon-s-user-circle">
+            Estados de clientes
+        </x-sidebar.item>
+    </x-sidebar.group>
 
-    </x-sidebar.layout>
+    {{-- ===== FINANZAS ===== --}}
+    <x-sidebar.group>
+        <x-sidebar.title>Finanzas</x-sidebar.title>
+
+        <x-sidebar.item
+            href="{{ route('configuration.pagos.index') }}"
+            icon="heroicon-s-credit-card">
+            Métodos de pago
+        </x-sidebar.item>
+
+        <x-sidebar.item
+            href="{{ route('configuration.impuestos.index') }}"
+            icon="heroicon-s-receipt-percent">
+            Impuestos
+        </x-sidebar.item>
+    </x-sidebar.group>
+
+    {{-- ===== CALENDARIO / OPERACIÓN ===== --}}
+    <x-sidebar.group>
+        <x-sidebar.title>Operación</x-sidebar.title>
+
+        <x-sidebar.item
+            href="{{ route('configuration.dias.index') }}"
+            icon="heroicon-s-calendar-days">
+            Días laborables
+        </x-sidebar.item>
+    </x-sidebar.group>
+
+</x-sidebar.layout>
+
 
     {{-- CONTENIDO --}}
     <div class="flex-1 flex flex-col transition-all duration-300 ml-0"
