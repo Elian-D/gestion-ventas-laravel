@@ -9,6 +9,8 @@ class ConfiguracionGeneral extends Model
 {
     use HasFactory;
 
+    protected $table = 'configuraciones_generales';
+
     protected $fillable = [
         'nombre_empresa',
         'logo',
