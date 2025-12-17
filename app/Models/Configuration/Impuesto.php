@@ -21,13 +21,11 @@ class Impuesto extends Model
         'estado',
     ];
 
-    // Relación con ConfiguracionGeneral 
-    // Descomentar mas tarde si es necesario
-/*     public function configuracion()
-{
-    return $this->hasOne(ConfiguracionGeneral::class);
-}
- */
+    // Relación con ConfiguracionGeneral
+    public function configuraciones()
+    {
+        return $this->hasMany(ConfiguracionGeneral::class);
+    }
 
     // Métodos para verificar el tipo de impuesto
     public function isPorcentaje(): bool

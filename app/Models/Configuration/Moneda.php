@@ -14,11 +14,9 @@ class Moneda extends Model
         'es_principal',
     ];
 
-    // Relación con ConfiguracionGeneral 
-    // Descomentar mas tarde si es necesario
-/*     public function configuracion()
-{
-    return $this->hasOne(ConfiguracionGeneral::class);
-}
- */
+    // Relación con ConfiguracionGeneral
+    public function configuraciones()
+    {
+        return $this->hasMany(ConfiguracionGeneral::class);
+    }
 }
