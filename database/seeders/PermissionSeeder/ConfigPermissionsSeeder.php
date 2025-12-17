@@ -10,6 +10,7 @@ class ConfigPermissionsSeeder extends Seeder
     public function run(): void
     {
         Permission::firstOrCreate(['name' => 'view configuration']);
+        Permission::firstOrCreate(['name' => 'configure general data']);
         Permission::firstOrCreate(['name' => 'configure documents']);
         Permission::firstOrCreate(['name' => 'configure payments']);
         Permission::firstOrCreate(['name' => 'configure client-states']);
