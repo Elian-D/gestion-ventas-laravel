@@ -14,29 +14,37 @@ return new class extends Migration
         Schema::create('configuraciones_generales', function (Blueprint $table) {
             $table->id();
 
-            // Datos de empresa
+            // Datos empresa
             $table->string('nombre_empresa');
             $table->string('logo')->nullable();
             $table->string('telefono')->nullable();
             $table->string('email')->nullable();
             $table->text('direccion')->nullable();
             $table->string('ciudad')->nullable();
-            $table->string('pais')->nullable();
 
-            // Relaciones clave
-            $table->foreignId('moneda_id')
-                ->constrained('monedas')
-                ->restrictOnDelete();
+            // Ubicación geográfica REAL
+            $table->unsignedMediumInteger('country_id')->default(62);
+            $table->unsignedMediumInteger('state_id')->nullable();
 
-            $table->foreignId('impuesto_id')
-                ->constrained('impuestos')
-                ->restrictOnDelete();
+            // Moneda (editable)
+            $table->string('currency', 10);
+            $table->string('currency_name')->nullable();
+            $table->string('currency_symbol')->nullable();
 
-            $table->string('timezone')->default('America/Santo_Domingo');
+            // Zona horaria (NO editable)
+            $table->string('timezone');
 
             $table->timestamps();
-        });
 
+            // Relaciones
+            $table->foreign('country_id')
+                ->references('id')->on('countries')
+                ->restrictOnDelete();
+
+            $table->foreign('state_id')
+                ->references('id')->on('states')
+                ->nullOnDelete();
+        });
     }
 
     /**

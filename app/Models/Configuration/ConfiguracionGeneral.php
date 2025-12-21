@@ -4,6 +4,8 @@ namespace App\Models\Configuration;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Geo\Country;
+use App\Models\Geo\State;
 
 class ConfiguracionGeneral extends Model
 {
@@ -18,25 +20,27 @@ class ConfiguracionGeneral extends Model
         'email',
         'direccion',
         'ciudad',
-        'pais',
-        'moneda_id',
-        'impuesto_id',
+        'country_id',
+        'state_id',
+        'currency',
+        'currency_name',
+        'currency_symbol',
         'timezone',
     ];
 
-    public function moneda()
-{
-    return $this->belongsTo(Moneda::class);
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public static function actual()
+    {
+        return self::first();
+    }
 }
 
-public function impuesto()
-{
-    return $this->belongsTo(Impuesto::class);
-}
-
-public static function actual()
-{
-    return self::first();
-}
-
-}

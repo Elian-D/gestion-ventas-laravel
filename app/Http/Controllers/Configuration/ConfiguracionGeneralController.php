@@ -4,65 +4,77 @@ namespace App\Http\Controllers\Configuration;
 
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\ConfiguracionGeneral;
-use App\Models\Configuration\Impuesto;
-use App\Models\Configuration\Moneda;
+use App\Models\Geo\Country;
+use App\Models\Geo\State;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class ConfiguracionGeneralController extends Controller
 {
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
+
     public function edit()
     {
-        $configuracionGeneral = ConfiguracionGeneral::first();
-        $monedas = Moneda::orderBy('nombre')->get();
-        $impuestos = Impuesto::activo()->orderBy('nombre')->get();
+        $config = ConfiguracionGeneral::actual();
+        $countries = Country::ordered()->get();
 
-        return view(
-            'configuration.general.edit',
-            compact('configuracionGeneral', 'monedas', 'impuestos')
-        );
+        $states = $config?->country_id
+            ? State::byCountry($config->country_id)->orderBy('name')->get()
+            : collect();
+
+        return view('configuration.general.edit', compact(
+            'config',
+            'countries',
+            'states'
+        ));
     }
 
 
     public function update(Request $request)
     {
-        $configuracionGeneral = ConfiguracionGeneral::actual() ?? new ConfiguracionGeneral(); // Obtener o crear una instancia
+        $config = ConfiguracionGeneral::actual();
 
         $validated = $request->validate([
             'nombre_empresa' => 'required|string|max:255',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'logo' => 'nullable|image|max:2048',
             'telefono' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'direccion' => 'nullable|string',
             'ciudad' => 'nullable|string|max:255',
-            'pais' => 'nullable|string|max:255',
-            'moneda_id' => 'required|exists:monedas,id',
-            'impuesto_id' => 'required|exists:impuestos,id',
-            'timezone' => 'required|string|timezone',
+            'country_id' => 'required|exists:countries,id',
+            'state_id' => 'nullable|exists:states,id',
         ]);
 
+        $country = Country::findOrFail($validated['country_id']);
+        $state = $validated['state_id']
+            ? State::find($validated['state_id'])
+            : null;
+
+        // Moneda automática desde país
+        $validated['currency'] = $country->currency;
+        $validated['currency_name'] = $country->currency_name;
+        $validated['currency_symbol'] = $country->currency_symbol;
+
+        // Timezone (prioridad estado > país)
+        $validated['timezone'] = $state?->timezone
+            ?? json_decode($country->timezones, true)[0]['zoneName']
+            ?? config('app.timezone');
+
+        // Logo
         if ($request->hasFile('logo')) {
-            
-            // 1. Eliminar logo anterior (si existe)
-            if ($configuracionGeneral->logo) {
-                Storage::disk('public')->delete($configuracionGeneral->logo);
+
+            // 1. Eliminar logo anterior si existe
+            if ($config && $config->logo && Storage::disk('public')->exists($config->logo)) {
+                Storage::disk('public')->delete($config->logo);
             }
-            
-            // 2. Almacenar el nuevo logo en 'config' dentro del disco 'public'
-            // El resultado será una ruta como 'config/nombre_hash.png'
+
+            // 2. Guardar nuevo logo
             $validated['logo'] = $request->file('logo')->store('config', 'public');
         } else {
-            // Si no se sube un nuevo archivo, conservar el existente
-            if (!$configuracionGeneral->exists) {
-                 // Si es la primera creación y no hay logo, se queda null
-                 $validated['logo'] = null;
-            } else {
-                // Si estamos actualizando, conservamos el logo anterior si no se subió uno nuevo
-                $validated['logo'] = $configuracionGeneral->logo;
+            // Si no se sube nuevo logo, conservar el actual
+            if ($config) {
+                $validated['logo'] = $config->logo;
             }
         }
 
@@ -70,5 +82,4 @@ class ConfiguracionGeneralController extends Controller
 
         return back()->with('success', 'Configuración actualizada correctamente.');
     }
-
 }
