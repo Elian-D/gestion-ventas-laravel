@@ -47,6 +47,7 @@ class ConfiguracionGeneralSeeder extends Seeder
                 'ciudad'           => null,
 
                 // Moneda sugerida por país (editable luego)
+                'impuesto_id' => 1,
                 'currency'         => $country->currency,
                 'currency_name'    => $country->currency_name,
                 'currency_symbol'  => $country->currency_symbol,

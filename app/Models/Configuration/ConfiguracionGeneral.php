@@ -23,6 +23,7 @@ class ConfiguracionGeneral extends Model
         'ciudad',
         'country_id',
         'state_id',
+        'impuesto_id',
         'currency',
         'currency_name',
         'currency_symbol',
@@ -40,6 +41,12 @@ class ConfiguracionGeneral extends Model
     {
         return $this->belongsTo(State::class);
     }
+
+    public function impuesto()
+    {
+        return $this->belongsTo(Impuesto::class);
+    }
+
 
     public function taxIdentifierType()
     {

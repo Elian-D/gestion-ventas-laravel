@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Configuration;
 
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\ConfiguracionGeneral;
+use App\Models\Configuration\Impuesto;
 use App\Models\Configuration\TaxIdentifierType;
 use App\Models\Geo\Country;
 use App\Models\Geo\State;
@@ -19,6 +20,7 @@ class ConfiguracionGeneralController extends Controller
     {
         $config = ConfiguracionGeneral::actual();
         $countries = Country::ordered()->get();
+        $impuestos = Impuesto::all();
 
         // Obtener estados del país configurado
         $states = $config?->country_id
@@ -34,7 +36,8 @@ class ConfiguracionGeneralController extends Controller
             'config',
             'countries',
             'states',
-            'taxTypes'
+            'taxTypes',
+            'impuestos'
         ));
     }
 
@@ -52,6 +55,13 @@ class ConfiguracionGeneralController extends Controller
             'direccion' => 'nullable|string',
             'ciudad' => 'nullable|string|max:255',
             'country_id' => 'required|exists:countries,id',
+
+
+            'impuesto_nombre' => 'required|string|max:255',
+            'impuesto_tipo'   => 'required|in:porcentaje,fijo',
+            'impuesto_valor'  => 'required|numeric|min:0',
+            'impuesto_incluido' => 'nullable|boolean',
+
             'state_id' => 'nullable|exists:states,id',
             'tax_identifier_type_id' => 'nullable|exists:tax_identifier_types,id',
         ]);
@@ -87,6 +97,18 @@ class ConfiguracionGeneralController extends Controller
                 $validated['logo'] = $config->logo;
             }
         }
+
+        $impuesto = Impuesto::updateOrCreate(
+            ['id' => $config?->impuesto_id], // Si existe lo edita, si no, crea uno nuevo
+            [
+                'nombre' => $validated['impuesto_nombre'],
+                'tipo'   => $validated['impuesto_tipo'],
+                'valor'  => $validated['impuesto_valor'],
+                'es_incluido' => $request->has('impuesto_incluido')
+            ]
+        );
+    
+        $validated['impuesto_id'] = $impuesto->id;
 
         ConfiguracionGeneral::updateOrCreate(['id' => 1], $validated);
 

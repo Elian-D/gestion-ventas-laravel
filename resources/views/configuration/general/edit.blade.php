@@ -14,6 +14,7 @@
             selectedCountry: '{{ old('country_id', $config->country_id ?? 62) }}',
             selectedState: '{{ old('state_id', $config->state_id ?? '') }}',
             selectedTaxType: '{{ old('tax_identifier_type_id', $config->tax_identifier_type_id ?? '') }}',
+            selectedImpuesto: '{{ old('impuesto_id', $config->impuesto_id ?? '') }}',
             
             logoPreview: '{{ $config?->logo ? asset('storage/'.$config->logo) : '' }}',
             phoneCode: '{{ $countries->where('id', old('country_id', $config->country_id ?? 62))->first()->phonecode ?? '' }}',
@@ -83,7 +84,8 @@
                     </button>
                 </div>
             @endif
-            <form method="POST" action="{{ route('configuration.general.update') }}" enctype="multipart/form-data" class="space-y-10">
+
+            <form method="POST" action="{{ route('configuration.general.update') }}" enctype="multipart/form-data" class="space-y-8">
                 @csrf
                 @method('PUT')
 
@@ -98,8 +100,8 @@
                     <div class="p-6 border-b border-slate-100 flex items-center gap-4">
                         <span class="flex-none w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-100">1</span>
                         <div>
-                            <h2 class="font-bold text-slate-800 text-xl">Ubicación de Operación</h2>
-                            <p class="text-sm text-slate-500">Define la región base para el cálculo de impuestos y formatos.</p>
+                            <h2 class="font-bold text-slate-800 text-xl tracking-tight">Ubicación de Operación</h2>
+                            <p class="text-sm text-slate-500">Región base para impuestos y formatos.</p>
                         </div>
                     </div>
 
@@ -115,7 +117,7 @@
                                     </span>
                                     <x-heroicon-s-chevron-down class="w-5 h-5 text-slate-400" />
                                 </button>
-                                <input type="hidden" name="country_id" :value="selectedCountry">
+                                <input type="hidden" name="country_id" :value="selectedCountry" required>
                                 
                                 <div x-show="openCountry" @click.outside="openCountry = false" class="absolute z-[100] mt-2 w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
                                     <div class="p-3 bg-slate-50 border-b">
@@ -151,7 +153,6 @@
                                                 <span x-text="state.name"></span>
                                             </button>
                                         </template>
-                                        <div x-show="filteredStates.length === 0" class="p-4 text-center text-xs text-slate-400 italic">No se encontraron resultados</div>
                                     </div>
                                 </div>
                             </div>
@@ -169,52 +170,38 @@
                         </div>
 
                         <div class="mt-8 pt-6 border-t border-slate-100" :class="isLoading ? 'opacity-50' : ''">
-                            <div class="flex items-center gap-2 mb-4">
-                                <x-heroicon-s-sparkles class="w-5 h-5 text-indigo-500" />
-                                <h4 class="text-sm font-bold text-slate-700">Ajustes regionales aplicados</h4>
-                            </div>
-                            
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 transition-all hover:bg-blue-50">
+                                <div class="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 transition-all">
                                     <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Moneda Local</p>
                                     <div class="flex items-center gap-2">
                                         <span class="text-lg font-bold text-blue-700" x-text="currency"></span>
-                                        <span class="text-xs text-blue-500 font-medium">Auto-detectada</span>
                                     </div>
                                 </div>
-    
-                                <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 transition-all hover:bg-indigo-50">
-                                    <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Prefijo Telefónico</p>
+                                <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 transition-all">
+                                    <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-1">Prefijo</p>
                                     <div class="flex items-center gap-2">
                                         <span class="text-lg font-bold text-indigo-700" x-text="`+${phoneCode}`"></span>
-                                        <span class="text-xs text-indigo-500 font-medium">Internacional</span>
                                     </div>
                                 </div>
-    
-                                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition-all">
+                                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 transition-all overflow-hidden">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Zona Horaria</p>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-bold text-slate-700 truncate" x-text="timezone"></span>
-                                        <x-heroicon-s-clock class="w-4 h-4 text-slate-400" />
+                                        <span class="text-xs font-bold text-slate-700 truncate" x-text="timezone"></span>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <p class="mt-3 text-[11px] text-slate-400 italic">
-                                * Estos valores se sincronizan automáticamente con el país y estado seleccionados para garantizar la validez fiscal.
-                            </p>
                         </div>
                     </div>
                 </section>
 
-                <section class="bg-white rounded-3xl shadow-sm border border-slate-200">
+                <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex items-center gap-4">
-                        <span class="flex-none w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">2</span>
+                        <span class="flex-none w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">2</span>
                         <h2 class="font-bold text-slate-800 text-lg">Canales de Contacto</h2>
                     </div>
-                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Correo Electrónico Corporativo</label>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Email Corporativo</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <x-heroicon-s-envelope class="w-5 h-5 text-slate-400" />
@@ -223,79 +210,112 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Teléfono de Contacto</label>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block tracking-wider">Teléfono</label>
                             <div class="flex">
-                                <span class="inline-flex items-center px-4 rounded-l-2xl border border-r-0 border-slate-200 bg-slate-50 text-slate-500 font-bold sm:text-sm" x-text="`+${phoneCode}`"></span>
+                                <span class="inline-flex items-center px-4 rounded-l-2xl border border-r-0 border-slate-200 bg-slate-50 text-slate-500 font-bold text-xs" x-text="`+${phoneCode}`"></span>
                                 <x-text-input name="telefono" type="text" class="flex-1 rounded-l-none" placeholder="809 000 0000" value="{{ $config->telefono ?? '' }}" />
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">3</span>
-                            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-widest">Logo de la Empresa</h3>
-                        </div>
-                        <div class="flex flex-col items-center">
-                            <div class="w-32 h-32 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden mb-4 relative group">
-                                <template x-if="logoPreview">
-                                    <img :src="logoPreview" class="object-contain w-full h-full p-2">
-                                </template>
-                                
-                                <template x-if="!logoPreview">
-                                    <x-heroicon-s-photo class="w-12 h-12 text-slate-300" />
-                                </template>
+                <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex items-center gap-4">
+                        <span class="flex-none w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">3</span>
+                        <h3 class="font-bold text-slate-800 text-lg">Identidad e Información Legal</h3>
+                    </div>
 
-                                <div x-show="logoPreview" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <span class="text-[10px] text-white font-bold uppercase">Cambiar</span>
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+                            <div class="md:col-span-4 flex flex-col items-center border-b md:border-b-0 md:border-r border-slate-100 pb-8 md:pb-0 md:pr-10">
+                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-4 self-start">Logo de la Empresa</label>
+                                <div class="w-40 h-40 rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden mb-4 relative group transition-all hover:border-indigo-300">
+                                    <template x-if="logoPreview">
+                                        <img :src="logoPreview" class="object-contain w-full h-full p-2">
+                                    </template>
+                                    <template x-if="!logoPreview">
+                                        <x-heroicon-s-photo class="w-16 h-16 text-slate-200" />
+                                    </template>
+                                    <div x-show="logoPreview" class="absolute inset-0 bg-indigo-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+                                        <span class="text-[10px] text-white font-black uppercase tracking-widest">Cambiar Imagen</span>
+                                    </div>
+                                </div>
+                                <input type="file" name="logo" accept="image/*" @change="updateLogoPreview"
+                                    class="text-[10px] text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 cursor-pointer w-full" />
+                                <p class="mt-3 text-[9px] text-slate-400 italic text-center leading-tight">Sugerido: PNG/SVG fondo transparente (200x200px)</p>
+                            </div>
+
+                            <div class="md:col-span-8 space-y-8">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre Comercial</label>
+                                        <x-text-input name="nombre_empresa" class="w-full" value="{{ $config->nombre_empresa ?? '' }}" />
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Identificación Fiscal</label>
+                                        <div class="flex flex-col sm:flex-row gap-2">
+                                            <select name="tax_identifier_type_id" 
+                                                class="w-full sm:w-32 border-slate-200 rounded-2xl text-[11px] bg-slate-50 font-bold text-slate-700" 
+                                                x-model="selectedTaxType" :disabled="isLoading" required>
+                                                <option value="" disabled x-show="!selectedTaxType">Tipo</option>
+                                                <template x-for="type in taxTypes" :key="type.id">
+                                                    <option :value="type.id" x-text="type.code" :selected="type.id == selectedTaxType"></option>
+                                                </template>
+                                            </select>
+                                            <x-text-input name="tax_id" class="flex-1" placeholder="Número de identificación" value="{{ $config->tax_id ?? '' }}" ::disabled="isLoading" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-indigo-50/30 rounded-3xl p-6 border border-indigo-100/50">
+                                    <h4 class="text-[11px] font-black text-indigo-600 uppercase mb-5 flex items-center gap-2 tracking-widest">
+                                        <x-heroicon-s-receipt-percent class="w-4 h-4" />
+                                        Impuesto Principal
+                                    </h4>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div class="sm:col-span-2 lg:col-span-1">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Nombre (IVA, ITBIS...)</label>
+                                            <x-text-input name="impuesto_nombre" value="{{ $config->impuesto->nombre ?? '' }}" class="w-full bg-white" />
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                                            <select name="impuesto_tipo" class="w-full border-slate-200 rounded-2xl bg-white text-xs font-bold text-slate-700">
+                                                <option value="porcentaje" {{ ($config->impuesto?->tipo ?? '') == 'porcentaje' ? 'selected' : '' }}>Porcentaje %</option>
+                                                <option value="fijo" {{ ($config->impuesto?->tipo ?? '') == 'fijo' ? 'selected' : '' }}>Monto Fijo $</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase mb-1">Valor</label>
+                                            <x-text-input name="impuesto_valor" type="number" step="0.01" value="{{ $config->impuesto->valor ?? '' }}" class="w-full bg-white" />
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-5 flex items-start gap-3 bg-white/60 p-4 rounded-2xl border border-indigo-100">
+                                        <input type="checkbox" name="impuesto_incluido" value="1" 
+                                            {{ ($config->impuesto?->es_incluido ?? false) ? 'checked' : '' }}
+                                            class="mt-1 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                        <label class="text-xs font-semibold text-slate-600 leading-snug">
+                                            El precio de los productos ya incluye este impuesto. <span class="block text-[10px] font-normal text-slate-400 italic">Activa esto si tus precios de venta son finales.</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-
-                            <input type="file" 
-                                name="logo" 
-                                accept="image/*"
-                                @change="updateLogoPreview"
-                                class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer" />
-                            
-                            <p class="mt-2 text-[10px] text-slate-400 italic text-center">Formatos recomendados: PNG o SVG (200x200px)</p>
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                        <div class="flex items-center gap-3 mb-6">
-                            <span class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">4</span>
-                            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-widest">Información Legal</h3>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Nombre Comercial</label>
-                                <x-text-input name="nombre_empresa" class="w-full py-2" value="{{ $config->nombre_empresa ?? '' }}" />
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase mb-1">Identificación Fiscal</label>
-                                <div class="flex gap-2">
-                                    <select name="tax_identifier_type_id" class="w-24 border-slate-200 rounded-xl text-[10px] bg-slate-50 font-bold" x-model="selectedTaxType" :disabled="isLoading">
-                                        <option value="">Tipo</option>
-                                        <template x-for="type in taxTypes" :key="type.id">
-                                            <option :value="type.id" x-text="type.code"></option>
-                                        </template>
-                                    </select>
-                                    <x-text-input name="tax_id" class="flex-1 py-2" placeholder="ID Fiscal" value="{{ $config->tax_id ?? '' }}" ::disabled="isLoading" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-                <div class="sticky bottom-6 bg-white/90 backdrop-blur border border-slate-200 p-4 rounded-3xl shadow-xl flex items-center justify-between z-[40]">
-                    <x-secondary-button type="button" x-on:click="$dispatch('open-modal', 'confirm-discard')">
+                <div class="sticky bottom-6 bg-white/80 backdrop-blur-md border border-slate-200 p-4 rounded-3xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 z-[40]">
+                    <button type="button" x-on:click="$dispatch('open-modal', 'confirm-discard')"
+                        class="w-full sm:w-auto px-6 py-3 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest">
                         Descartar cambios
-                    </x-secondary-button>
+                    </button>
 
-                    <x-primary-button class="bg-indigo-600 px-8 py-3 rounded-2xl" ::disabled="isLoading">
-                        <span x-show="!isLoading">Guardar Cambios</span>
+                    <x-primary-button class="w-full sm:w-auto bg-indigo-600 px-10 py-4 rounded-2xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all" ::disabled="isLoading">
+                        <span x-show="!isLoading" class="flex items-center gap-2">
+                            <x-heroicon-s-cloud-arrow-up class="w-5 h-5" />
+                            Guardar Configuración
+                        </span>
                         <span x-show="isLoading">Procesando...</span>
                     </x-primary-button>
                 </div>
@@ -303,28 +323,21 @@
         </div>
 
         <x-modal name="confirm-discard" :show="false" maxWidth="md">
-            <div class="p-6">
-                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
-                    <x-heroicon-s-exclamation-triangle class="w-6 h-6 text-red-600" />
+            <div class="p-8">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-50 rounded-full mb-4">
+                    <x-heroicon-s-exclamation-triangle class="w-8 h-8 text-red-500" />
                 </div>
-                
-                <div class="mt-3 text-center sm:mt-5">
-                    <h3 class="text-lg font-bold text-slate-800 leading-6">
-                        ¿Descartar cambios?
-                    </h3>
-                    <div class="mt-2">
-                        <p class="text-sm text-slate-500">
-                            Se perderán todos los datos modificados en este formulario y se recargarán los valores guardados en la base de datos.
-                        </p>
-                    </div>
+                <div class="text-center">
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">¿Descartar cambios?</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed">
+                        Se perderán todos los datos modificados. Los valores volverán a su estado original guardado en el servidor.
+                    </p>
                 </div>
-
-                <div class="mt-6 flex justify-center gap-3">
-                    <x-secondary-button x-on:click="$dispatch('close')">
+                <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+                    <x-secondary-button x-on:click="$dispatch('close')" class="w-full sm:w-auto justify-center py-3">
                         Continuar editando
                     </x-secondary-button>
-
-                    <x-danger-button @click="window.location.reload()">
+                    <x-danger-button @click="window.location.reload()" class="w-full sm:w-auto justify-center py-3">
                         Sí, descartar todo
                     </x-danger-button>
                 </div>

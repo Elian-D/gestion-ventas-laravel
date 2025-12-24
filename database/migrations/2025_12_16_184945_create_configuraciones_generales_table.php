@@ -52,6 +52,12 @@ return new class extends Migration
                     ->nullable()
                     ->references('id')->on('tax_identifier_types')
                     ->nullOnDelete();;
+            
+            $table->foreignId('impuesto_id')
+                ->nullable()
+                ->constrained('impuestos')
+                ->restrictOnDelete();
+
         });
     }
 
