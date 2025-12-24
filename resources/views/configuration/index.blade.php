@@ -92,18 +92,5 @@
             </p>
         </a>
 
-        <!-- Impuestos -->
-        <a href="{{ route('configuration.impuestos.index') }}" class="group bg-white border border-gray-200 p-6 rounded-xl shadow-sm hover:shadow-lg transition-all">
-            <div class="flex items-center gap-4">
-                <div class="p-3 rounded-lg bg-rose-100 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition">
-                    <x-heroicon-s-receipt-percent class="w-6 h-6" />
-                </div>
-                <h2 class="text-lg font-semibold text-gray-800">Impuestos</h2>
-            </div>
-            <p class="mt-4 text-sm text-gray-500">
-                Configura impuestos, porcentajes y reglas fiscales.
-            </p>
-        </a>
-
     </div>
 </x-config-layout>

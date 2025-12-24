@@ -81,28 +81,7 @@
                     <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
                         Configuración
                     </x-sidebar.item>
-
-                    {{-- Ubicaciones --}}
-                    <x-sidebar.dropdown 
-                        id="ubicaciones" 
-                        icon="heroicon-s-map-pin" 
-                        :activeRoutes="['provincias', 'municipios', 'sectores']"
-                    >
-                        Ubicaciones
-                        <x-slot name="submenu">
-                            <x-sidebar.subitem href="/admin/geography/provincias">
-                                Provincias
-                            </x-sidebar.subitem>
-
-                            <x-sidebar.subitem href="/admin/geography/municipios">
-                                Municipios
-                            </x-sidebar.subitem>
-
-                            <x-sidebar.subitem href="/admin/geography/sectores">
-                                Sectores
-                            </x-sidebar.subitem>
-                        </x-slot>
-                    </x-sidebar.dropdown>
+                    
                 </x-sidebar.group>
 
 
