@@ -18,35 +18,46 @@ class EstadosClienteSeeder extends Seeder
         $estados = [
             [
                 'nombre' => 'Activo',
-                'estado' => true, // La fila está activa
+                'activo' => true,
+                'permite_operar' => true,
+                'permite_facturar' => true,
                 'clase_fondo' => 'bg-green-100',
                 'clase_texto' => 'text-green-800',
             ],
             [
                 'nombre' => 'Inactivo',
-                'estado' => true, // La fila está inactiva/desactivada
+                'activo' => true,
+                'permite_operar' => false,
+                'permite_facturar' => false,
                 'clase_fondo' => 'bg-gray-100',
                 'clase_texto' => 'text-gray-800',
             ],
             [
                 'nombre' => 'Suspendido',
-                'estado' => true, 
+                'activo' => true,
+                'permite_operar' => false,
+                'permite_facturar' => false,
                 'clase_fondo' => 'bg-yellow-100',
                 'clase_texto' => 'text-yellow-800',
             ],
             [
                 'nombre' => 'Moroso',
-                'estado' => true,
+                'activo' => true,
+                'permite_operar' => true,
+                'permite_facturar' => false,
                 'clase_fondo' => 'bg-red-100',
                 'clase_texto' => 'text-red-800',
             ],
             [
                 'nombre' => 'Prospecto',
-                'estado' => true,
-                'clase_fondo' => 'bg-blue-100', // Usando blue para prospectos
+                'activo' => true,
+                'permite_operar' => false,
+                'permite_facturar' => false,
+                'clase_fondo' => 'bg-blue-100',
                 'clase_texto' => 'text-blue-800',
             ],
         ];
+
 
         foreach ($estados as $estado) {
             // Se usa updateOrCreate para evitar duplicados si se ejecuta el seeder varias veces

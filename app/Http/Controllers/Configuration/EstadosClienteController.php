@@ -33,19 +33,21 @@ class EstadosClienteController extends Controller
     public function index(Request $request) {
         // Obtener parámetros de búsqueda y filtro de estado de la solicitud
         $search = $request->query('search'); 
-        $estado = $request->query('estado'); 
+        $estadoFiltro = $request->query('estado'); // activo | inactivo | null 
 
         // Construir query con filtros dinámicos, ordenar por nombre y paginar
         $estados = EstadosCliente::query()
-            ->when($search, fn($q) => $q->where('nombre', 'like', "%{$search}%"))
-            ->when($estado === 'activo', fn($q) => $q->activo())
-            ->when($estado === 'inactivo', fn($q) => $q->inactivo())
+            ->when($search, fn ($q) =>
+                $q->where('nombre', 'like', "%{$search}%")
+            )
+            ->filtrarPorEstado($estadoFiltro)
             ->orderBy('nombre')
             ->paginate(10)
             ->withQueryString();
 
+
         // Retornar vista con estados y parámetros de filtrado
-        return view('configuration.estados.index', compact('estados', 'search', 'estado'));
+        return view('configuration.estados.index', compact('estados', 'search', 'estadoFiltro'));
     }
 
 
@@ -56,16 +58,21 @@ class EstadosClienteController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|unique:estados_clientes,nombre',
-            'color_base' => ['required', 'string', Rule::in($this->allowedColors)], // NUEVA VALIDACIÓN
+            'color_base' => ['required', 'string', Rule::in($this->allowedColors)],
+            'permite_operar' => 'required|boolean',
+            'permite_facturar' => 'required|boolean',
         ]);
 
-        // Construir las clases de estilo
+
         $styleClasses = $this->buildStyleClasses($request->color_base);
 
         $estado = EstadosCliente::create(array_merge([
             'nombre' => $request->nombre,
-            'estado' => true // Por defecto 'true'
-        ], $styleClasses)); // UNIR con las clases de estilo
+            'activo' => true,
+            'permite_operar' => $request->boolean('permite_operar'),
+            'permite_facturar' => $request->boolean('permite_facturar'),
+        ], $styleClasses));
+
 
         // ... (redirección)
         return redirect()
@@ -84,20 +91,22 @@ class EstadosClienteController extends Controller
                 'string',
                 Rule::unique('estados_clientes')->ignore($estado->id),
             ],
-            'color_base' => ['required', 'string', Rule::in($this->allowedColors)], // NUEVA VALIDACIÓN
+            'color_base' => ['required', 'string', Rule::in($this->allowedColors)],
+            'permite_operar' => 'required|boolean',
+            'permite_facturar' => 'required|boolean',
         ]);
 
-        // 2. Preparación de los datos
         $data = [
             'nombre' => $request->nombre,
+            'permite_operar' => $request->boolean('permite_operar'),
+            'permite_facturar' => $request->boolean('permite_facturar'),
         ];
-        
-        // Construir las clases de estilo
-        $styleClasses = $this->buildStyleClasses($request->color_base);
-        $data = array_merge($data, $styleClasses); // UNIR con las clases de estilo
 
-        // 3. Actualización del registro
+        $styleClasses = $this->buildStyleClasses($request->color_base);
+        $data = array_merge($data, $styleClasses);
+
         $estado->update($data);
+
 
         // ... (redirección)
         return redirect()
@@ -105,16 +114,24 @@ class EstadosClienteController extends Controller
             ->with('success', 'Estado de cliente "' . $estado->nombre . '" actualizado exitosamente.');
     }
 
-    public function toggleEstado(EstadosCliente $estado) {
-        $estado->toggleEstado();
+    public function toggleEstado(EstadosCliente $estado)
+    {
+        if ($estado->activo) {
+            $activosCount = EstadosCliente::activos()->count();
+            
+            if ($activosCount <= 2) {
+                return redirect()
+                    ->route('configuration.estados.index')
+                    ->with('error', 'No se puede desactivar. Deben existir al menos 2 estados activos en el catálogo.');
+            }
+        }
+        $estado->toggleActivo();
 
         return redirect()
             ->route('configuration.estados.index')
-            ->with(
-                'success',
-                'Estado actualizado para "' . $estado->nombre . '".'
-            );
+            ->with('success', 'Estado actualizado para "' . $estado->nombre . '".');
     }
+
 
     // Elimina la EstadosCliente si no tiene relaciones (o desactiva la eliminación por defecto).
     public function destroy(EstadosCliente $estado)

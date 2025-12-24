@@ -10,31 +10,75 @@ class EstadosCliente extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * Los atributos que se pueden asignar masivamente
-     */
-    protected $fillable = ['nombre', 'estado', 'clase_fondo', 'clase_texto'];
+    protected $table = 'estados_clientes';
+
+    protected $fillable = [
+        'nombre',
+        'activo',
+        'permite_operar',
+        'permite_facturar',
+        'clase_fondo',
+        'clase_texto',
+    ];
 
     protected $casts = [
-    'estado' => 'boolean',
-];
+        'activo' => 'boolean',
+        'permite_operar' => 'boolean',
+        'permite_facturar' => 'boolean',
+    ];
 
+    /* ===========================
+     |  SCOPES DEL CATÁLOGO
+     =========================== */
 
-    // Scopes para filtrar por estado
-    public function scopeActivo($query)
+    // Estados utilizables
+    public function scopeActivos($query)
     {
-        return $query->where('estado', true);
+        return $query->where('activo', true);
     }
 
-    public function scopeInactivo($query)
+    // Estados deshabilitados
+    public function scopeInactivos($query)
     {
-        return $query->where('estado', false);
+        return $query->where('activo', false);
     }
 
-    // Alternar estado
-    public function toggleEstado(): void
+    // Scope flexible por estado (activo/inactivo)
+    public function scopeFiltrarPorEstado($query, ?string $estado)
     {
-        $this->estado = ! $this->estado;
+        return match ($estado) {
+            'activo' => $query->activos(),
+            'inactivo' => $query->inactivos(),
+            default => $query,
+        };
+    }
+
+    /**
+     * Scope flexible por nombre del estado
+     * Ej: EstadosCliente::porNombre('Moroso')->first()
+     */
+    public function scopePorNombre($query, string $nombre)
+    {
+        return $query->whereRaw('LOWER(nombre) = ?', [strtolower($nombre)]);
+    }
+
+    /* ===========================
+     |  COMPORTAMIENTO
+     =========================== */
+
+    public function toggleActivo(): void
+    {
+        $this->activo = ! $this->activo;
         $this->save();
+    }
+
+    public function puedeOperar(): bool
+    {
+        return $this->activo && $this->permite_operar;
+    }
+
+    public function puedeFacturar(): bool
+    {
+        return $this->activo && $this->permite_facturar;
     }
 }
