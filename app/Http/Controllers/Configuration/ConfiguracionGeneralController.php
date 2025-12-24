@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Configuration;
 
 use App\Http\Controllers\Controller;
 use App\Models\Configuration\ConfiguracionGeneral;
+use App\Models\Configuration\TaxIdentifierType;
 use App\Models\Geo\Country;
 use App\Models\Geo\State;
 use Illuminate\Http\Request;
@@ -19,14 +20,21 @@ class ConfiguracionGeneralController extends Controller
         $config = ConfiguracionGeneral::actual();
         $countries = Country::ordered()->get();
 
+        // Obtener estados del país configurado
         $states = $config?->country_id
             ? State::byCountry($config->country_id)->orderBy('name')->get()
+            : collect();
+        
+        //Obtener identificadores fiscales del país configurado
+        $taxTypes = $config?->country_id
+            ? TaxIdentifierType::byCountry($config->country_id)->get()
             : collect();
 
         return view('configuration.general.edit', compact(
             'config',
             'countries',
-            'states'
+            'states',
+            'taxTypes'
         ));
     }
 
@@ -38,12 +46,14 @@ class ConfiguracionGeneralController extends Controller
         $validated = $request->validate([
             'nombre_empresa' => 'required|string|max:255',
             'logo' => 'nullable|image|max:2048',
+            'tax_id' => 'nullable|string|max:50',
             'telefono' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'direccion' => 'nullable|string',
             'ciudad' => 'nullable|string|max:255',
             'country_id' => 'required|exists:countries,id',
             'state_id' => 'nullable|exists:states,id',
+            'tax_identifier_type_id' => 'nullable|exists:tax_identifier_types,id',
         ]);
 
         $country = Country::findOrFail($validated['country_id']);

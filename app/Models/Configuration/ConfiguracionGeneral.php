@@ -16,6 +16,7 @@ class ConfiguracionGeneral extends Model
     protected $fillable = [
         'nombre_empresa',
         'logo',
+        'tax_id',
         'telefono',
         'email',
         'direccion',
@@ -26,8 +27,10 @@ class ConfiguracionGeneral extends Model
         'currency_name',
         'currency_symbol',
         'timezone',
+        'tax_identifier_type_id',
     ];
 
+    // Relaciones
     public function country()
     {
         return $this->belongsTo(Country::class);
@@ -38,6 +41,12 @@ class ConfiguracionGeneral extends Model
         return $this->belongsTo(State::class);
     }
 
+    public function taxIdentifierType()
+    {
+        return $this->belongsTo(TaxIdentifierType::class);
+    }
+
+    // Obtener la configuración general actual (única fila)
     public static function actual()
     {
         return self::first();

@@ -17,6 +17,9 @@ return new class extends Migration
             // Datos empresa
             $table->string('nombre_empresa');
             $table->string('logo')->nullable();
+
+            $table->string('tax_id', 50)->nullable();
+            
             $table->string('telefono')->nullable();
             $table->string('email')->nullable();
             $table->text('direccion')->nullable();
@@ -44,6 +47,11 @@ return new class extends Migration
             $table->foreign('state_id')
                 ->references('id')->on('states')
                 ->nullOnDelete();
+
+            $table->foreignId('tax_identifier_type_id')
+                    ->nullable()
+                    ->references('id')->on('tax_identifier_types')
+                    ->nullOnDelete();;
         });
     }
 
