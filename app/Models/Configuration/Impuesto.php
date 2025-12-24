@@ -4,11 +4,10 @@ namespace App\Models\Configuration;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Impuesto extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     const TIPO_PORCENTAJE = 'porcentaje';
     const TIPO_FIJO = 'fijo';
@@ -18,14 +17,14 @@ class Impuesto extends Model
         'tipo',
         'valor',
         'es_incluido',
-        'estado',
     ];
 
-    // Relación con ConfiguracionGeneral
-    public function configuraciones()
+    // Impuesto.php
+    public function configuracion()
     {
-        return $this->hasMany(ConfiguracionGeneral::class);
+        return $this->hasOne(ConfiguracionGeneral::class);
     }
+
 
     // Métodos para verificar el tipo de impuesto
     public function isPorcentaje(): bool
@@ -38,22 +37,4 @@ class Impuesto extends Model
         return $this->tipo === self::TIPO_FIJO;
     }
 
-
-    // Scopes para filtrar por estado
-    public function scopeActivo($query)
-    {
-        return $query->where('estado', true);
-    }
-
-    public function scopeInactivo($query)
-    {
-        return $query->where('estado', false);
-    }
-
-    // Alternar estado
-    public function toggleEstado(): void
-    {
-        $this->estado = ! $this->estado;
-        $this->save();
-    }
 }

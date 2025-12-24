@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('impuestos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
-            $table->string('tipo', 20)->comment('porcentaje | fijo');
+
+            $table->string('nombre');
+            $table->enum('tipo', ['porcentaje', 'fijo']);
             $table->decimal('valor', 8, 2);
             $table->boolean('es_incluido')->default(false);
-            $table->boolean('estado')->default(true)->index();
+
             $table->timestamps();
-            $table->softDeletes();
         });
+
     }
 
     /**

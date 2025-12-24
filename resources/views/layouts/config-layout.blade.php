@@ -86,12 +86,6 @@
             icon="heroicon-s-credit-card">
             Métodos de pago
         </x-sidebar.item>
-
-        <x-sidebar.item
-            href="{{ route('configuration.impuestos.index') }}"
-            icon="heroicon-s-receipt-percent">
-            Impuestos
-        </x-sidebar.item>
     </x-sidebar.group>
 
     {{-- ===== CALENDARIO / OPERACIÓN ===== --}}
