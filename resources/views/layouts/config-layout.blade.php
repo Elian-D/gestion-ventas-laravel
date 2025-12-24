@@ -60,15 +60,9 @@
         </x-sidebar.item>
     </x-sidebar.group>
 
-    {{-- ===== CLIENTES & DOCUMENTOS ===== --}}
+    {{-- ===== CLIENTES ===== --}}
     <x-sidebar.group>
         <x-sidebar.title>Clientes y Documentos</x-sidebar.title>
-
-        <x-sidebar.item
-            href="{{ route('configuration.documentos.index') }}"
-            icon="heroicon-s-identification">
-            Tipos de documentos
-        </x-sidebar.item>
 
         <x-sidebar.item
             href="{{ route('configuration.estados.index') }}"
