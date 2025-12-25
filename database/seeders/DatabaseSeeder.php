@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PermissionSeeder\UsersPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\ConfigPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\GeographyPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\ClientPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
 
@@ -35,6 +36,7 @@ class DatabaseSeeder extends Seeder
 
             // Clients Configuration Seeders
             \Database\Seeders\ClientsConfigSeeders\BusinessTypeSeeder::class,
+            \Database\Seeders\ClientsConfigSeeders\EquipmentTypeSeeder::class,
         ]);
     }
 }
