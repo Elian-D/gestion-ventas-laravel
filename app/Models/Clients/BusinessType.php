@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Models\Clients;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class BusinessType extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'business_types';
+
+    protected $fillable = [
+        'nombre',
+        'activo',
+    ];
+
+    protected $casts = [
+        'activo' => 'boolean',
+    ];
+
+    /* ===========================
+     |  SCOPES DEL CATÁLOGO
+     =========================== */
+
+    // Tipos de negocio habilitados
+    public function scopeActivos($query)
+    {
+        return $query->where('activo', true);
+    }
+
+    // Tipos de negocio deshabilitados
+    public function scopeInactivos($query)
+    {
+        return $query->where('activo', false);
+    }
+
+    // Scope flexible por estado (activo/inactivo)
+    public function scopeFiltrarPorEstado($query, ?string $estado)
+    {
+        return match ($estado) {
+            'activo' => $query->activos(),
+            'inactivo' => $query->inactivos(),
+            default => $query,
+        };
+    }
+
+    /* ===========================
+     |  COMPORTAMIENTO
+     =========================== */
+
+    /**
+     * Alternar el estado activo/inactivo
+     */
+    public function toggleActivo(): void
+    {
+        $this->activo = ! $this->activo;
+        $this->save();
+    }
+}
