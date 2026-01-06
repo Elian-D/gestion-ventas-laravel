@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Clients\ClientController;
 
-Route::prefix('gestion')->group(function () {
+Route::group([], function () {
     
     // Listado principal y búsqueda
     Route::get('/', [ClientController::class, 'index'])

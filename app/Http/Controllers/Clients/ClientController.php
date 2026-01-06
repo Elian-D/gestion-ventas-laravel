@@ -6,6 +6,8 @@ use App\Models\Clients\Client;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
+use App\Models\Configuration\ConfiguracionGeneral;
+use App\Models\Configuration\TaxIdentifierType;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -39,18 +41,22 @@ class ClientController extends Controller
      */
     public function create()
     {
+        $config = ConfiguracionGeneral::actual();
         $estados = EstadosCliente::activos()->get();
         $states = State::orderBy('name')->get();
         $types = ['individual' => 'Persona Física', 'company' => 'Empresa / Jurídica'];
+        // Pasamos el tax_label por defecto basado en la config
+    $defaultTaxLabel = $config->taxIdentifierType->code ?? 'Tax ID';
 
-        return view('clients.create', compact('estados', 'states', 'types'));
+        return view('clients.create', compact('estados', 'states', 'types', 'defaultTaxLabel'));
     }
-
+    
     /**
      * Almacenar nuevo cliente
      */
     public function store(Request $request)
     {
+        $config = ConfiguracionGeneral::actual();
         $data = $request->validate([
             'type' => ['required', Rule::in(['individual', 'company'])],
             'name' => 'required|string|max:255',
@@ -63,6 +69,15 @@ class ClientController extends Controller
             'tax_id' => 'nullable|string|max:50',
         ]);
 
+        $entityType = ($data['type'] === 'individual') ? 'person' : 'company';
+
+        $identifier = TaxIdentifierType::where('country_id', $config->country_id)
+        ->where(function($q) use ($entityType) {
+            $q->where('entity_type', $entityType)->orWhere('entity_type', 'both');
+        })->first();
+
+        $data['tax_identifier_type_id'] = $identifier?->id;
+        
         $client = Client::create(array_merge($data, ['active' => true]));
 
         return redirect()

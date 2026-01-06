@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
             // Clients Configuration Seeders
             \Database\Seeders\ClientsConfigSeeders\BusinessTypeSeeder::class,
             \Database\Seeders\ClientsConfigSeeders\EquipmentTypeSeeder::class,
+            \Database\Seeders\ClientsConfigSeeders\ClientSeeder::class,
         ]);
     }
 }
