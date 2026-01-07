@@ -135,21 +135,50 @@ export default function AjaxDataTable(config) {
     };
 
     const clearAll = () => {
-        // Guardamos el valor actual de per_page antes de resetear
+        // 1. Guardamos el estado actual de las preferencias (per_page y columnas)
         const currentPerPage = form.querySelector('[name="per_page"]')?.value || 10;
         
+        // Obtenemos los valores de las columnas que están marcadas actualmente
+        const selectedColumns = Array.from(form.querySelectorAll('input[name="columns[]"]:checked'))
+            .map(cb => cb.value);
+        
+        // 2. Reseteamos el formulario (esto desmarca todo y limpia inputs)
         form.reset();
-
-        // Restauramos el valor de per_page para que la UX sea consistente
+        
+        // 3. Restauramos per_page
         const perPageInput = form.querySelector('[name="per_page"]');
         if (perPageInput) perPageInput.value = currentPerPage;
+        
+        // 4. Restauramos las columnas marcadas
+        form.querySelectorAll('input[name="columns[]"]').forEach(cb => {
+            cb.checked = selectedColumns.includes(cb.value);
+        });
 
-        const base = window.location.pathname;
-        fetchTable(base);
-        history.replaceState({}, '', base);
-        renderChips({});
+        // 5. Aplicamos los cambios
+        apply(); 
     };
 
+    const resetColumns = () => {
+        const container = document.getElementById('column-selector-container');
+        if (!container) return;
+
+        // 1. Obtenemos las columnas por defecto desde el atributo data
+        const defaultColumns = JSON.parse(container.dataset.defaultColumns || '[]');
+        
+        // 2. Buscamos todos los checkboxes de columnas
+        const columnCheckboxes = form.querySelectorAll('input[name="columns[]"]');
+        
+        columnCheckboxes.forEach(cb => {
+            // 3. Lo marcamos solo si está en la lista de permitidos por defecto
+            // Usamos el valor del checkbox para comparar
+            cb.checked = defaultColumns.includes(cb.value);
+        });
+
+        // 4. Ejecutamos la petición AJAX para actualizar la tabla
+        apply();
+    };
+
+    window.resetTableColumns = resetColumns;
 
     // Autosubmit select
     form.querySelectorAll('select').forEach(el =>
