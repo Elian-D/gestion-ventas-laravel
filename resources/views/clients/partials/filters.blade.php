@@ -1,20 +1,28 @@
-<div x-data="{ open: false }" class="mb-4">
-    <form id="clients-filters" method="GET">
-        <div class="flex flex-col md:flex-row items-start md:items-center gap-3">
-            
-            <x-data-table.per-page-selector />
-
-            <x-data-table.filter-dropdown>
+<x-data-table.filter-container formId="clients-filters">
     
-                {{-- Filtro de Estado Operativo --}}
-                <x-data-table.filter-select label="Estado Operativo" name="active">
+    {{-- BUSCADOR: Ocupa todo el ancho en móvil y crece en escritorio --}}
+    <div class="w-full md:flex-grow order-1">
+        <x-data-table.search 
+            formId="clients-filters" 
+            placeholder="Buscar cliente..." 
+        />
+    </div>
+
+    {{-- ACCIONES: Se distribuyen equitativamente en móvil --}}
+    <div class="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 order-2">
+        
+        {{-- Grupo Izquierdo (en móvil) --}}
+        <div class="flex items-center gap-2">
+            <x-data-table.per-page-selector formId="clients-filters" />
+            
+            <x-data-table.filter-dropdown>
+                <x-data-table.filter-select label="Estado Operativo" name="active" formId="clients-filters">
                     <option value="">Todos</option>
                     <option value="1" @selected(request('active') === '1')>Activos</option>
                     <option value="0" @selected(request('active') === '0')>Inactivos</option>
                 </x-data-table.filter-select>
 
-                {{-- Filtro de Estado del Cliente (Dinámico) --}}
-                <x-data-table.filter-select label="Estado del Cliente" name="estado_cliente">
+                <x-data-table.filter-select label="Estado del Cliente" name="estado_cliente" formId="clients-filters">
                     <option value="">Todos los estados</option>
                     @foreach($estadosClientes as $estado)
                         <option value="{{ $estado->id }}" @selected(request('estado_cliente') == $estado->id)>
@@ -23,8 +31,7 @@
                     @endforeach
                 </x-data-table.filter-select>
 
-                {{-- Filtro de Tipo de Negocio (Dinámico) --}}
-                <x-data-table.filter-select label="Tipo de Negocio" name="business_type">
+                <x-data-table.filter-select label="Tipo de Negocio" name="business_type" formId="clients-filters">
                     <option value="">Todos los tipos</option>
                     @foreach($tiposNegocio as $tipo)
                         <option value="{{ $tipo->id }}" @selected(request('business_type') == $tipo->id)>
@@ -32,19 +39,15 @@
                         </option>
                     @endforeach
                 </x-data-table.filter-select>
-
             </x-data-table.filter-dropdown>
-            
-            <x-data-table.column-selector 
-                :allColumns="$allColumns" 
-                :visibleColumns="$visibleColumns" 
-                />
-
-            <x-data-table.search placeholder="Buscar cliente..." />
         </div>
-    </form>
 
-    {{-- CHIPS ACTIVOS (FUNCIONALES) --}}
-    <div id="active-filters" class="flex flex-wrap items-center gap-2 mt-4"></div>
+        {{-- Grupo Derecho (en móvil) --}}
+        <x-data-table.column-selector 
+            formId="clients-filters"
+            :allColumns="$allColumns" 
+            :visibleColumns="$visibleColumns" 
+        />
+    </div>
 
-</div>
+</x-data-table.filter-container>
