@@ -58,9 +58,13 @@ export default function AjaxDataTable(config) {
 
         chipsContainer.innerHTML = '';
 
-        Object.entries(params).forEach(([key, value]) => {
-            const config = chips[key] ?? {};
+        // 1. Filtramos los parámetros para obtener solo los que generan chips reales
+        const realFilterKeys = Object.keys(params).filter(key => key !== 'per_page');
 
+        // 2. Renderizamos los chips normalmente
+        realFilterKeys.forEach(key => {
+            const value = params[key];
+            const config = chips[key] ?? {};
             const name = config.label ?? key;
             const label = resolveLabel(config, value);
 
@@ -83,18 +87,18 @@ export default function AjaxDataTable(config) {
             chipsContainer.appendChild(chip);
         });
 
-        if (!Object.keys(params).length) return;
-        {
+        // 3. LA CLAVE: Solo mostramos "Limpiar todo" si hay filtros reales aplicados
+        if (realFilterKeys.length > 0) {
             const clear = document.createElement('button');
             clear.textContent = 'Limpiar todo';
-            clear.className = 'text-xs text-red-500 ml-2';
+            clear.className = 'text-xs text-red-500 hover:text-red-700 ml-2 font-medium transition';
             clear.onclick = () => {
                 clearAll();
             };
             chipsContainer.appendChild(clear);
         }
     };
-
+    
     const apply = () => {
         const params = getParams();
         const url = buildUrl(params);
@@ -104,17 +108,20 @@ export default function AjaxDataTable(config) {
     };
 
     const clearAll = () => {
-    form.reset();
+        // Guardamos el valor actual de per_page antes de resetear
+        const currentPerPage = form.querySelector('[name="per_page"]')?.value || 10;
+        
+        form.reset();
 
-    const base = window.location.pathname;
+        // Restauramos el valor de per_page para que la UX sea consistente
+        const perPageInput = form.querySelector('[name="per_page"]');
+        if (perPageInput) perPageInput.value = currentPerPage;
 
-    fetchTable(base);
-
-    // ⚠️ CLAVE: reemplaza el estado, no lo empujes
-    history.replaceState({}, '', base);
-
-    renderChips({});
-};
+        const base = window.location.pathname;
+        fetchTable(base);
+        history.replaceState({}, '', base);
+        renderChips({});
+    };
 
 
     // Autosubmit select
