@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Clients;
 
 use App\Models\Clients\Client;
+use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
@@ -11,30 +12,34 @@ use App\Models\Configuration\TaxIdentifierType;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Filters\Client\ClientFilters;
 
 class ClientController extends Controller
 {
     use SoftDeletesTrait;
 
-    /**
-     * Listado principal de clientes
-     */
+
+
     public function index(Request $request)
     {
-        $search = $request->query('search');
-        $estadoFiltro = $request->query('estado'); // activo | inactivo
-
-        $clients = Client::with(['estadoCliente', 'state']) // Eager Loading para optimizar
-            ->when($search, fn($q) => $q->search($search))
-            ->when($estadoFiltro, function($q) use ($estadoFiltro) {
-                return $estadoFiltro === 'activo' ? $q->activos() : $q->where('active', false);
-            })
-            ->latest()
+        $clients = (new ClientFilters($request))
+            ->apply(Client::query())
             ->paginate(10)
             ->withQueryString();
+        
+        $estadosClientes = EstadosCliente::query()
+            ->get();
 
-        return view('clients.index', compact('clients', 'search', 'estadoFiltro'));
+        $tiposNegocio = BusinessType::query()
+            ->get();
+
+        if ($request->ajax()) {
+            return view('clients.partials.table', compact('clients'))->render();
+        }
+
+        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio'));
     }
+
 
     /**
      * Mostrar formulario de creación

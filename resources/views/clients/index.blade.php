@@ -1,107 +1,97 @@
+    @include('clients.partials.filter-sources')
 <x-app-layout>
-    <div class="max-w-7xl mx-auto">
-        <div class="bg-white shadow-xl rounded-lg p-6">
+
+    <div class="max-w-7xl mx-auto py-4 px-2 sm:px-3 lg:px-4">
+        <div class="bg-white shadow-xl rounded-xl overflow-hidden">
             
-            {{-- SECCIÓN DE ALERTAS (TOASTS) --}}
             <div class="fixed top-4 right-4 z-50 flex flex-col gap-4 w-full max-w-sm px-4 md:px-0">
+                {{-- TOAST DE ÉXITO --}}
                 @if (session('success'))
-                    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                    <div x-data="{ show: true }" x-show="show" 
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-x-8"
+                        x-transition:enter-end="opacity-100 transform translate-x-0"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        x-init="setTimeout(() => show = false, 5000)"
                         class="overflow-hidden rounded-lg shadow-2xl border border-emerald-600">
+                        {{-- Cabecera del Toast (Verde Oscuro) --}}
                         <div class="bg-emerald-600 px-4 py-2 flex justify-between items-center">
-                            <span class="text-white font-bold text-sm">Operación Exitosa</span>
-                            <button @click="show = false" class="text-white"><x-heroicon-s-x-mark class="w-4 h-4" /></button>
+                            <span class="text-white font-bold text-sm">Configuración actualizada</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-emerald-100 text-xs font-medium">Éxito</span>
+                                <button @click="show = false" class="text-white hover:text-emerald-200 transition-colors">
+                                    <x-heroicon-s-x-mark class="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
+                        {{-- Cuerpo del Toast (Verde Claro) --}}
                         <div class="bg-emerald-500 px-4 py-3">
-                            <p class="text-white text-sm leading-relaxed">{{ session('success') }}</p>
+                            <p class="text-white text-sm leading-relaxed">
+                                {{ session('success') }}
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
+                {{-- TOAST DE ERROR --}}
+                @if (session('error'))
+                    <div x-data="{ show: true }" x-show="show" 
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform translate-x-8"
+                        x-transition:enter-end="opacity-100 transform translate-x-0"
+                        x-init="setTimeout(() => show = false, 6000)"
+                        class="overflow-hidden rounded-lg shadow-2xl border border-red-600">
+                        <div class="bg-red-600 px-4 py-2 flex justify-between items-center">
+                            <span class="text-white font-bold text-sm">Error en el sistema</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-red-100 text-xs font-medium">Alerta</span>
+                                <button @click="show = false" class="text-white hover:text-red-200">
+                                    <x-heroicon-s-x-mark class="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-red-500 px-4 py-3">
+                            <p class="text-white text-sm leading-relaxed">{{ session('error') }}</p>
                         </div>
                     </div>
                 @endif
             </div>
 
-            <h2 class="text-xl font-semibold text-gray-800 mb-6 border-b pb-3">Gestión de Clientes</h2>
-
-            {{-- Toolbar --}}
-            <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
-                <form method="GET" class="w-full md:w-2/3 flex gap-2">
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Nombre, RNC o email..."
-                           class="w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
-                    <button class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                        <x-heroicon-s-magnifying-glass class="w-5 h-5" />
-                    </button>
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-gray-100 pb-4">
+                    <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
+                        Gestión de Clientes
+                    </h2>
                     
-                    <select name="estado" onchange="this.form.submit()" class="rounded-md border-gray-300 text-sm">
-                        <option value="">Todos</option>
-                        <option value="activo" {{ $estadoFiltro === 'activo' ? 'selected' : '' }}>Habilitados</option>
-                        <option value="inactivo" {{ $estadoFiltro === 'inactivo' ? 'selected' : '' }}>Deshabilitados</option>
-                    </select>
-                </form>
+                    {{-- ACCIONES PRINCIPALES --}}
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('clients.eliminados') }}" 
+                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all duration-200">
+                            <x-heroicon-s-trash class="w-4 h-4 mr-2" />
+                            Papelera
+                        </a>
+                        <a href="{{ route('clients.create') }}" 
+                           class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition">
+                            <x-heroicon-s-plus class="w-4 h-4 mr-2" />
+                            NUEVO CLIENTE
+                        </a>
+                    </div>
+                </div>
 
-                <div class="flex gap-2">
-                    <a href="{{ route('clients.eliminados') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-100">
-                        <x-heroicon-s-trash class="w-5 h-5 mr-2" /> Papelera
-                    </a>
-                    <a href="{{ route('clients.create') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition">
-                        <x-heroicon-s-plus class="w-5 h-5 mr-2" /> Nuevo
-                    </a>
+                {{-- FILTROS Y BARRA DE BÚSQUEDA --}}
+                @include('clients.partials.filters')
+
+                {{-- TABLA --}}
+                <div id="clients-table" class="mt-6 border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                    @include('clients.partials.table')
                 </div>
             </div>
-
-            {{-- TABLA --}}
-            <x-data-table :items="$clients" :headers="['Cliente', 'Ubicación', 'Estado']">
-                @forelse($clients as $client)
-                    <tr class="block md:table-row hover:bg-gray-50 transition duration-150 p-4 border-b border-gray-200 md:border-b-0">
-                        
-                        <td class="block md:table-cell px-6 py-4 w-full md:w-4/12">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-gray-900 text-base md:text-sm">{{ $client->display_name }}</span>
-                                <span class="text-xs text-gray-500">{{ $client->tax_id ?? 'Sin RNC' }}</span>
-                            </div>
-                        </td>
-
-                        <td class="hidden md:table-cell px-6 py-4 text-sm text-gray-600 w-3/12">
-                            {{ $client->city }}, {{ $client->state->name }}
-                        </td>
-
-                        <td class="block md:table-cell px-6 py-4 w-full md:w-2/12">
-                            <span class="px-2 py-1 text-xs rounded font-bold {{ $client->estadoCliente->clase_fondo }} {{ $client->estadoCliente->clase_texto }}">
-                                {{ $client->estadoCliente->nombre }}
-                            </span>
-                        </td>
-
-                        <td class="block md:table-cell px-6 py-4 whitespace-nowrap text-sm font-medium w-full md:w-3/12">
-                            <div class="flex items-center gap-3 mt-2 md:mt-0">
-                                {{-- BOTÓN RADICAL: VER TODO (MODAL) --}}
-
-                                {{-- Toggle Activo --}}
-                                <form action="{{ route('clients.toggle', $client) }}" method="POST">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="text-xs px-2 py-1 rounded border {{ $client->active ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100' : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' }}">
-                                        {{ $client->active ? 'Deshabilitar' : 'Habilitar' }}
-                                    </button>
-                                </form>
-
-                                <button @click="$dispatch('open-modal', 'view-client-{{ $client->id }}')" 
-                                        class="bg-gray-100 text-gray-600 hover:bg-indigo-600 hover:text-white p-2 rounded-full transition-all shadow-sm"
-                                        title="Ver detalles completos">
-                                    <x-heroicon-s-eye class="w-5 h-5" />
-                                </button>
-
-                                <a href="{{ route('clients.edit', $client) }}" class="text-indigo-600 hover:text-indigo-900 p-2 rounded-full hover:bg-indigo-50">
-                                    <x-heroicon-s-pencil class="w-5 h-5" />
-                                </a>
-
-                                <button @click="$dispatch('open-modal', 'confirm-deletion-{{ $client->id }}')" class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-50">
-                                    <x-heroicon-s-trash class="w-5 h-5" />
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="4" class="text-center py-10 text-gray-500">No hay clientes.</td></tr>
-                @endforelse
-            </x-data-table>
         </div>
     </div>
 
-    @include('clients.modals')
+
+
+
 </x-app-layout>
