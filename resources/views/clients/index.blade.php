@@ -84,7 +84,7 @@
                 @include('clients.partials.filters')
 
                 {{-- TABLA --}}
-                <div id="clients-table" class="mt-6 border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+                <div id="clients-table">
                     @include('clients.partials.table')
                 </div>
             </div>
