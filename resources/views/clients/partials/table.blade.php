@@ -2,14 +2,14 @@
     @forelse($clients as $client)
         <tr class="hover:bg-gray-50 transition border-b border-gray-100">
             @if(in_array('id', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-500 font-mono">#{{ $client->id }}</td>
+                <td class="px-6 py-4 text-sm text-gray-500 ">#{{ $client->id }}</td>
             @endif
 
             @if(in_array('cliente', $visibleColumns))
                 <td class="px-6 py-4">
                     <div class="flex flex-col">
-                        <span class="font-bold text-gray-900">{{ $client->display_name }}</span>
-                        <span class="text-[10px] text-gray-400 font-mono">{{ $client->tax_id ?? 'Sin ID' }}</span>
+                        <span class="font-bold text-gray-900 text-base md:text-sm">{{ $client->display_name }}</span>
+                        <span class="text-xs text-gray-500">{{ $client->tax_id ?? 'Sin ID' }}</span>
                     </div>
                 </td>
             @endif
@@ -22,7 +22,7 @@
 
             @if(in_array('estado_cliente', $visibleColumns))
                 <td class="px-6 py-4">
-                    <span class="px-2 py-1 text-[10px] rounded font-bold {{ $client->estadoCliente->clase_fondo }} {{ $client->estadoCliente->clase_texto }}">
+                    <span class="px-2 py-1 text-xs rounded font-bold {{ $client->estadoCliente->clase_fondo }} {{ $client->estadoCliente->clase_texto }}">
                         {{ $client->estadoCliente->nombre }}
                     </span>
                 </td>
@@ -30,7 +30,7 @@
 
             @if(in_array('estado_operativo', $visibleColumns))
                 <td class="px-6 py-4">
-                    <span class="px-2 py-1 text-[10px] {{ $client->active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full font-bold">
+                    <span class="px-2 py-1 text-xs {{ $client->active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full font-bold">
                         {{ $client->active ? 'Activo' : 'Inactivo' }}
                     </span>
                 </td>
