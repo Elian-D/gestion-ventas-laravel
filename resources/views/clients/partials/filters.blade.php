@@ -44,9 +44,10 @@
 
         {{-- Grupo Derecho (en móvil) --}}
         <x-data-table.column-selector 
-            formId="clients-filters"
             :allColumns="$allColumns" 
             :visibleColumns="$visibleColumns" 
+            :defaultVisible="$defaultVisible"
+            formId="clients-filters" 
         />
     </div>
 

@@ -53,10 +53,10 @@ class ClientController extends Controller
             ->get();
 
         if ($request->ajax()) {
-            return view('clients.partials.table', compact('clients', 'allColumns', 'visibleColumns'))->render();
+            return view('clients.partials.table', compact('clients', 'allColumns', 'visibleColumns', 'defaultVisible'))->render();
         }
 
-        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio', 'allColumns', 'visibleColumns'));
+        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio', 'allColumns', 'visibleColumns', 'defaultVisible'));
     }
 
 
