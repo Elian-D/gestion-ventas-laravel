@@ -1,34 +1,29 @@
 @props([
-    'items', // La colección paginada (aunque no la iteraremos aquí, la necesitamos para la paginación)
-    'headers', // El array de encabezados
+    'items',
+    'headers',
 ])
 
-<div class="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+<div class="overflow-x-auto border border-gray-200 rounded-lg">
     <table class="min-w-full divide-y divide-gray-200">
-        
-        {{-- ENCABEZADOS --}}
         <thead class="bg-gray-50 hidden md:table-header-group">
             <tr>
                 @foreach($headers as $header)
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                         {{ $header }}
                     </th>
                 @endforeach
-                {{-- La columna de acciones se convierte en otro header --}}
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
             </tr>
         </thead>
-        
-        {{-- CUERPO: El slot sin nombre contiene todas las filas (<tr>) generadas por la vista --}}
-        <tbody class="bg-white divide-y divide-gray-200 md:table-row-group">
+
+        <tbody class="bg-white divide-y divide-gray-200">
             {{ $slot }}
         </tbody>
     </table>
 </div>
 
-{{-- PAGINACIÓN (Sigue siendo útil) --}}
 @if(method_exists($items, 'links'))
-    <div class="mt-6">
+    <div class="mt-4 pagination">
         {{ $items->links() }}
     </div>
 @endif
