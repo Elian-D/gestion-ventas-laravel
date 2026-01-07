@@ -31,14 +31,39 @@ export default function AjaxDataTable(config) {
 
 
     const getParams = () => {
-        return Object.fromEntries(
-            [...new FormData(form).entries()].filter(([_, v]) => v !== '')
-        );
+        const formData = new FormData(form);
+        const params = {};
+
+        for (const [key, value] of formData.entries()) {
+            if (value === '') continue;
+
+            if (key.endsWith('[]')) {
+                // Si la llave ya existe, añadimos al array, si no, lo creamos
+                if (!params[key]) {
+                    params[key] = [];
+                }
+                params[key].push(value);
+            } else {
+                params[key] = value;
+            }
+        }
+        return params;
     };
 
     const buildUrl = (params) => {
         const base = window.location.pathname;
-        const query = new URLSearchParams(params).toString();
+        const searchParams = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                // Si es un array (como columns[]), añadimos cada valor individualmente
+                value.forEach(v => searchParams.append(key, v));
+            } else {
+                searchParams.append(key, value);
+            }
+        });
+
+        const query = searchParams.toString();
         return query ? `${base}?${query}` : base;
     };
 
@@ -59,7 +84,9 @@ export default function AjaxDataTable(config) {
         chipsContainer.innerHTML = '';
 
         // 1. Filtramos los parámetros para obtener solo los que generan chips reales
-        const realFilterKeys = Object.keys(params).filter(key => key !== 'per_page');
+        const realFilterKeys = Object.keys(params).filter(key => 
+            key !== 'per_page' && key !== 'columns[]'
+        );
 
         // 2. Renderizamos los chips normalmente
         realFilterKeys.forEach(key => {
@@ -98,7 +125,7 @@ export default function AjaxDataTable(config) {
             chipsContainer.appendChild(clear);
         }
     };
-    
+
     const apply = () => {
         const params = getParams();
         const url = buildUrl(params);
@@ -134,6 +161,15 @@ export default function AjaxDataTable(config) {
         el.addEventListener('input', () => {
             clearTimeout(timer);
             timer = setTimeout(apply, debounce);
+        })
+    );
+
+        // Autosubmit checkboxes (Columnas)
+    form.querySelectorAll('input[type="checkbox"]').forEach(el => 
+        el.addEventListener('change', () => {
+            // Opcional: Si es la paginación no reseteamos página, 
+            // pero para columnas es indiferente.
+            apply();
         })
     );
 
