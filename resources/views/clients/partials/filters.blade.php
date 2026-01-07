@@ -76,6 +76,10 @@
                     </div>
                 </div>
             </div>
+            <x-data-table.column-selector 
+                :allColumns="$allColumns" 
+                :visibleColumns="$visibleColumns" 
+                formId="clients-filters" />
         </div>
     </form>
 

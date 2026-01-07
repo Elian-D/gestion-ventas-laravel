@@ -22,6 +22,23 @@ class ClientController extends Controller
 
     public function index(Request $request)
     {
+        // 1. Definición maestra de todas las columnas posibles
+        $allColumns = [
+            'id' => 'ID',
+            'cliente' => 'Cliente',
+            'ubicacion' => 'Ubicación',
+            'estado_cliente' => 'Estado del Cliente',
+            'estado_operativo' => 'Estado Operativo',
+            'created_at' => 'Fecha Creación',
+            'updated_at' => 'Última Actualización'
+        ];
+
+        // 2. Columnas visibles por defecto (excluyendo auditoría)
+        $defaultVisible = ['id', 'cliente', 'ubicacion', 'estado_cliente', 'estado_operativo'];
+
+        // 3. Capturamos la selección del usuario o usamos el default
+        $visibleColumns = $request->input('columns', $defaultVisible);
+
         $perPage = $request->input('per_page', 10);
 
         $clients = (new ClientFilters($request))
@@ -36,10 +53,10 @@ class ClientController extends Controller
             ->get();
 
         if ($request->ajax()) {
-            return view('clients.partials.table', compact('clients'))->render();
+            return view('clients.partials.table', compact('clients', 'allColumns', 'visibleColumns'))->render();
         }
 
-        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio'));
+        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio', 'allColumns', 'visibleColumns'));
     }
 
 
