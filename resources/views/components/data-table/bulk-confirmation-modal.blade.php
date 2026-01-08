@@ -17,6 +17,7 @@
                 this.ids = e.detail.ids;
                 this.requiresValue = e.detail.requiresValue;
                 this.options = e.detail.options;
+                this.selectedValue = '';
                 this.confirmText = '';
                 this.$dispatch('open-modal', 'confirm-bulk-action');
             });
