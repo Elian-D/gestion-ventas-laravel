@@ -91,7 +91,10 @@
         </div>
     </div>
 
-
+<x-data-table.bulk-confirmation-modal 
+    formId="clients-filters" 
+    route="{{ route('clients.bulk') }}" 
+/>
 
 
 </x-app-layout>

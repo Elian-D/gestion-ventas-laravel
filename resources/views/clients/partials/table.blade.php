@@ -1,6 +1,15 @@
-<x-data-table :items="$clients" :headers="$allColumns" :visibleColumns="$visibleColumns">
+<x-data-table :items="$clients" :headers="$allColumns" :visibleColumns="$visibleColumns" :bulkActions="true" >
     @forelse($clients as $client)
         <tr class="hover:bg-gray-50 transition border-b border-gray-100">
+
+            @if(isset($bulkActions) && $bulkActions)
+                <td class="px-4 py-4 text-center">
+                    <input type="checkbox" 
+                        value="{{ $client->id }}" 
+                        class="row-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                </td>
+            @endif
+
             @if(in_array('id', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-gray-500 ">#{{ $client->id }}</td>
             @endif

@@ -13,6 +13,11 @@
         
         {{-- Grupo Izquierdo (en móvil) --}}
         <div class="flex items-center gap-2">
+            <x-data-table.bulk-actions :actions="[
+            ['id' => 'activate', 'label' => 'Activar', 'icon' => 'heroicon-s-check-circle'],
+            ['id' => 'deactivate', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
+            ['id' => 'delete', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
+            ]" />
             <x-data-table.per-page-selector formId="clients-filters" />
             
             <x-data-table.filter-dropdown>
