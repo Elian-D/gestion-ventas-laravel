@@ -33,6 +33,10 @@ Route::group([], function () {
         ->middleware('permission:clients edit')
         ->name('toggle');
 
+    Route::post('/bulk-action', [ClientController::class, 'bulk'])
+        ->middleware('permission:clients edit')
+        ->name('bulk');
+
     // Eliminación (Soft Delete)
     Route::delete('/{client}', [ClientController::class, 'destroy'])
         ->middleware('permission:clients delete')
