@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ClientController extends Controller
 {
@@ -108,28 +109,42 @@ class ClientController extends Controller
             default => throw new \Exception("Acción desconocida para la etiqueta: " . $request->action),
         };
 
-        DB::transaction(function () use ($ids, $action, $value) {
-            $query = Client::whereIn('id', $ids);
+        try {
 
-            match ($action) {
-                'activate'   => $query->update(['active' => 1]),
-                'deactivate' => $query->update(['active' => 0]),
-                'delete'     => $query->delete(),
-                'change_status' => $query->update(['estado_cliente_id' => $value]),
-                'change_geo_state' => $query->update(['state_id' => $value]),
-                default => throw new \Exception("Acción no permitida"),
-            };
+            DB::transaction(function () use ($ids, $action, $value) {
+                $query = Client::whereIn('id', $ids);
 
-        });
+                match ($action) {
+                    'activate'   => $query->update(['active' => 1]),
+                    'deactivate' => $query->update(['active' => 0]),
+                    'delete'     => $query->delete(),
+                    'change_status' => $query->update(['estado_cliente_id' => $value]),
+                    'change_geo_state' => $query->update(['state_id' => $value]),
+                    default => throw new \Exception("Acción no permitida"),
+                };
 
-        // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
-        $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
-        session()->flash('success', $mensaje);
+            });
 
-        return response()->json([
-            'success' => true, 
-            'message' => $mensaje
-        ]);
+            // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
+            $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
+            session()->flash('success', $mensaje);
+
+            return response()->json([
+                'success' => true, 
+                'message' => $mensaje
+            ]);
+            
+        } catch (\Exception $e) {
+            // Logueamos el error real para nosotros
+            Log::error("Error en acción masiva: " . $e->getMessage());
+            
+            // Enviamos un mensaje amigable al usuario
+            return response()->json([
+                'success' => false, 
+                'message' => 'No se pudo completar la operación. Verifique las restricciones de los registros.'
+            ], 422);
+        }
+
     }
 
 
