@@ -75,6 +75,7 @@ export default function AjaxDataTable(config) {
         });
 
         table.innerHTML = await res.text();
+        syncCheckboxes();
         table.classList.remove('opacity-50', 'pointer-events-none', 'cursor-wait');
     };
 
@@ -218,47 +219,62 @@ export default function AjaxDataTable(config) {
         const allCheckboxes = table.querySelectorAll('.row-checkbox');
         const masterCheckbox = document.getElementById('select-all-main');
         
-        // Obtenemos los IDs marcados en la página actual
-        const checkedCheckboxes = table.querySelectorAll('.row-checkbox:checked');
-        selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value);
+        // 1. Sincronizar array global con lo que el usuario acaba de marcar/desmarcar
+        allCheckboxes.forEach(cb => {
+            if (cb.checked) {
+                if (!selectedIds.includes(cb.value)) selectedIds.push(cb.value);
+            } else {
+                selectedIds = selectedIds.filter(id => id !== cb.value);
+            }
+        });
 
-        // Sincronizar el checkbox maestro
+        // 2. Sincronizar el checkbox maestro visualmente
         if (masterCheckbox) {
-            masterCheckbox.checked = allCheckboxes.length > 0 && 
-                                    allCheckboxes.length === checkedCheckboxes.length;
-            masterCheckbox.indeterminate = checkedCheckboxes.length > 0 && 
-                                        checkedCheckboxes.length < allCheckboxes.length;
+            const visibleChecked = table.querySelectorAll('.row-checkbox:checked').length;
+            const totalVisible = allCheckboxes.length;
+
+            masterCheckbox.checked = totalVisible > 0 && visibleChecked === totalVisible;
+            // El estado indeterminado ocurre si hay algunos marcados pero no todos EN LA VISTA ACTUAL
+            masterCheckbox.indeterminate = visibleChecked > 0 && visibleChecked < totalVisible;
         }
 
-        // Emitir un evento con los IDs seleccionados para que otros componentes reaccionen
-        // Esto es lo que lo hace genérico
-        const event = new CustomEvent('table-selection-changed', { 
-            detail: { ids: selectedIds } 
-        });
-        document.dispatchEvent(event);
+        // 3. ENVIAR SIEMPRE EL TOTAL GLOBAL (Esto arregla el contador del dropdown)
+        document.dispatchEvent(new CustomEvent('table-selection-changed', { 
+            detail: { ids: [...selectedIds] } 
+        }));
     };
 
-    // Evento para el checkbox maestro
+    const syncCheckboxes = () => {
+        const allCheckboxes = table.querySelectorAll('.row-checkbox');
+        
+        // Marcar los que ya estaban seleccionados globalmente
+        allCheckboxes.forEach(cb => {
+            cb.checked = selectedIds.includes(cb.value);
+        });
+
+        // Re-ejecutar la lógica visual del maestro y el conteo del dropdown
+        updateSelectionState();
+    };
+
     table.addEventListener('change', (e) => {
+        // Si se hace click en el maestro
         if (e.target.id === 'select-all-main') {
+            const isChecked = e.target.checked;
             const checkboxes = table.querySelectorAll('.row-checkbox');
-            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = isChecked;
+            });
+            // IMPORTANTE: updateSelectionState se encarga de añadir/quitar del array global
             updateSelectionState();
+            return;
         }
         
+        // Si se hace click en una fila individual
         if (e.target.classList.contains('row-checkbox')) {
             updateSelectionState();
         }
     });
-
-    // Reiniciar selección cuando cambie la tabla (paginación/filtros)
-    // Esto es importante para evitar procesar IDs que ya no están visibles
-    const clearSelection = () => {
-        selectedIds = [];
-        updateSelectionState();
-    };
-
-
     
     renderChips(getParams());
 }
