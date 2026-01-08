@@ -23,7 +23,16 @@ class ClientController extends Controller
 
     public function index(Request $request)
     {
-        // 1. Definición maestra de todas las columnas posibles
+        // Autorizamos que se pueden hacer bulk actions
+        $bulkActions = true;
+
+        $config = ConfiguracionGeneral::actual();
+        $countryId = $config?->country_id;
+
+        $states = $countryId 
+            ? State::byCountry($countryId)->orderBy('name')->get() 
+            : collect();
+
         $allColumns = [
             'id' => 'ID',
             'cliente' => 'Cliente',
@@ -34,13 +43,8 @@ class ClientController extends Controller
             'updated_at' => 'Última Actualización'
         ];
 
-        // 2. Columnas visibles por defecto (excluyendo auditoría)
         $defaultVisible = ['id', 'cliente', 'ubicacion', 'estado_cliente', 'estado_operativo'];
-
-        // 3. Capturamos la selección del usuario o usamos el default
         $visibleColumns = $request->input('columns', $defaultVisible);
-
-        $bulkActions = true;
 
         $perPage = $request->input('per_page', 10);
 
@@ -49,17 +53,83 @@ class ClientController extends Controller
             ->paginate($perPage)
             ->withQueryString();
         
-        $estadosClientes = EstadosCliente::query()
-            ->get();
+        $estadosClientes = EstadosCliente::all();
 
-        $tiposNegocio = BusinessType::query()
-            ->get();
+        $tiposNegocio = BusinessType::all();
 
         if ($request->ajax()) {
-            return view('clients.partials.table', compact('clients', 'allColumns', 'visibleColumns', 'defaultVisible', 'bulkActions'))->render();
+            return view('clients.partials.table', compact(
+                'clients',
+                'allColumns',
+                'visibleColumns',
+                'defaultVisible',
+                'bulkActions'
+                ))->render();
         }
 
-        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio', 'allColumns', 'visibleColumns', 'defaultVisible', 'bulkActions'));
+        return view('clients.index', compact(
+        'clients', 
+        'estadosClientes', 
+        'tiposNegocio', 
+        'states',
+        'allColumns', 
+        'visibleColumns', 
+        'defaultVisible',
+        'bulkActions'
+    ));
+    }
+
+    /**
+     * Acciones masivas
+     */
+    public function bulk(Request $request)
+    {
+        $allowedActions = ['activate', 'deactivate', 'delete', 'change_status', 'change_geo_state'];
+
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:clients,id',
+            'action' => 'required|in:' . implode(',', $allowedActions),
+            'value' => 'nullable'
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+        $value = $request->value;
+
+        $count = count($ids);
+
+        $actionLabel = match ($action) {
+            'activate'   => 'activado',
+            'deactivate' => 'desactivado',
+            'delete'     => 'eliminado',
+            'change_status' => 'actualizado el estado',
+            'change_geo_state' => 'actualizado la ubicación',
+            default => throw new \Exception("Acción desconocida para la etiqueta: " . $request->action),
+        };
+
+        DB::transaction(function () use ($ids, $action, $value) {
+            $query = Client::whereIn('id', $ids);
+
+            match ($action) {
+                'activate'   => $query->update(['active' => 1]),
+                'deactivate' => $query->update(['active' => 0]),
+                'delete'     => $query->delete(),
+                'change_status' => $query->update(['estado_cliente_id' => $value]),
+                'change_geo_state' => $query->update(['state_id' => $value]),
+                default => throw new \Exception("Acción no permitida"),
+            };
+
+        });
+
+        // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
+        $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
+        session()->flash('success', $mensaje);
+
+        return response()->json([
+            'success' => true, 
+            'message' => $mensaje
+        ]);
     }
 
 
@@ -167,56 +237,6 @@ class ClientController extends Controller
     {
         // El trait manejará la lógica de borrado suave y redirección
         return $this->destroyTrait($client, null);
-    }
-
-    public function bulk(Request $request)
-    {
-        $allowedActions = ['activate', 'deactivate', 'delete', 'change_status'];
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:clients,id',
-            'action' => 'required|in:' . implode(',', $allowedActions),
-            'value' => 'nullable'
-        ]);
-
-        $ids = $request->ids;
-        $action = $request->action;
-        $value = $request->value;
-
-        $count = count($ids);
-
-        $actionLabel = match ($action) {
-            'activate'   => 'activado',
-            'deactivate' => 'desactivado',
-            'delete'     => 'eliminado',
-            'change_status' => 'actualizado el estado',
-            
-            default => throw new \Exception("Acción desconocida para la etiqueta: " . $request->action),
-        };
-
-        DB::transaction(function () use ($ids, $action, $value) {
-            $query = Client::whereIn('id', $ids);
-
-            match ($action) {
-                'activate'   => $query->update(['active' => 1]),
-                'deactivate' => $query->update(['active' => 0]),
-                'delete'     => $query->delete(),
-                'change_status' => $query->update(['estado_cliente_id' => $value]),
-                
-                default => throw new \Exception("Acción no permitida"),
-            };
-
-        });
-
-        // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
-        $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
-        session()->flash('success', $mensaje);
-
-        return response()->json([
-            'success' => true, 
-            'message' => $mensaje
-        ]);
     }
 
     /* ===========================
