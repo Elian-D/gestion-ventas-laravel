@@ -20,6 +20,12 @@
                 'icon' => 'heroicon-s-user-group',
                 'options' => $estadosClientes->map(fn($e) => ['id' => $e->id, 'label' => $e->nombre])
             ],
+            [
+            'id' => 'change_geo_state', 
+            'label' => 'Cambiar Región', 
+            'icon' => 'heroicon-s-map-pin',
+            'options' => $states->map(fn($s) => ['id' => $s->id, 'label' => $s->name])
+            ],
             ['id' => 'activate', 'label' => 'Activar', 'icon' => 'heroicon-s-check-circle'],
             ['id' => 'deactivate', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
             ['id' => 'delete', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
