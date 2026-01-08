@@ -212,5 +212,53 @@ export default function AjaxDataTable(config) {
         history.pushState({}, '', link.href);
     });
 
+    let selectedIds = [];
+
+    const updateSelectionState = () => {
+        const allCheckboxes = table.querySelectorAll('.row-checkbox');
+        const masterCheckbox = document.getElementById('select-all-main');
+        
+        // Obtenemos los IDs marcados en la página actual
+        const checkedCheckboxes = table.querySelectorAll('.row-checkbox:checked');
+        selectedIds = Array.from(checkedCheckboxes).map(cb => cb.value);
+
+        // Sincronizar el checkbox maestro
+        if (masterCheckbox) {
+            masterCheckbox.checked = allCheckboxes.length > 0 && 
+                                    allCheckboxes.length === checkedCheckboxes.length;
+            masterCheckbox.indeterminate = checkedCheckboxes.length > 0 && 
+                                        checkedCheckboxes.length < allCheckboxes.length;
+        }
+
+        // Emitir un evento con los IDs seleccionados para que otros componentes reaccionen
+        // Esto es lo que lo hace genérico
+        const event = new CustomEvent('table-selection-changed', { 
+            detail: { ids: selectedIds } 
+        });
+        document.dispatchEvent(event);
+    };
+
+    // Evento para el checkbox maestro
+    table.addEventListener('change', (e) => {
+        if (e.target.id === 'select-all-main') {
+            const checkboxes = table.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = e.target.checked);
+            updateSelectionState();
+        }
+        
+        if (e.target.classList.contains('row-checkbox')) {
+            updateSelectionState();
+        }
+    });
+
+    // Reiniciar selección cuando cambie la tabla (paginación/filtros)
+    // Esto es importante para evitar procesar IDs que ya no están visibles
+    const clearSelection = () => {
+        selectedIds = [];
+        updateSelectionState();
+    };
+
+
+    
     renderChips(getParams());
 }
