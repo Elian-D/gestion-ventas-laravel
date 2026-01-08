@@ -35,7 +35,9 @@
                 @click="open = false; $dispatch('execute-bulk-action', { 
                     action: '{{ $action['id'] }}', 
                     label: '{{ $action['label'] }}',
-                    ids: selectedIds 
+                    ids: selectedIds,
+                    requiresValue: {{ isset($action['options']) ? 'true' : 'false' }},
+                    options: @js($action['options'] ?? [])
                 })"
                 class="flex items-center w-full px-3 py-2 text-sm text-gray-600 hover:bg-indigo-50 hover:text-indigo-700 rounded-lg transition group">
                 @if(isset($action['icon']))

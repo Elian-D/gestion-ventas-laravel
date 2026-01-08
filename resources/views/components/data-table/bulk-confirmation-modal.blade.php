@@ -5,6 +5,9 @@
         action: '', 
         label: '', 
         ids: [], 
+        requiresValue: false,
+        options: [],
+        selectedValue: '',
         confirmText: '',
         loading: false,
         init() {
@@ -12,6 +15,8 @@
                 this.action = e.detail.action;
                 this.label = e.detail.label;
                 this.ids = e.detail.ids;
+                this.requiresValue = e.detail.requiresValue;
+                this.options = e.detail.options;
                 this.confirmText = '';
                 this.$dispatch('open-modal', 'confirm-bulk-action');
             });
@@ -30,7 +35,8 @@
                     },
                     body: JSON.stringify({
                         action: this.action,
-                        ids: this.ids
+                        ids: this.ids,
+                        value: this.selectedValue
                     })
                 });
 
@@ -73,6 +79,19 @@
         </p>
 
         <div class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                
+            <template x-if="requiresValue">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Seleccione el nuevo valor:</label>
+                    <select x-model="selectedValue" class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500">
+                        <option value="">Seleccionar...</option>
+                        <template x-for="opt in options" :key="opt.id">
+                            <option :value="opt.id" x-text="opt.label"></option>
+                        </template>
+                    </select>
+                </div>
+            </template>
+
             <label class="block text-xs font-bold text-gray-600 uppercase mb-2">
                 Escribe <span class="text-indigo-600 font-black" x-text="label.toLowerCase()"></span> para confirmar:
             </label>
