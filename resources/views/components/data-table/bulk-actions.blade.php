@@ -35,6 +35,7 @@
                 @click="open = false; $dispatch('execute-bulk-action', { 
                     action: '{{ $action['id'] }}', 
                     label: '{{ $action['label'] }}',
+                    type: '{{ $action['type'] ?? 'text' }}',
                     ids: selectedIds,
                     requiresValue: {{ isset($action['options']) ? 'true' : 'false' }},
                     options: @js($action['options'] ?? [])

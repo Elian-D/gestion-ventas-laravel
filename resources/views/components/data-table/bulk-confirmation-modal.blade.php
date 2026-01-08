@@ -3,6 +3,7 @@
 <x-modal name="confirm-bulk-action" focusable maxWidth="md">
     <div x-data="{ 
         action: '', 
+        inputType: '', 
         label: '', 
         ids: [], 
         requiresValue: false,
@@ -13,6 +14,7 @@
         init() {
             document.addEventListener('execute-bulk-action', (e) => {
                 this.action = e.detail.action;
+                this.inputType = e.detail.type || 'text';
                 this.label = e.detail.label;
                 this.ids = e.detail.ids;
                 this.requiresValue = e.detail.requiresValue;
@@ -81,17 +83,29 @@
 
         <div class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 
-            <template x-if="requiresValue">
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-600 uppercase mb-2">Seleccione el nuevo valor:</label>
-                    <select x-model="selectedValue" class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500">
+            <div x-show="requiresValue" class="mb-4">
+                <label class="block text-xs font-bold text-gray-600 uppercase mb-2" x-text="'Nuevo valor para ' + label"></label>
+                
+                <template x-if="inputType === 'select'">
+                    <select x-model="selectedValue" class="w-full border-gray-300 rounded-lg text-sm">
                         <option value="">Seleccionar...</option>
                         <template x-for="opt in options" :key="opt.id">
                             <option :value="opt.id" x-text="opt.label"></option>
                         </template>
                     </select>
-                </div>
-            </template>
+                </template>
+
+                <template x-if="inputType === 'text'">
+                    <input type="text" x-model="selectedValue" 
+                        class="w-full border-gray-300 rounded-lg text-sm" 
+                        placeholder="Escriba el nuevo valor...">
+                </template>
+
+                <template x-if="inputType === 'number'">
+                    <input type="number" x-model="selectedValue" 
+                        class="w-full border-gray-300 rounded-lg text-sm">
+                </template>
+            </div>
 
             <label class="block text-xs font-bold text-gray-600 uppercase mb-2">
                 Escribe <span class="text-indigo-600 font-black" x-text="label.toLowerCase()"></span> para confirmar:
