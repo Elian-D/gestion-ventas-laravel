@@ -14,6 +14,12 @@
         {{-- Grupo Izquierdo (en móvil) --}}
         <div class="flex items-center gap-2">
             <x-data-table.bulk-actions :actions="[
+            [
+                'id' => 'change_status', 
+                'label' => 'Cambiar Estado', 
+                'icon' => 'heroicon-s-user-group',
+                'options' => $estadosClientes->map(fn($e) => ['id' => $e->id, 'label' => $e->nombre])
+            ],
             ['id' => 'activate', 'label' => 'Activar', 'icon' => 'heroicon-s-check-circle'],
             ['id' => 'deactivate', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
             ['id' => 'delete', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
