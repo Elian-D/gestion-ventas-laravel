@@ -170,38 +170,54 @@ class ClientController extends Controller
     }
 
     public function bulk(Request $request)
-{
-    $request->validate([
-        'ids' => 'required|array',
-        'ids.*' => 'exists:clients,id',
-        'action' => 'required|string|in:activate,deactivate,delete'
-    ]);
+    {
+        $allowedActions = ['activate', 'deactivate', 'delete', 'change_status'];
 
-    $count = count($request->ids);
-        $actionLabel = match ($request->action) {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:clients,id',
+            'action' => 'required|in:' . implode(',', $allowedActions),
+            'value' => 'nullable'
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+        $value = $request->value;
+
+        $count = count($ids);
+
+        $actionLabel = match ($action) {
             'activate'   => 'activado',
             'deactivate' => 'desactivado',
             'delete'     => 'eliminado',
+            'change_status' => 'actualizado el estado',
+            
+            default => throw new \Exception("Acción desconocida para la etiqueta: " . $request->action),
         };
 
-    DB::transaction(function () use ($request) {
-        $query = Client::whereIn('id', $request->ids);
-        match ($request->action) {
-            'activate'   => $query->update(['active' => 1]),
-            'deactivate' => $query->update(['active' => 0]),
-            'delete'     => $query->delete(),
-        };
-    });
+        DB::transaction(function () use ($ids, $action, $value) {
+            $query = Client::whereIn('id', $ids);
 
-    // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
-    $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
-    session()->flash('success', $mensaje);
+            match ($action) {
+                'activate'   => $query->update(['active' => 1]),
+                'deactivate' => $query->update(['active' => 0]),
+                'delete'     => $query->delete(),
+                'change_status' => $query->update(['estado_cliente_id' => $value]),
+                
+                default => throw new \Exception("Acción no permitida"),
+            };
 
-    return response()->json([
-        'success' => true, 
-        'message' => $mensaje
-    ]);
-}
+        });
+
+        // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
+        $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
+        session()->flash('success', $mensaje);
+
+        return response()->json([
+            'success' => true, 
+            'message' => $mensaje
+        ]);
+    }
 
     /* ===========================
      |  CONFIGURACIÓN DEL TRAIT
