@@ -13,6 +13,7 @@ use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
+use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
@@ -39,6 +40,8 @@ class ClientController extends Controller
         // 3. Capturamos la selección del usuario o usamos el default
         $visibleColumns = $request->input('columns', $defaultVisible);
 
+        $bulkActions = true;
+
         $perPage = $request->input('per_page', 10);
 
         $clients = (new ClientFilters($request))
@@ -53,10 +56,10 @@ class ClientController extends Controller
             ->get();
 
         if ($request->ajax()) {
-            return view('clients.partials.table', compact('clients', 'allColumns', 'visibleColumns', 'defaultVisible'))->render();
+            return view('clients.partials.table', compact('clients', 'allColumns', 'visibleColumns', 'defaultVisible', 'bulkActions'))->render();
         }
 
-        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio', 'allColumns', 'visibleColumns', 'defaultVisible'));
+        return view('clients.index', compact('clients', 'estadosClientes', 'tiposNegocio', 'allColumns', 'visibleColumns', 'defaultVisible', 'bulkActions'));
     }
 
 
@@ -165,6 +168,40 @@ class ClientController extends Controller
         // El trait manejará la lógica de borrado suave y redirección
         return $this->destroyTrait($client, null);
     }
+
+    public function bulk(Request $request)
+{
+    $request->validate([
+        'ids' => 'required|array',
+        'ids.*' => 'exists:clients,id',
+        'action' => 'required|string|in:activate,deactivate,delete'
+    ]);
+
+    $count = count($request->ids);
+        $actionLabel = match ($request->action) {
+            'activate'   => 'activado',
+            'deactivate' => 'desactivado',
+            'delete'     => 'eliminado',
+        };
+
+    DB::transaction(function () use ($request) {
+        $query = Client::whereIn('id', $request->ids);
+        match ($request->action) {
+            'activate'   => $query->update(['active' => 1]),
+            'deactivate' => $query->update(['active' => 0]),
+            'delete'     => $query->delete(),
+        };
+    });
+
+    // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
+    $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
+    session()->flash('success', $mensaje);
+
+    return response()->json([
+        'success' => true, 
+        'message' => $mensaje
+    ]);
+}
 
     /* ===========================
      |  CONFIGURACIÓN DEL TRAIT
