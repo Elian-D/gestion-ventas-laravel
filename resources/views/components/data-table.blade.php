@@ -1,11 +1,25 @@
-@props(['items', 'headers', 'visibleColumns' => []])
+@props([
+    'items', 
+    'headers', 
+    'visibleColumns' => [],
+    'bulkActions' => false
+])
 
 <div class="flex flex-col">
-    {{-- Contenedor con scroll horizontal para móviles (futuro) --}}
+    <div id="bulk-actions-container"></div>
+
     <div class="overflow-x-auto border border-gray-200 rounded-lg custom-scrollbar">
         <table class="w-max min-w-full divide-y divide-gray-200 shadow-sm">
             <thead class="bg-gray-50 hidden md:table-header-group">
                 <tr>
+                    @if($bulkActions)
+                        <th scope="col" class="px-4 py-3 text-center w-10">
+                            <input type="checkbox" 
+                                   id="select-all-main" 
+                                   class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        </th>
+                    @endif
+                    
                     @foreach($headers as $key => $label)
                         @if(in_array($key, $visibleColumns))
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
