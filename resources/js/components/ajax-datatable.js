@@ -275,6 +275,20 @@ export default function AjaxDataTable(config) {
             updateSelectionState();
         }
     });
+
+    // Función para limpiar la selección globalmente
+    const clearGlobalSelection = () => {
+        selectedIds = []; // Vaciar el array de memoria
+        
+        // Desmarcar físicamente los que están en la vista actual
+        table.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+        
+        // Sincronizar el checkbox maestro y disparar el evento para el componente Alpine
+        updateSelectionState();
+    };
+
+    // Exponer la función a la ventana global para que AlpineJS pueda llamarla
+    window.clearTableSelection = clearGlobalSelection;
     
     renderChips(getParams());
 }
