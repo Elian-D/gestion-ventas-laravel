@@ -1,5 +1,16 @@
+/**
+ * ============================================================
+ * AjaxDataTable
+ * Maneja filtros, paginación, selección de filas y columnas
+ * mediante AJAX sin recargar la página
+ * ============================================================
+ */
 export default function AjaxDataTable(config) {
 
+    /* ============================================================
+     * 1. CONFIGURACIÓN INICIAL
+     * ============================================================
+     */
     const {
         tableId,
         formId,
@@ -11,10 +22,23 @@ export default function AjaxDataTable(config) {
     const form = document.getElementById(formId);
     const chipsContainer = document.getElementById('active-filters');
 
+    // Si no existe la tabla o el formulario, no inicializamos nada
     if (!table || !form) return;
 
     let timer = null;
 
+
+    /* ============================================================
+     * 2. UTILIDADES
+     * ============================================================
+     */
+
+    /**
+     * Resuelve el label legible de un filtro
+     * Puede venir desde:
+     * - values definidos en config
+     * - una fuente global (window.filterSources)
+     */
     const resolveLabel = (config, value) => {
         if (!config) return value;
 
@@ -30,6 +54,15 @@ export default function AjaxDataTable(config) {
     };
 
 
+    /* ============================================================
+     * 3. SERIALIZACIÓN DEL FORMULARIO
+     * ============================================================
+     */
+
+    /**
+     * Obtiene los parámetros del formulario en un objeto
+     * Maneja correctamente inputs tipo array (ej: columns[])
+     */
     const getParams = () => {
         const formData = new FormData(form);
         const params = {};
@@ -38,7 +71,6 @@ export default function AjaxDataTable(config) {
             if (value === '') continue;
 
             if (key.endsWith('[]')) {
-                // Si la llave ya existe, añadimos al array, si no, lo creamos
                 if (!params[key]) {
                     params[key] = [];
                 }
@@ -50,13 +82,15 @@ export default function AjaxDataTable(config) {
         return params;
     };
 
+    /**
+     * Construye la URL final con query params
+     */
     const buildUrl = (params) => {
         const base = window.location.pathname;
         const searchParams = new URLSearchParams();
 
         Object.entries(params).forEach(([key, value]) => {
             if (Array.isArray(value)) {
-                // Si es un array (como columns[]), añadimos cada valor individualmente
                 value.forEach(v => searchParams.append(key, v));
             } else {
                 searchParams.append(key, value);
@@ -67,29 +101,59 @@ export default function AjaxDataTable(config) {
         return query ? `${base}?${query}` : base;
     };
 
+
+    /* ============================================================
+     * 4. PETICIÓN AJAX DE LA TABLA
+     * ============================================================
+     */
+
+    /**
+     * Hace fetch del HTML de la tabla
+     * Aplica estados visuales de carga
+     */
     const fetchTable = async (url) => {
+        // Evitar peticiones concurrentes si ya se está cargando
+        if (table.classList.contains('opacity-50')) return;
+
         table.classList.add('opacity-50', 'pointer-events-none', 'cursor-wait');
 
-        const res = await fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
+        try {
+            const res = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
 
-        table.innerHTML = await res.text();
-        syncCheckboxes();
-        table.classList.remove('opacity-50', 'pointer-events-none', 'cursor-wait');
+            if (!res.ok) throw new Error('Error en la respuesta del servidor');
+
+            table.innerHTML = await res.text();
+            syncCheckboxes();
+        } catch (error) {
+            console.error("DataTable Error:", error);
+            alert("No se pudo cargar la información. Intente de nuevo.");
+        } finally {
+            table.classList.remove('opacity-50', 'pointer-events-none', 'cursor-wait');
+        }
     };
 
+
+    /* ============================================================
+     * 5. CHIPS DE FILTROS ACTIVOS
+     * ============================================================
+     */
+
+    /**
+     * Renderiza los chips visibles de filtros activos
+     */
     const renderChips = (params) => {
         if (!chipsContainer) return;
 
         chipsContainer.innerHTML = '';
 
-        // 1. Filtramos los parámetros para obtener solo los que generan chips reales
+        // Excluir parámetros que no deben generar chips
         const realFilterKeys = Object.keys(params).filter(key => 
             key !== 'per_page' && key !== 'columns[]'
         );
 
-        // 2. Renderizamos los chips normalmente
+        // Chips individuales
         realFilterKeys.forEach(key => {
             const value = params[key];
             const config = chips[key] ?? {};
@@ -115,7 +179,7 @@ export default function AjaxDataTable(config) {
             chipsContainer.appendChild(chip);
         });
 
-        // 3. LA CLAVE: Solo mostramos "Limpiar todo" si hay filtros reales aplicados
+        // Botón "Limpiar todo" solo si hay filtros reales
         if (realFilterKeys.length > 0) {
             const clear = document.createElement('button');
             clear.textContent = 'Limpiar todo';
@@ -127,6 +191,19 @@ export default function AjaxDataTable(config) {
         }
     };
 
+
+    /* ============================================================
+     * 6. APLICAR FILTROS
+     * ============================================================
+     */
+
+    /**
+     * Aplica filtros:
+     * - Serializa formulario
+     * - Hace fetch
+     * - Actualiza URL
+     * - Renderiza chips
+     */
     const apply = () => {
         const params = getParams();
         const url = buildUrl(params);
@@ -135,58 +212,73 @@ export default function AjaxDataTable(config) {
         renderChips(params);
     };
 
+
+    /* ============================================================
+     * 7. LIMPIEZA DE FILTROS
+     * ============================================================
+     */
+
+    /**
+     * Limpia filtros pero conserva:
+     * - per_page
+     * - columnas seleccionadas
+     */
     const clearAll = () => {
-        // 1. Guardamos el estado actual de las preferencias (per_page y columnas)
         const currentPerPage = form.querySelector('[name="per_page"]')?.value || 10;
-        
-        // Obtenemos los valores de las columnas que están marcadas actualmente
-        const selectedColumns = Array.from(form.querySelectorAll('input[name="columns[]"]:checked'))
-            .map(cb => cb.value);
-        
-        // 2. Reseteamos el formulario (esto desmarca todo y limpia inputs)
+
+        const selectedColumns = Array.from(
+            form.querySelectorAll('input[name="columns[]"]:checked')
+        ).map(cb => cb.value);
+
         form.reset();
-        
-        // 3. Restauramos per_page
+
         const perPageInput = form.querySelector('[name="per_page"]');
         if (perPageInput) perPageInput.value = currentPerPage;
-        
-        // 4. Restauramos las columnas marcadas
+
         form.querySelectorAll('input[name="columns[]"]').forEach(cb => {
             cb.checked = selectedColumns.includes(cb.value);
         });
 
-        // 5. Aplicamos los cambios
         apply(); 
     };
 
+
+    /* ============================================================
+     * 8. MANEJO DE COLUMNAS
+     * ============================================================
+     */
+
+    /**
+     * Restaura columnas por defecto
+     */
     const resetColumns = () => {
         const container = document.getElementById('column-selector-container');
         if (!container) return;
 
-        // 1. Obtenemos las columnas por defecto desde el atributo data
         const defaultColumns = JSON.parse(container.dataset.defaultColumns || '[]');
-        
-        // 2. Buscamos todos los checkboxes de columnas
         const columnCheckboxes = form.querySelectorAll('input[name="columns[]"]');
-        
+
         columnCheckboxes.forEach(cb => {
-            // 3. Lo marcamos solo si está en la lista de permitidos por defecto
-            // Usamos el valor del checkbox para comparar
             cb.checked = defaultColumns.includes(cb.value);
         });
 
-        // 4. Ejecutamos la petición AJAX para actualizar la tabla
         apply();
     };
 
     window.resetTableColumns = resetColumns;
 
-    // Autosubmit select
+
+    /* ============================================================
+     * 9. AUTO-SUBMIT DEL FORMULARIO
+     * ============================================================
+     */
+
+    // Selects
     form.querySelectorAll('select').forEach(el =>
         el.addEventListener('change', apply)
     );
 
-    // Autosubmit input (debounce)
+    // Inputs texto con debounce
     form.querySelectorAll('input[type="text"]').forEach(el =>
         el.addEventListener('input', () => {
             clearTimeout(timer);
@@ -194,16 +286,16 @@ export default function AjaxDataTable(config) {
         })
     );
 
-        // Autosubmit checkboxes (Columnas)
+    // Checkboxes (incluye columnas)
     form.querySelectorAll('input[type="checkbox"]').forEach(el => 
-        el.addEventListener('change', () => {
-            // Opcional: Si es la paginación no reseteamos página, 
-            // pero para columnas es indiferente.
-            apply();
-        })
+        el.addEventListener('change', apply)
     );
 
-    // Paginación
+
+    /* ============================================================
+     * 10. PAGINACIÓN AJAX
+     * ============================================================
+     */
     table.addEventListener('click', e => {
         const link = e.target.closest('.pagination a');
         if (!link) return;
@@ -213,82 +305,106 @@ export default function AjaxDataTable(config) {
         history.pushState({}, '', link.href);
     });
 
+
+    /* ============================================================
+     * 11. SELECCIÓN DE FILAS (GLOBAL)
+     * ============================================================
+     */
+
     let selectedIds = [];
 
+    /**
+     * Sincroniza:
+     * - Array global
+     * - Checkbox maestro
+     * - Evento global para Alpine
+     */
     const updateSelectionState = () => {
-        const allCheckboxes = table.querySelectorAll('.row-checkbox');
+        const allCheckboxes = Array.from(table.querySelectorAll('.row-checkbox'));
         const masterCheckbox = document.getElementById('select-all-main');
-        
-        // 1. Sincronizar array global con lo que el usuario acaba de marcar/desmarcar
+
+        // Sincronizar array de forma funcional
         allCheckboxes.forEach(cb => {
-            if (cb.checked) {
-                if (!selectedIds.includes(cb.value)) selectedIds.push(cb.value);
-            } else {
-                selectedIds = selectedIds.filter(id => id !== cb.value);
+            const id = cb.value;
+            const index = selectedIds.indexOf(id);
+            
+            if (cb.checked && index === -1) {
+                selectedIds.push(id);
+            } else if (!cb.checked && index !== -1) {
+                selectedIds.splice(index, 1);
             }
         });
 
-        // 2. Sincronizar el checkbox maestro visualmente
         if (masterCheckbox) {
-            const visibleChecked = table.querySelectorAll('.row-checkbox:checked').length;
+            const visibleChecked = allCheckboxes.filter(cb => cb.checked).length;
             const totalVisible = allCheckboxes.length;
 
             masterCheckbox.checked = totalVisible > 0 && visibleChecked === totalVisible;
-            // El estado indeterminado ocurre si hay algunos marcados pero no todos EN LA VISTA ACTUAL
             masterCheckbox.indeterminate = visibleChecked > 0 && visibleChecked < totalVisible;
         }
 
-        // 3. ENVIAR SIEMPRE EL TOTAL GLOBAL (Esto arregla el contador del dropdown)
         document.dispatchEvent(new CustomEvent('table-selection-changed', { 
             detail: { ids: [...selectedIds] } 
         }));
-    };
+    }
 
+    /**
+     * Sincroniza checkboxes visibles con la selección global
+     */
     const syncCheckboxes = () => {
         const allCheckboxes = table.querySelectorAll('.row-checkbox');
-        
-        // Marcar los que ya estaban seleccionados globalmente
+
         allCheckboxes.forEach(cb => {
             cb.checked = selectedIds.includes(cb.value);
         });
 
-        // Re-ejecutar la lógica visual del maestro y el conteo del dropdown
         updateSelectionState();
     };
 
+
+    /* ============================================================
+     * 12. EVENTOS DE CHECKBOXES DE LA TABLA
+     * ============================================================
+     */
     table.addEventListener('change', (e) => {
-        // Si se hace click en el maestro
+
+        // Checkbox maestro
         if (e.target.id === 'select-all-main') {
             const isChecked = e.target.checked;
             const checkboxes = table.querySelectorAll('.row-checkbox');
-            
+
             checkboxes.forEach(cb => {
                 cb.checked = isChecked;
             });
-            // IMPORTANTE: updateSelectionState se encarga de añadir/quitar del array global
+
             updateSelectionState();
             return;
         }
-        
-        // Si se hace click en una fila individual
+
+        // Checkbox individual
         if (e.target.classList.contains('row-checkbox')) {
             updateSelectionState();
         }
     });
 
-    // Función para limpiar la selección globalmente
+
+    /* ============================================================
+     * 13. LIMPIAR SELECCIÓN GLOBAL
+     * ============================================================
+     */
+
     const clearGlobalSelection = () => {
-        selectedIds = []; // Vaciar el array de memoria
-        
-        // Desmarcar físicamente los que están en la vista actual
+        selectedIds = [];
         table.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
-        
-        // Sincronizar el checkbox maestro y disparar el evento para el componente Alpine
         updateSelectionState();
     };
 
-    // Exponer la función a la ventana global para que AlpineJS pueda llamarla
     window.clearTableSelection = clearGlobalSelection;
-    
+
+
+    /* ============================================================
+     * 14. INICIALIZACIÓN
+     * ============================================================
+     */
     renderChips(getParams());
 }
