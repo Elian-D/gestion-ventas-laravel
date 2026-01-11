@@ -31,8 +31,11 @@ class ClientController extends Controller
         $countryId = $config?->country_id;
 
         $states = $countryId 
-            ? State::byCountry($countryId)->orderBy('name')->get() 
-            : collect();
+                ? State::byCountry($countryId)
+                    ->select('id', 'name')
+                    ->orderBy('name')
+                    ->get() 
+                : collect();
 
         $allColumns = [
             'id' => 'ID',
@@ -46,17 +49,24 @@ class ClientController extends Controller
 
         $defaultVisible = ['id', 'cliente', 'ubicacion', 'estado_cliente', 'estado_operativo'];
         $visibleColumns = $request->input('columns', $defaultVisible);
+        
 
         $perPage = $request->input('per_page', 10);
 
         $clients = (new ClientFilters($request))
-            ->apply(Client::query())
+            ->apply(
+                Client::query()
+                    ->with([
+                        'estadoCliente:id,nombre,permite_operar,clase_fondo,clase_texto',
+                        'state:id,name',
+                    ])
+            )
             ->paginate($perPage)
             ->withQueryString();
-        
-        $estadosClientes = EstadosCliente::all();
 
-        $tiposNegocio = BusinessType::all();
+        
+        $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
+        $tiposNegocio = BusinessType::select('id', 'nombre')->get();
 
         if ($request->ajax()) {
             return view('clients.partials.table', compact(
