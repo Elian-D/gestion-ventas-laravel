@@ -67,7 +67,8 @@
         <x-data-table.column-selector 
             :allColumns="$allColumns" 
             :visibleColumns="$visibleColumns" 
-            :defaultVisible="$defaultVisible"
+            :defaultDesktop="$defaultDesktop"
+            :defaultMobile="$defaultMobile"
             formId="clients-filters" 
         />
     </div>
