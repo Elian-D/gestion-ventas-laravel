@@ -7,7 +7,6 @@ use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
-use App\Models\Configuration\ConfiguracionGeneral;
 use App\Models\Configuration\TaxIdentifierType;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
@@ -27,12 +26,15 @@ class ClientController extends Controller
         // Autorizamos que se pueden hacer bulk actions
         $bulkActions = true;
 
-        $config = ConfiguracionGeneral::actual();
+        $config = general_config();
         $countryId = $config?->country_id;
 
         $states = $countryId 
-            ? State::byCountry($countryId)->orderBy('name')->get() 
-            : collect();
+                ? State::byCountry($countryId)
+                    ->select('id', 'name')
+                    ->orderBy('name')
+                    ->get() 
+                : collect();
 
         $allColumns = [
             'id' => 'ID',
@@ -46,17 +48,24 @@ class ClientController extends Controller
 
         $defaultVisible = ['id', 'cliente', 'ubicacion', 'estado_cliente', 'estado_operativo'];
         $visibleColumns = $request->input('columns', $defaultVisible);
+        
 
         $perPage = $request->input('per_page', 10);
 
         $clients = (new ClientFilters($request))
-            ->apply(Client::query())
+            ->apply(
+                Client::query()
+                    ->with([
+                        'estadoCliente:id,nombre,permite_operar,clase_fondo,clase_texto',
+                        'state:id,name',
+                    ])
+            )
             ->paginate($perPage)
             ->withQueryString();
-        
-        $estadosClientes = EstadosCliente::all();
 
-        $tiposNegocio = BusinessType::all();
+        
+        $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
+        $tiposNegocio = BusinessType::select('id', 'nombre')->get();
 
         if ($request->ajax()) {
             return view('clients.partials.table', compact(
@@ -153,7 +162,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        $config = ConfiguracionGeneral::actual();
+        $config = general_config();
         $estados = EstadosCliente::activos()->get();
         $states = State::orderBy('name')->get();
         $types = ['individual' => 'Persona Física', 'company' => 'Empresa / Jurídica'];
@@ -168,7 +177,7 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        $config = ConfiguracionGeneral::actual();
+        $config = general_config();
         $data = $request->validate([
             'type' => ['required', Rule::in(['individual', 'company'])],
             'name' => 'required|string|max:255',
