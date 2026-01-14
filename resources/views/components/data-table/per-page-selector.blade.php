@@ -1,4 +1,4 @@
-@props(['options' => [10, 20, 50, 100, 200]])
+@props(['options' => [10, 20, 50, 100]])
 
 <div class="flex items-center gap-2 text-sm text-gray-600">
     <label for="per_page" class="font-medium whitespace-nowrap">Mostrar:</label>

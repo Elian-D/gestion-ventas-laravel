@@ -54,25 +54,6 @@ class Client extends Model
     }
 
     /* ===========================
-     |    SCOPES (FILTROS)
-     =========================== */
-
-    public function scopeActivos($query)
-    {
-        return $query->where('active', true);
-    }
-
-    public function scopeSearch($query, $term)
-    {
-        return $query->where(function ($q) use ($term) {
-            $q->where('name', 'like', "%{$term}%")
-              ->orWhere('commercial_name', 'like', "%{$term}%")
-              ->orWhere('tax_id', 'like', "%{$term}%")
-              ->orWhere('email', 'like', "%{$term}%");
-        });
-    }
-
-    /* ===========================
      |    ACCESSORS (AYUDANTES DE VISTA)
      =========================== */
 
@@ -100,28 +81,25 @@ class Client extends Model
 
     public function getTaxLabelAttribute(): string
     {
-        // Usamos una variable estática para no consultar la DB 50 veces en una lista
         static $taxTypes = [];
 
-        $config = ConfiguracionGeneral::actual();
-        if (!$config) return 'ID Fiscal';
+        $config = general_config();
+        if (! $config) return 'ID Fiscal';
 
-        $entityType = ($this->type === 'individual') ? 'person' : 'company';
-        
-        // Creamos una llave única por país y tipo para el cache en memoria
+        $entityType = $this->type === 'individual' ? 'person' : 'company';
         $cacheKey = "{$config->country_id}_{$entityType}";
 
-        if (!isset($taxTypes[$cacheKey])) {
-            $taxTypes[$cacheKey] = TaxIdentifierType::where('country_id', $config->country_id)
-                ->where(function($query) use ($entityType) {
-                    $query->where('entity_type', $entityType)
-                        ->orWhere('entity_type', 'both');
-                })
+        if (! isset($taxTypes[$cacheKey])) {
+            $taxTypes[$cacheKey] = TaxIdentifierType::query()
+                ->select('code')
+                ->where('country_id', $config->country_id)
+                ->whereIn('entity_type', [$entityType, 'both'])
                 ->first();
         }
 
-        return $taxTypes[$cacheKey] ? $taxTypes[$cacheKey]->code : 'ID Fiscal';
+        return $taxTypes[$cacheKey]?->code ?? 'ID Fiscal';
     }
+
 
     /* ===========================
      |    COMPORTAMIENTO
