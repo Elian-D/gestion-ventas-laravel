@@ -255,29 +255,55 @@ export default function AjaxDataTable(config) {
     };
 
 
-    /* ============================================================
-     * 8. MANEJO DE COLUMNAS
-     * ============================================================
-     */
+/* ============================================================
+    * 8. MANEJO DE COLUMNAS INTELIGENTE
+    * ============================================================
+    */
+    const getDeviceDefaultColumns = (container) => {
+        // Usamos 768px (md) o 640px (sm) según tu preferencia de diseño
+        const isMobile = window.innerWidth < 640;
+        const desktopCols = JSON.parse(container.dataset.defaultDesktop || '[]');
+        const mobileCols = JSON.parse(container.dataset.defaultMobile || '[]');
+        
+        return isMobile ? mobileCols : desktopCols;
+    };
 
-    /**
-     * Restaura columnas por defecto
-     */
     const resetColumns = () => {
         const container = document.getElementById('column-selector-container');
-        if (!container) return;
-
-        const defaultColumns = JSON.parse(container.dataset.defaultColumns || '[]');
+        if (!container || !form) return;
+        
+        const targetColumns = getDeviceDefaultColumns(container);
         const columnCheckboxes = form.querySelectorAll('input[name="columns[]"]');
-
+        
         columnCheckboxes.forEach(cb => {
-            cb.checked = defaultColumns.includes(cb.value);
+            cb.checked = targetColumns.includes(cb.value);
         });
-
+        
         apply();
     };
 
     window.resetTableColumns = resetColumns;
+
+    /**
+     * Función interna para verificar si debemos forzar columnas de móvil al inicio
+     */
+    const checkInitialDeviceColumns = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        // SI no hay columnas en la URL AND estamos en móvil
+        if (!urlParams.has('columns[]') && window.innerWidth < 640) {
+            const container = document.getElementById('column-selector-container');
+            if (container) {
+                const targetColumns = getDeviceDefaultColumns(container);
+                const columnCheckboxes = form.querySelectorAll('input[name="columns[]"]');
+                
+                columnCheckboxes.forEach(cb => {
+                    cb.checked = targetColumns.includes(cb.value);
+                });
+                
+                apply();
+            }
+        }
+    };
 
 
     /* ============================================================
@@ -418,5 +444,9 @@ export default function AjaxDataTable(config) {
      * 14. INICIALIZACIÓN
      * ============================================================
      */
+    // Ejecutar detección de dispositivo inmediatamente
+    checkInitialDeviceColumns();
+    
+    // Render de chips inicial
     renderChips(getParams());
 }

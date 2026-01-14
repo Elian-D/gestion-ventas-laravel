@@ -47,8 +47,10 @@ class ClientController extends Controller
             'updated_at' => 'Última Actualización'
         ];
 
-        $defaultVisible = ['id', 'cliente', 'city', 'state', 'estado_cliente', 'estado_operativo'];
-        $visibleColumns = $request->input('columns', $defaultVisible);
+        $defaultDesktop = ['id', 'cliente', 'city', 'state', 'estado_cliente', 'estado_operativo'];
+        $defaultMobile = ['id','cliente'];
+
+        $visibleColumns = $request->input('columns', $defaultDesktop);
         
 
         $perPage = $request->input('per_page', 10);
@@ -73,7 +75,8 @@ class ClientController extends Controller
                 'clients',
                 'allColumns',
                 'visibleColumns',
-                'defaultVisible',
+                'defaultDesktop',
+                'defaultMobile',
                 'bulkActions'
                 ))->render();
         }
@@ -85,7 +88,8 @@ class ClientController extends Controller
         'states',
         'allColumns', 
         'visibleColumns', 
-        'defaultVisible',
+        'defaultDesktop',
+        'defaultMobile',
         'bulkActions'
     ));
     }
