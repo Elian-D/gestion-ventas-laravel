@@ -23,11 +23,18 @@
                 </td>
             @endif
 
-            @if(in_array('ubicacion', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-600 italic">
-                    {{ $client->city }}, {{ $client->state->name }}
+            @if(in_array('city', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-700">
+                    {{ $client->city }}
                 </td>
             @endif
+
+            @if(in_array('state', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    {{ $client->state->name ?? '—' }}
+                </td>
+            @endif
+
 
             @if(in_array('estado_cliente', $visibleColumns))
                 <td class="px-6 py-4">

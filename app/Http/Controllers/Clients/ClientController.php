@@ -39,14 +39,15 @@ class ClientController extends Controller
         $allColumns = [
             'id' => 'ID',
             'cliente' => 'Cliente',
-            'ubicacion' => 'Ubicación',
+            'city' => 'Ciudad',
+            'state' => 'Estado (Ubicacion)',
             'estado_cliente' => 'Estado del Cliente',
             'estado_operativo' => 'Estado Operativo',
             'created_at' => 'Fecha Creación',
             'updated_at' => 'Última Actualización'
         ];
 
-        $defaultVisible = ['id', 'cliente', 'ubicacion', 'estado_cliente', 'estado_operativo'];
+        $defaultVisible = ['id', 'cliente', 'city', 'state', 'estado_cliente', 'estado_operativo'];
         $visibleColumns = $request->input('columns', $defaultVisible);
         
 
