@@ -13,7 +13,7 @@
         x-transition:enter="transition ease-out duration-100"
         x-transition:enter-start="transform opacity-0 scale-95"
         x-transition:enter-end="transform opacity-100 scale-100"
-        class="origin-top-right absolute left-0 mt-2 w-72 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 p-4 border border-gray-100">
+        class="origin-top-right absolute right-0 mt-2 w-72 rounded-xl shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 p-4 border border-gray-100">
         
         <div class="flex flex-col gap-4">
             {{ $slot }}

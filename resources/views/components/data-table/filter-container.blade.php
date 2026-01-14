@@ -1,15 +1,15 @@
 @props(['formId'])
 
-<div class="mb-6 bg-white p-1">
-    <form id="{{ $formId }}" method="GET" x-on:submit.prevent>
-        <div class="flex flex-col md:flex-row md:items-center gap-4">
+<div class="mb-6 bg-white rounded-xl">
+    <form id="{{ $formId }}" method="GET" x-on:submit.prevent class="space-y-4">
+        {{-- Layout dinámico: En móvil apilado, en tablet/pc en línea --}}
+        <div class="flex flex-col lg:flex-row lg:items-center gap-3">
             {{ $slot }}
         </div>
+
+        {{-- Contenedor de Chips (solo se muestra si hay filtros) --}}
+        <div id="active-filters" class="flex flex-wrap items-center gap-2 empty:hidden border-t border-gray-50 pt-3">
+            {{-- Chips dinámicos --}}
+        </div>
     </form>
-
-    {{-- Contenedor de Chips --}}
-    <div id="active-filters" class="flex flex-wrap items-center gap-2 mt-4">
-        {{-- Aquí se insertarán los chips de filtros activos dinámicamente --}}
-    </div>
-
 </div>
