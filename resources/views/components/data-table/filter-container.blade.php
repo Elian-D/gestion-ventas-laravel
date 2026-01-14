@@ -9,7 +9,7 @@
 
     {{-- Contenedor de Chips --}}
     <div id="active-filters" class="flex flex-wrap items-center gap-2 mt-4">
-        // Generado por js
+        {{-- Aquí se insertarán los chips de filtros activos dinámicamente --}}
     </div>
 
 </div>
