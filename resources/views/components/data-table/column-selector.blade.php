@@ -8,9 +8,9 @@
 <div x-data="{ open: false }" 
      id="column-selector-container"
      data-default-columns='@json($defaultVisible)'
-     class="relative inline-block text-left">
+     class="relative inline-block text-left w-full sm:w-auto">
     
-    <button @click="open = !open" type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
+    <button @click="open = !open" type="button" class="inline-flex items-center justify-center w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition shadow-sm">
         <x-heroicon-s-view-columns class="w-4 h-4 mr-2" />
         Columnas
         <x-heroicon-s-chevron-down class="ml-2 w-4 h-4" />

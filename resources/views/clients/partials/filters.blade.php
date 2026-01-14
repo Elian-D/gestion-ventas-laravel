@@ -12,30 +12,27 @@
     <div class="w-full lg:w-auto flex flex-wrap items-center justify-between sm:justify-start lg:justify-end gap-2">
         
         {{-- Grupo Izquierdo (en móvil) --}}
-        <div class="flex items-center gap-2">
-            <x-data-table.bulk-actions :actions="[
-            [
-                'id' => 'change_status',
-                'type' => 'select', 
-                'label' => 'Cambiar Estado', 
-                'icon' => 'heroicon-s-user-group',
-                'options' => $estadosClientes->map(fn($e) => ['id' => $e->id, 'label' => $e->nombre])
-            ],
-
-            [
-            'id' => 'change_geo_state',
+        <x-data-table.bulk-actions :actions="[
+        [
+            'id' => 'change_status',
             'type' => 'select', 
-            'label' => 'Cambiar Región', 
-            'icon' => 'heroicon-s-map-pin',
-            'options' => $states->map(fn($s) => ['id' => $s->id, 'label' => $s->name])
-            ],
+            'label' => 'Cambiar Estado', 
+            'icon' => 'heroicon-s-user-group',
+            'options' => $estadosClientes->map(fn($e) => ['id' => $e->id, 'label' => $e->nombre])
+        ],
 
-            ['id' => 'activate', 'type' => 'none', 'label' => 'Activar', 'icon' => 'heroicon-s-check-circle'],
-            ['id' => 'deactivate', 'type' => 'none', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
-            ['id' => 'delete', 'type' => 'none', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
-            ]" />
-            
-        </div>
+        [
+        'id' => 'change_geo_state',
+        'type' => 'select', 
+        'label' => 'Cambiar Región', 
+        'icon' => 'heroicon-s-map-pin',
+        'options' => $states->map(fn($s) => ['id' => $s->id, 'label' => $s->name])
+        ],
+
+        ['id' => 'activate', 'type' => 'none', 'label' => 'Activar', 'icon' => 'heroicon-s-check-circle'],
+        ['id' => 'deactivate', 'type' => 'none', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
+        ['id' => 'delete', 'type' => 'none', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
+        ]" />
 
         <div class="flex items-center gap-2">
             <x-data-table.per-page-selector formId="clients-filters" />
@@ -66,16 +63,13 @@
             </x-data-table.filter-dropdown>
         </div>
 
-        <div class="flex-shrink-0 ml-auto sm:ml-0">
-            {{-- Grupo Derecho (en móvil) --}}
-            <x-data-table.column-selector 
-                :allColumns="$allColumns" 
-                :visibleColumns="$visibleColumns" 
-                :defaultVisible="$defaultVisible"
-                formId="clients-filters" 
-            />
-        </div>
-
+        {{-- Grupo Derecho (en móvil) --}}
+        <x-data-table.column-selector 
+            :allColumns="$allColumns" 
+            :visibleColumns="$visibleColumns" 
+            :defaultVisible="$defaultVisible"
+            formId="clients-filters" 
+        />
     </div>
 
 </x-data-table.filter-container>
