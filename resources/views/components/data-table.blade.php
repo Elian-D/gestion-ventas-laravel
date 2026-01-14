@@ -5,11 +5,11 @@
     'bulkActions' => false
 ])
 
-<div class="flex flex-col">
+<div class="flex flex-col w-full">
     <div id="bulk-actions-container"></div>
 
-    <div class="overflow-x-auto border border-gray-200 rounded-lg custom-scrollbar">
-        <table class="w-max min-w-full divide-y divide-gray-200 shadow-sm">
+    <div class="w-full overflow-x-auto border border-gray-200 rounded-lg custom-scrollbar">
+        <table class="w-full min-w-full divide-y divide-gray-200 shadow-sm table-auto">
             <thead class="bg-gray-50 hidden md:table-header-group">
                 <tr>
                     @if($bulkActions)

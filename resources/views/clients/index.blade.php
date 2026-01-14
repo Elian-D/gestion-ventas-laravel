@@ -1,8 +1,8 @@
     @include('clients.partials.filter-sources')
 <x-app-layout>
 
-    <div class="max-w-7xl mx-auto py-4 px-2 sm:px-3 lg:px-4">
-        <div class="bg-white shadow-xl rounded-xl overflow-hidden">
+    <div class="w-full max-w-7xl mx-auto py-4 px-2 sm:px-3 lg:px-4">
+        <div class="bg-white shadow-xl rounded-xl">
             
             <div class="fixed top-4 right-4 z-50 flex flex-col gap-4 w-full max-w-sm px-4 md:px-0">
                 {{-- TOAST DE ÉXITO --}}
@@ -84,7 +84,7 @@
                 @include('clients.partials.filters')
 
                 {{-- TABLA --}}
-                <div id="clients-table">
+                <div id="clients-table" class="w-full overflow-hidden">
                     @include('clients.partials.table')
                 </div>
             </div>
