@@ -1,7 +1,7 @@
 <x-data-table.filter-container formId="clients-filters">
     
     {{-- BUSCADOR: Ocupa todo el ancho en móvil y crece en escritorio --}}
-    <div class="w-full md:flex-grow order-1">
+    <div class="w-full lg:flex-1">
         <x-data-table.search 
             formId="clients-filters" 
             placeholder="Buscar cliente..." 
@@ -9,7 +9,7 @@
     </div>
 
     {{-- ACCIONES: Se distribuyen equitativamente en móvil --}}
-    <div class="w-full md:w-auto flex items-center justify-between md:justify-end gap-2 order-2">
+    <div class="w-full lg:w-auto flex flex-wrap items-center justify-between sm:justify-start lg:justify-end gap-2">
         
         {{-- Grupo Izquierdo (en móvil) --}}
         <div class="flex items-center gap-2">
@@ -34,8 +34,11 @@
             ['id' => 'deactivate', 'type' => 'none', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
             ['id' => 'delete', 'type' => 'none', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
             ]" />
-            <x-data-table.per-page-selector formId="clients-filters" />
             
+        </div>
+
+        <div class="flex items-center gap-2">
+            <x-data-table.per-page-selector formId="clients-filters" />
             <x-data-table.filter-dropdown>
                 <x-data-table.filter-select label="Estado Operativo" name="active" formId="clients-filters">
                     <option value="">Todos</option>
@@ -63,13 +66,16 @@
             </x-data-table.filter-dropdown>
         </div>
 
-        {{-- Grupo Derecho (en móvil) --}}
-        <x-data-table.column-selector 
-            :allColumns="$allColumns" 
-            :visibleColumns="$visibleColumns" 
-            :defaultVisible="$defaultVisible"
-            formId="clients-filters" 
-        />
+        <div class="flex-shrink-0 ml-auto sm:ml-0">
+            {{-- Grupo Derecho (en móvil) --}}
+            <x-data-table.column-selector 
+                :allColumns="$allColumns" 
+                :visibleColumns="$visibleColumns" 
+                :defaultVisible="$defaultVisible"
+                formId="clients-filters" 
+            />
+        </div>
+
     </div>
 
 </x-data-table.filter-container>
