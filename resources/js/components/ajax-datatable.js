@@ -111,24 +111,36 @@ export default function AjaxDataTable(config) {
      * Hace fetch del HTML de la tabla
      * Aplica estados visuales de carga
      */
+
+    let currentRequest = null;
+
     const fetchTable = async (url) => {
         // Evitar peticiones concurrentes si ya se está cargando
-        if (table.classList.contains('opacity-50')) return;
+        if (currentRequest) {
+            currentRequest.abort();
+        }
+
+        currentRequest = new AbortController();
+        const { signal } = currentRequest;
 
         table.classList.add('opacity-50', 'pointer-events-none', 'cursor-wait');
 
         try {
             const res = await fetch(url, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                signal
             });
 
             if (!res.ok) throw new Error('Error en la respuesta del servidor');
 
             table.innerHTML = await res.text();
             syncCheckboxes();
+
         } catch (error) {
-            console.error("DataTable Error:", error);
-            alert("No se pudo cargar la información. Intente de nuevo.");
+            if (error.name !== 'AbortError') {
+                console.error("DataTable Error:", error);
+                alert("No se pudo cargar la información.");
+            }
         } finally {
             table.classList.remove('opacity-50', 'pointer-events-none', 'cursor-wait');
         }
