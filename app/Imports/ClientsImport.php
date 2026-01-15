@@ -11,8 +11,9 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithUpserts;
 
-class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading
+class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading, WithUpserts
 {
     private $states;
     private $estadosClientes;
@@ -28,6 +29,15 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatc
         
         $this->taxTypes = TaxIdentifierType::where('country_id', general_config()->country_id)
             ->pluck('id', 'name')->toArray();
+    }
+
+    /**
+     * Definimos qué columna es la que determina si un registro es duplicado.
+     * En este caso, el RNC/Cédula (tax_id).
+     */
+    public function uniqueBy()
+    {
+        return 'tax_id';
     }
 
     public function model(array $row)

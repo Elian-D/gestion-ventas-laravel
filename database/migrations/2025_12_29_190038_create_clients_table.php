@@ -37,7 +37,9 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('tax_identifier_types')
                 ->nullOnDelete();
-            $table->string('tax_id', 50)->nullable();
+            $table->string('tax_id', 50)
+                ->nullable()
+                ->unique();
 
             // Control operativo
             $table->boolean('active')->default(true);
