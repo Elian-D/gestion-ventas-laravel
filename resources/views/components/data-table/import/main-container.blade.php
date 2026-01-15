@@ -56,16 +56,7 @@
                             <span class="text-xs font-medium text-gray-500" x-text="fileName ? fileName : 'Seleccionar archivo .xlsx'"></span>
                         </div>
                         
-                        <input 
-                            type="file"
-                            name="file"
-                            accept=".xlsx,.xls,.csv"
-                            required
-                            class="hidden"
-                            @change="fileName = $el.files[0].name"
-                            :disabled="uploading"
-                        />
-
+                        <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="hidden" @change="fileName = $el.files[0].name"/>
                     </label>
                     
                     <button type="submit" 
