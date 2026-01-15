@@ -37,6 +37,8 @@ Route::group([], function () {
         ->middleware('permission:clients edit')
         ->name('bulk');
 
+    Route::get('/export', [ClientController::class, 'export'])->name('export');
+
     // Eliminación (Soft Delete)
     Route::delete('/{client}', [ClientController::class, 'destroy'])
         ->middleware('permission:clients delete')

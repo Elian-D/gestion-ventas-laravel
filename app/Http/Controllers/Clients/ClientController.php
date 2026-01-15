@@ -14,6 +14,8 @@ use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ClientsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClientController extends Controller
 {
@@ -158,9 +160,28 @@ class ClientController extends Controller
                 'message' => 'No se pudo completar la operación. Verifique las restricciones de los registros.'
             ], 422);
         }
-
     }
 
+    // Exportar clientes a Excel
+    public function export(Request $request) 
+    {
+        // 1. Construimos la misma query que usas en el index, aplicando los filtros
+        $query = (new ClientFilters($request))
+            ->apply(
+                Client::query()->with(['estadoCliente', 'state'])
+            );
+
+        // 2. Obtener columnas seleccionadas del request
+        // Laravel Excel recibirá algo como: columns => ['id', 'cliente', 'city']
+        $columns = $request->input('columns', ['id', 'cliente', 'estado_cliente']);
+
+        // 3. Retornamos la descarga. 
+        // El nombre del archivo incluye la fecha para evitar confusiones.
+        return Excel::download(
+            new ClientsExport($query, $columns), 
+            'reporte-clientes-' . now()->format('d-m-Y-Hi') . '.xlsx'
+        );
+    }
 
     /**
      * Mostrar formulario de creación
