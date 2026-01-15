@@ -179,7 +179,7 @@ class ClientController extends Controller
         // El nombre del archivo incluye la fecha para evitar confusiones.
         return Excel::download(
             new ClientsExport($query, $columns), 
-            'reporte-clientes-' . now()->format('d-m-Y-Hi') . '.xlsx'
+            'reporte-clientes-' . now()->format('d-m-Y') . '.xlsx'
         );
     }
 

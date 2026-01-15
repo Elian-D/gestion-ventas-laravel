@@ -6,8 +6,13 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithDefaultStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Style;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class ClientsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
+class ClientsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize, WithStyles, WithDefaultStyles
 {
     protected $query;
     protected $columns;
@@ -64,5 +69,38 @@ class ClientsExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoS
             };
         }
         return $data;
+    }
+
+    /**
+     * Estilos por defecto para toda la hoja
+     */
+    public function defaultStyles(Style $defaultStyle)
+    {
+        return [
+            'font' => [
+                'name' => 'Arial',
+                'size' => 11,
+            ],
+        ];
+    }
+
+    /**
+     * Estilos específicos por celdas o rangos
+     */
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            // Estilo para la fila 1 (Encabezados)
+            1 => [
+                'font' => [
+                    'bold' => true, 
+                    'color' => ['argb' => 'FFFFFF']
+                ],
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'startColor' => ['argb' => '4F46E5'], // Indigo-600 de Tailwind
+                ]
+            ],
+        ];
     }
 }
