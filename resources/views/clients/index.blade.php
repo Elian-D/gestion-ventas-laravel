@@ -67,16 +67,23 @@
                     
                     {{-- ACCIONES PRINCIPALES --}}
                     <div class="flex items-center gap-3">
+                        
                         <a href="{{ route('clients.eliminados') }}" 
                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all duration-200">
                             <x-heroicon-s-trash class="w-4 h-4 mr-2" />
                             Papelera
                         </a>
+
                         <a href="{{ route('clients.create') }}" 
                            class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition">
                             <x-heroicon-s-plus class="w-4 h-4 mr-2" />
                             NUEVO CLIENTE
                         </a>
+                        
+                        <x-data-table.export-button 
+                            :route="route('clients.export')" 
+                            formId="clients-filters" 
+                        />
                     </div>
                 </div>
 
