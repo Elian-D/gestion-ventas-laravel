@@ -1,7 +1,10 @@
 <?php
 
+use App\Exports\Catalogs\StatesCatalogExport;
+use App\Exports\Catalogs\TaxTypesCatalogExportt;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Clients\ClientController;
+use Maatwebsite\Excel\Excel;
 
 Route::group([], function () {
     
@@ -37,7 +40,11 @@ Route::group([], function () {
         ->middleware('permission:clients edit')
         ->name('bulk');
 
+    // Exportación e importación
     Route::get('/export', [ClientController::class, 'export'])->name('export');
+    Route::get('/import', [ClientController::class, 'showImportForm'])->name('import.view');
+    Route::post('/import', [ClientController::class, 'import'])->name('import.process');
+    Route::get('/import-template', [ClientController::class, 'downloadTemplate'])->name('template');
 
     // Eliminación (Soft Delete)
     Route::delete('/{client}', [ClientController::class, 'destroy'])

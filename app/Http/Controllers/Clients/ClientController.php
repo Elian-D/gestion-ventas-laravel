@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Exports\Catalogs\ClientStatusCatalogExport;
+use App\Exports\Catalogs\StatesCatalogExport;
+use App\Exports\Catalogs\TaxTypesCatalogExportt;
+use App\Exports\Clients\ClientsTemplateExport;
 use App\Models\Clients\Client;
 use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
@@ -15,7 +19,10 @@ use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\ClientsExport;
+use App\Imports\ClientsImport;
 use Maatwebsite\Excel\Facades\Excel;
+
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class ClientController extends Controller
 {
@@ -181,6 +188,41 @@ class ClientController extends Controller
             new ClientsExport($query, $columns), 
             'reporte-clientes-' . now()->format('d-m-Y') . '.xlsx'
         );
+    }
+
+/**
+     * Muestra la vista de importación
+     */
+    public function showImportForm()
+    {
+        return view('clients.import');
+    }
+
+    /**
+     * Descarga la plantilla base de clientes
+     */
+    public function downloadTemplate()
+    {
+        // La Facade Excel se llama de forma estática correctamente
+        return Excel::download(new ClientsTemplateExport, 'plantilla-importacion-clientes.xlsx');
+    }
+
+
+    /**
+     * Procesa la importación
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        try {
+            Excel::import(new ClientsImport, $request->file('file'));
+            return redirect()->route('clients.index')->with('success', 'Importación completada.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            return back()->withErrors($e->failures());
+        }
     }
 
     /**
