@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\Clients;
 
-use App\Exports\Catalogs\ClientStatusCatalogExport;
-use App\Exports\Catalogs\StatesCatalogExport;
-use App\Exports\Catalogs\TaxTypesCatalogExportt;
 use App\Exports\Clients\ClientsTemplateExport;
 use App\Models\Clients\Client;
 use App\Models\Clients\BusinessType;
@@ -18,7 +15,7 @@ use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Exports\ClientsExport;
+use App\Exports\Clients\ClientsExport;
 use App\Imports\ClientsImport;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -172,25 +169,18 @@ class ClientController extends Controller
     // Exportar clientes a Excel
     public function export(Request $request) 
     {
-        // 1. Construimos la misma query que usas en el index, aplicando los filtros
+        // 1. Aplicamos tus filtros existentes
         $query = (new ClientFilters($request))
-            ->apply(
-                Client::query()->with(['estadoCliente', 'state'])
-            );
+            ->apply(Client::query()->with(['estadoCliente', 'state', 'taxIdentifierType']));
 
-        // 2. Obtener columnas seleccionadas del request
-        // Laravel Excel recibirá algo como: columns => ['id', 'cliente', 'city']
-        $columns = $request->input('columns', ['id', 'cliente', 'estado_cliente']);
-
-        // 3. Retornamos la descarga. 
-        // El nombre del archivo incluye la fecha para evitar confusiones.
+        // 2. IMPORTANTE: Ignoramos las columnas seleccionadas de la vista    
         return Excel::download(
-            new ClientsExport($query, $columns), 
-            'reporte-clientes-' . now()->format('d-m-Y') . '.xlsx'
+            new ClientsExport($query), 
+            'respaldo-clientes-' . now()->format('d-m-Y-h:ia') . '.xlsx'
         );
     }
 
-/**
+    /**
      * Muestra la vista de importación
      */
     public function showImportForm()

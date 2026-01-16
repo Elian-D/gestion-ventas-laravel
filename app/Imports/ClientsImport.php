@@ -72,7 +72,17 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatc
             ],
             'estado_cliente' => 'required',
             'ciudad' => 'required|string',
-        ];
+
+            'tipo_identificacion' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if (!isset($this->taxTypes[$value])) {
+                        $fail("El tipo de identificación '$value' no es válido.");
+                    }
+                },
+            ],
+            
+            ];
     }
 
         /**
@@ -85,6 +95,7 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatc
             'nombre_o_razon_social' => 'nombre del cliente',
             'provincia_estado' => 'provincia',
             'estado_cliente' => 'estado del cliente',
+            'rnc_cedula.required' => 'El número de identificación (RNC/Cédula) es obligatorio.',
         ];
     }
 
