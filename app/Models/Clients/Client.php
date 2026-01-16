@@ -84,29 +84,30 @@ class Client extends Model
     }
 
     /**
-     * Retorna la etiqueta dinámica del identificador fiscal (RNC, Cédula, RFC, etc.)
-     * Basado en la configuración general y el tipo de cliente.
+     * Retorna la sigla o nombre del identificador fiscal real del cliente.
+     * Ejemplo: "RNC", "Cédula", "DNI", etc.
      */
-
     public function getTaxLabelAttribute(): string
     {
-        static $taxTypes = [];
-
-        $config = general_config();
-        if (! $config) return 'ID Fiscal';
-
-        $entityType = $this->type === 'individual' ? 'person' : 'company';
-        $cacheKey = "{$config->country_id}_{$entityType}";
-
-        if (! isset($taxTypes[$cacheKey])) {
-            $taxTypes[$cacheKey] = TaxIdentifierType::query()
-                ->select('code')
-                ->where('country_id', $config->country_id)
-                ->whereIn('entity_type', [$entityType, 'both'])
-                ->first();
+        // 1. Intentamos obtener el código desde la relación cargada
+        // Esto es mucho más preciso que adivinar por el tipo de cliente.
+        if ($this->taxIdentifierType) {
+            return $this->taxIdentifierType->code ?? $this->taxIdentifierType->name;
         }
 
-        return $taxTypes[$cacheKey]?->code ?? 'ID Fiscal';
+        // 2. Fallback: Si por alguna razón no tiene tipo asignado, 
+        // usamos la lógica de configuración general como último recurso.
+        $config = general_config();
+        if (!$config) return 'ID Fiscal';
+
+        $entityType = $this->type === 'individual' ? 'person' : 'company';
+        
+        // Podríamos cachear esto, pero lo ideal es que el cliente siempre tenga su tipo_id
+        $default = TaxIdentifierType::where('country_id', $config->country_id)
+                    ->whereIn('entity_type', [$entityType, 'both'])
+                    ->first();
+
+        return $default?->code ?? 'ID Fiscal';
     }
 
 
