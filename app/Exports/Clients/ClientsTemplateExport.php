@@ -19,7 +19,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 '809-000-0000', 
                 'Monseñor Nouel', // Asegúrate que este nombre exista en tu DB
                 'Bonao', 
-                'Cedula', 
+                'Cédula de Identidad y Electoral', 
                 '001-0000000-0', 
                 'Activo', 
                 'Si'
@@ -32,7 +32,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 '809-555-5555', 
                 'La Vega', 
                 'La Vega', 
-                'RNC', 
+                'Registro Nacional del Contribuyente', 
                 '130123456', 
                 'Prospecto', 
                 'Si'
