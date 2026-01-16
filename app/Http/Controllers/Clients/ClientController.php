@@ -67,6 +67,7 @@ class ClientController extends Controller
                     ->with([
                         'estadoCliente:id,nombre,permite_operar,clase_fondo,clase_texto',
                         'state:id,name',
+                        'taxIdentifierType:id,name,code',
                     ])
             )
             ->paginate($perPage)
