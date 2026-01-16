@@ -53,6 +53,15 @@ class Client extends Model
         return $this->belongsTo(State::class, 'state_id');
     }
 
+    /**
+     * Obtiene el tipo de identificador fiscal (RNC, Cédula, RFC, etc.)
+     */
+
+    public function taxIdentifierType(): BelongsTo
+    {
+        return $this->belongsTo(TaxIdentifierType::class, 'tax_identifier_type_id');
+    }
+
     /* ===========================
      |    ACCESSORS (AYUDANTES DE VISTA)
      =========================== */
