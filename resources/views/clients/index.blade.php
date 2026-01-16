@@ -60,25 +60,35 @@
             </div>
 
             <div class="p-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-gray-100 pb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 tracking-tight">
-                        Gestión de Clientes
-                    </h2>
-                    
-                    {{-- ACCIONES PRINCIPALES --}}
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('clients.eliminados') }}" 
-                           class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-gray-900 transition-all duration-200">
-                            <x-heroicon-s-trash class="w-4 h-4 mr-2" />
-                            Papelera
-                        </a>
-                        <a href="{{ route('clients.create') }}" 
-                           class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition">
-                            <x-heroicon-s-plus class="w-4 h-4 mr-2" />
-                            NUEVO CLIENTE
-                        </a>
-                    </div>
-                </div>
+                
+            <x-page-toolbar title="Gestión de Clientes">
+                <x-slot name="actions">
+
+                    <a href="{{ route('clients.eliminados') }}"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
+                        <x-heroicon-s-trash class="w-4 h-4 mr-2" />
+                        Papelera
+                    </a>
+
+                    <a href="{{ route('clients.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 rounded-md text-xs font-semibold text-white uppercase hover:bg-green-700">
+                        <x-heroicon-s-plus class="w-4 h-4 mr-2" />
+                        Nuevo Cliente
+                    </a>
+
+                    <x-data-table.export-button 
+                        :route="route('clients.export')" 
+                        formId="clients-filters" 
+                    />
+
+                    <x-data-table.import-link 
+                        :route="route('clients.import.view')" 
+                        title="Importar clientes"
+                    />
+
+                </x-slot>
+            </x-page-toolbar>
+
 
                 {{-- FILTROS Y BARRA DE BÚSQUEDA --}}
                 @include('clients.partials.filters')

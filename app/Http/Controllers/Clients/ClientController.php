@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Exports\Clients\ClientsTemplateExport;
 use App\Models\Clients\Client;
 use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
@@ -14,6 +15,11 @@ use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Exports\Clients\ClientsExport;
+use App\Imports\ClientsImport;
+use Maatwebsite\Excel\Facades\Excel;
+
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class ClientController extends Controller
 {
@@ -61,6 +67,7 @@ class ClientController extends Controller
                     ->with([
                         'estadoCliente:id,nombre,permite_operar,clase_fondo,clase_texto',
                         'state:id,name',
+                        'taxIdentifierType:id,name,code',
                     ])
             )
             ->paginate($perPage)
@@ -158,9 +165,56 @@ class ClientController extends Controller
                 'message' => 'No se pudo completar la operación. Verifique las restricciones de los registros.'
             ], 422);
         }
-
     }
 
+    // Exportar clientes a Excel
+    public function export(Request $request) 
+    {
+        // 1. Aplicamos tus filtros existentes
+        $query = (new ClientFilters($request))
+            ->apply(Client::query()->with(['estadoCliente', 'state', 'taxIdentifierType']));
+
+        // 2. IMPORTANTE: Ignoramos las columnas seleccionadas de la vista    
+        return Excel::download(
+            new ClientsExport($query), 
+            'respaldo-clientes-' . now()->format('d-m-Y-h:ia') . '.xlsx'
+        );
+    }
+
+    /**
+     * Muestra la vista de importación
+     */
+    public function showImportForm()
+    {
+        return view('clients.import');
+    }
+
+    /**
+     * Descarga la plantilla base de clientes
+     */
+    public function downloadTemplate()
+    {
+        // La Facade Excel se llama de forma estática correctamente
+        return Excel::download(new ClientsTemplateExport, 'plantilla-importacion-clientes.xlsx');
+    }
+
+
+    /**
+     * Procesa la importación
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        try {
+            Excel::import(new ClientsImport, $request->file('file'));
+            return redirect()->route('clients.index')->with('success', 'Importación completada.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            return back()->withErrors($e->failures());
+        }
+    }
 
     /**
      * Mostrar formulario de creación
