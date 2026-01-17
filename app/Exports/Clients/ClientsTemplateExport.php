@@ -21,8 +21,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 'Bonao', 
                 'Cédula de Identidad y Electoral', 
                 '001-0000000-0', 
-                'Activo', 
-                'Si'
+                'Activo'
             ],
             [
                 'Empresa', 
@@ -34,8 +33,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 'La Vega', 
                 'Registro Nacional del Contribuyente', 
                 '130123456', 
-                'Prospecto', 
-                'Si'
+                'Prospecto'
             ],
         ]);
     }
@@ -45,7 +43,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
         return [
             'tipo', 'nombre_o_razon_social', 'nombre_comercial', 'email', 
             'telefono', 'provincia_estado', 'ciudad', 'tipo_identificacion', 
-            'rnc_cedula', 'estado_cliente', 'activo'
+            'rnc_cedula', 'estado_cliente'
         ];
     }
 }

@@ -10,7 +10,6 @@ class ClientFilters extends QueryFilter
     {
         return [
             'search'           => ClientSearchFilter::class,
-            'active'           => ClientActiveFilter::class,
             'estado_cliente'   => ClientBusinessStatusFilter::class,
             'business_type'    => ClientBusinessFilter::class,
         ];

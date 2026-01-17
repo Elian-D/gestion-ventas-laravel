@@ -29,20 +29,12 @@
         'options' => $states->map(fn($s) => ['id' => $s->id, 'label' => $s->name])
         ],
 
-        ['id' => 'activate', 'type' => 'none', 'label' => 'Activar', 'icon' => 'heroicon-s-check-circle'],
-        ['id' => 'deactivate', 'type' => 'none', 'label' => 'Desactivar', 'icon' => 'heroicon-s-x-circle'],
         ['id' => 'delete', 'type' => 'none', 'label' => 'Eliminar', 'icon' => 'heroicon-s-trash'],
         ]" />
 
         <div class="flex items-center gap-2">
             <x-data-table.per-page-selector formId="clients-filters" />
             <x-data-table.filter-dropdown>
-                <x-data-table.filter-select label="Estado Operativo" name="active" formId="clients-filters">
-                    <option value="">Todos</option>
-                    <option value="1" @selected(request('active') === '1')>Activos</option>
-                    <option value="0" @selected(request('active') === '0')>Inactivos</option>
-                </x-data-table.filter-select>
-
                 <x-data-table.filter-select label="Estado del Cliente" name="estado_cliente" formId="clients-filters">
                     <option value="">Todos los estados</option>
                     @foreach($estadosClientes as $estado)

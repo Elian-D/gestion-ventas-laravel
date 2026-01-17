@@ -26,7 +26,7 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
     const EXPECTED_HEADERS = [
         'tipo', 'nombre_o_razon_social', 'nombre_comercial', 'email', 'telefono',
         'provincia_estado', 'ciudad', 'tipo_identificacion', 'rnc_cedula',
-        'estado_cliente', 'activo',
+        'estado_cliente',
     ];
 
     public function __construct()
@@ -76,7 +76,6 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
                 'city'                   => $row['ciudad'],
                 'tax_identifier_type_id' => self::$taxTypes[$row['tipo_identificacion']] ?? null,
                 'tax_id'                 => $taxId,
-                'active'                 => strtolower($row['activo'] ?? 'si') == 'si',
                 'updated_at'             => now(),
                 'created_at'             => now(),
             ];
@@ -92,7 +91,7 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
                     $dataToUpsert,
                     ['tax_id'],
                     ['type', 'estado_cliente_id', 'name', 'commercial_name', 'email', 
-                     'phone', 'state_id', 'city', 'tax_identifier_type_id', 'active', 'updated_at']
+                    'phone', 'state_id', 'city', 'tax_identifier_type_id', 'updated_at']
                 );
                 
                 // Reactivar verificaciones
