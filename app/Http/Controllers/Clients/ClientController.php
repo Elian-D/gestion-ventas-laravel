@@ -176,7 +176,7 @@ class ClientController extends Controller
         // 2. IMPORTANTE: Ignoramos las columnas seleccionadas de la vista    
         return Excel::download(
             new ClientsExport($query), 
-            'respaldo-clientes-' . now()->format('d-m-Y-h:ia') . '.csv'
+            'respaldo-clientes-' . now()->format('d-m-Y-h:ia') . '.xlsx'
         );
     }
 
