@@ -14,7 +14,7 @@ export default function AjaxDataTable(config) {
     const {
         tableId,
         formId,
-        debounce = 500,
+        debounce = 1000,
         chips = {}
     } = config;
 
@@ -307,9 +307,16 @@ export default function AjaxDataTable(config) {
 
 
     /* ============================================================
-     * 9. AUTO-SUBMIT DEL FORMULARIO
-     * ============================================================
-     */
+    * 9. AUTO-SUBMIT DEL FORMULARIO
+    * ============================================================
+    */
+
+    // Interceptar submit del formulario (prevenir comportamiento por defecto)
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearTimeout(timer); // Cancelar cualquier debounce pendiente
+        apply(); // Ejecutar búsqueda inmediatamente
+    });
 
     // Selects
     form.querySelectorAll('select').forEach(el =>
@@ -317,18 +324,26 @@ export default function AjaxDataTable(config) {
     );
 
     // Inputs texto con debounce
-    form.querySelectorAll('input[type="text"]').forEach(el =>
+    form.querySelectorAll('input[type="text"]').forEach(el => {
         el.addEventListener('input', () => {
             clearTimeout(timer);
             timer = setTimeout(apply, debounce);
-        })
-    );
+        });
+        
+        // Enter ejecuta búsqueda inmediatamente
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(timer);
+                apply();
+            }
+        });
+    });
 
     // Checkboxes (incluye columnas)
-    form.querySelectorAll('input[type="checkbox"]').forEach(el => 
+    form.querySelectorAll('input[type="checkbox"]').forEach(el =>
         el.addEventListener('change', apply)
     );
-
 
     /* ============================================================
      * 10. PAGINACIÓN AJAX
