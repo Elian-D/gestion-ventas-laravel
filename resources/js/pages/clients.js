@@ -1,4 +1,4 @@
-import AjaxDataTable from '../components/ajax-datatable';
+import AjaxDataTable from '../components/ajax-datatable/index';
 
 document.addEventListener('DOMContentLoaded', () => {
     AjaxDataTable({

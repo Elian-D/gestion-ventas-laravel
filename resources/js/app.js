@@ -8,4 +8,3 @@ Alpine.start();
 
 // Loader de páginas
 import './pages/clients'
-import './components/ajax-datatable'
