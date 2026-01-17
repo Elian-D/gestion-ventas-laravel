@@ -53,11 +53,10 @@ class ClientController extends Controller
             'city'             => 'Ciudad',
             'state'            => 'Estado/Provincia',
             'estado_cliente'   => 'Estado del Cliente',
-            'estado_operativo' => 'Estado Operativo',
             'created_at'       => 'Fecha Creación',
             'updated_at'       => 'Última Actualización'
         ];
-        $defaultDesktop = ['id', 'name', 'tax_id', 'city', 'state', 'estado_cliente', 'estado_operativo'];
+        $defaultDesktop = ['id', 'name', 'tax_id', 'city', 'state', 'estado_cliente'];
         $defaultMobile = ['id','name'];
 
         $visibleColumns = $request->input('columns', $defaultDesktop);
@@ -108,7 +107,7 @@ class ClientController extends Controller
      */
     public function bulk(Request $request)
     {
-        $allowedActions = ['activate', 'deactivate', 'delete', 'change_status', 'change_geo_state'];
+        $allowedActions = ['delete', 'change_status', 'change_geo_state'];
 
         $request->validate([
             'ids' => 'required|array',
@@ -124,8 +123,6 @@ class ClientController extends Controller
         $count = count($ids);
 
         $actionLabel = match ($action) {
-            'activate'   => 'activado',
-            'deactivate' => 'desactivado',
             'delete'     => 'eliminado',
             'change_status' => 'actualizado el estado',
             'change_geo_state' => 'actualizado la ubicación',
@@ -138,8 +135,6 @@ class ClientController extends Controller
                 $query = Client::whereIn('id', $ids);
 
                 match ($action) {
-                    'activate'   => $query->update(['active' => 1]),
-                    'deactivate' => $query->update(['active' => 0]),
                     'delete'     => $query->delete(),
                     'change_status' => $query->update(['estado_cliente_id' => $value]),
                     'change_geo_state' => $query->update(['state_id' => $value]),
@@ -268,7 +263,7 @@ class ClientController extends Controller
 
         $data['tax_identifier_type_id'] = $identifier?->id;
         
-        $client = Client::create(array_merge($data, ['active' => true]));
+        $client = Client::create($data);
 
         return redirect()
             ->route('clients.index')
@@ -309,18 +304,6 @@ class ClientController extends Controller
         return redirect()
             ->route('clients.index')
             ->with('success', "Cliente {$client->name} actualizado correctamente.");
-    }
-
-    /**
-     * Alternar estado activo/inactivo
-     */
-    public function toggleEstado(Client $client)
-    {
-        $client->toggleActivo();
-        $status = $client->active ? 'activado' : 'desactivado';
-        
-        return redirect()->back()
-            ->with('success', "El cliente ha sido {$status}.");
     }
 
     /**

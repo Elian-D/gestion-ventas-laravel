@@ -31,11 +31,6 @@ Route::group([], function () {
         ->middleware('permission:clients edit')
         ->name('update');
 
-    // Cambio de estado (Activo/Inactivo)
-    Route::patch('/{client}/estado', [ClientController::class, 'toggleEstado'])
-        ->middleware('permission:clients edit')
-        ->name('toggle');
-
     Route::post('/bulk-action', [ClientController::class, 'bulk'])
         ->middleware('permission:clients edit')
         ->name('bulk');
