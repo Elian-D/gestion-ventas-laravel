@@ -71,14 +71,6 @@
                 </td>
             @endif
 
-            @if(in_array('estado_operativo', $visibleColumns))
-                <td class="px-6 py-4 text-center">
-                    <span class="px-2 py-1 text-[10px] {{ $client->active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full font-bold uppercase">
-                        {{ $client->active ? 'Activo' : 'Inactivo' }}
-                    </span>
-                </td>
-            @endif
-
             @if(in_array('created_at', $visibleColumns))
                 <td class="px-6 py-4 text-xs text-gray-400">
                     {{ $client->created_at->format('d/m/Y h:i A') }}
@@ -95,15 +87,6 @@
             <td class="px-6 py-4">
                 <div class="flex items-center gap-3 mt-2 md:mt-0">
                     {{-- BOTÓN RADICAL: VER TODO (MODAL) --}}
-
-                    {{-- Toggle Activo --}}
-                    <form action="{{ route('clients.toggle', $client) }}" method="POST">
-                        @csrf @method('PATCH')
-                        <button type="submit" class="text-xs px-2 py-1 rounded border {{ $client->active ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100' : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' }}">
-                            {{ $client->active ? 'Deshabilitar' : 'Habilitar' }}
-                        </button>
-                    </form>
-
                     <button @click="$dispatch('open-modal', 'view-client-{{ $client->id }}')" 
                             class="bg-gray-100 text-gray-600 hover:bg-indigo-600 hover:text-white p-2 rounded-full transition-all shadow-sm"
                             title="Ver detalles completos">
