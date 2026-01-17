@@ -184,7 +184,13 @@ export default function AjaxDataTable(config) {
 
             chip.onclick = () => {
                 const input = form.querySelector(`[name="${key}"]`);
-                if (input) input.value = '';
+                if (input) {
+                    if (input.tagName === 'SELECT') {
+                        input.selectedIndex = 0;
+                    } else {
+                        input.value = '';
+                    }
+                }
                 apply();
             };
 
@@ -236,14 +242,23 @@ export default function AjaxDataTable(config) {
      * - columnas seleccionadas
      */
     const clearAll = () => {
+        // 1. Guardar lo que NO queremos borrar
         const currentPerPage = form.querySelector('[name="per_page"]')?.value || 10;
-
         const selectedColumns = Array.from(
             form.querySelectorAll('input[name="columns[]"]:checked')
         ).map(cb => cb.value);
 
-        form.reset();
+        // 2. Limpiar manualmente inputs de texto y selects
+        form.querySelectorAll('input[type="text"], input[type="search"]').forEach(input => {
+            input.value = '';
+        });
 
+        form.querySelectorAll('select').forEach(select => {
+            // Seleccionamos la primera opción (usualmente es "Todos" o vacío)
+            select.selectedIndex = 0;
+        });
+
+        // 3. Restaurar configuración de tabla
         const perPageInput = form.querySelector('[name="per_page"]');
         if (perPageInput) perPageInput.value = currentPerPage;
 
@@ -251,9 +266,9 @@ export default function AjaxDataTable(config) {
             cb.checked = selectedColumns.includes(cb.value);
         });
 
+        // 4. Ejecutar la actualización
         apply(); 
     };
-
 
 /* ============================================================
     * 8. MANEJO DE COLUMNAS INTELIGENTE
