@@ -171,13 +171,12 @@ class ClientController extends Controller
     public function export(Request $request) 
     {
         // 1. Aplicamos tus filtros existentes
-        $query = (new ClientFilters($request))
-            ->apply(Client::query()->with(['estadoCliente', 'state', 'taxIdentifierType']));
+        $query = (new ClientFilters($request))->apply(Client::query());
 
         // 2. IMPORTANTE: Ignoramos las columnas seleccionadas de la vista    
         return Excel::download(
             new ClientsExport($query), 
-            'respaldo-clientes-' . now()->format('d-m-Y-h:ia') . '.xlsx'
+            'respaldo-clientes-' . now()->format('d-m-Y-h:ia') . '.csv'
         );
     }
 
@@ -205,14 +204,23 @@ class ClientController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+            'file' => 'required|mimes:xlsx,xls,csv|max:10240', // Aumenté a 10MB
         ]);
 
         try {
+            // Desactivar logs temporalmente para máximo rendimiento
+            DB::connection()->disableQueryLog();
+            
             Excel::import(new ClientsImport, $request->file('file'));
-            return redirect()->route('clients.index')->with('success', 'Importación completada.');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            return back()->withErrors($e->failures());
+            
+            return redirect()
+                ->route('clients.index')
+                ->with('success', 'Importación completada exitosamente.');
+                
+        } catch (ValidationException $e) {
+            return back()->withErrors(['file' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            return back()->withErrors(['file' => 'Error en la importación: ' . $e->getMessage()]);
         }
     }
 

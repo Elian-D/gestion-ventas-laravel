@@ -51,6 +51,9 @@ return new class extends Migration
             $table->foreign('state_id')
                 ->references('id')->on('states')
                 ->restrictOnDelete();
+            
+            // Índices
+            $table->index('tax_id');
         });
         ;
     }
