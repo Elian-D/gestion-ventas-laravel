@@ -6,6 +6,7 @@ use App\Models\Clients\Client;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Configuration\TaxIdentifierType;
 use App\Models\Geo\State;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -13,7 +14,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithUpserts;
 
-class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading, WithUpserts
+class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading, WithUpserts, SkipsEmptyRows
 {
     private $states;
     private $estadosClientes;
@@ -32,6 +33,60 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatc
     }
 
     /**
+     * Estructura exacta y ordenada esperada.
+     * IMPORTANTE: El orden de las columnas definido aquí debe coincidir exactamente con el del archivo importado.
+     */
+    const EXPECTED_HEADERS = [
+        'tipo',
+        'nombre_o_razon_social',
+        'nombre_comercial',
+        'email',
+        'telefono',
+        'provincia_estado',
+        'ciudad',
+        'tipo_identificacion',
+        'rnc_cedula',
+        'estado_cliente',
+        'activo',
+    ];
+
+    public function prepareForValidation($data, $index)
+    {
+        if ($index === 2) {
+            $fileHeaders = array_keys($data);
+
+            // 1. Validar si faltan columnas
+            $missing = array_diff(self::EXPECTED_HEADERS, $fileHeaders);
+            if (!empty($missing)) {
+                $names = implode(', ', $missing);
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'file' => "Estructura inválida. Faltan las siguientes columnas: [ $names ]"
+                ]);
+            }
+
+            // 2. Validar si sobran columnas (columnas extra no permitidas)
+            $extra = array_diff($fileHeaders, self::EXPECTED_HEADERS);
+            if (!empty($extra)) {
+                $names = implode(', ', $extra);
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'file' => "El archivo contiene columnas adicionales no permitidas: [ $names ]"
+                ]);
+            }
+
+            // 3. Validar el orden exacto
+            // Comparamos los arrays directamente. Al llegar aquí ya sabemos que tienen los mismos elementos,
+            // así que si la igualdad falla, es puramente por el orden.
+            if ($fileHeaders !== self::EXPECTED_HEADERS) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'file' => "Las columnas están en un orden incorrecto. Por favor, utilice la plantilla oficial sin mover las cabeceras."
+                ]);
+            }
+        }
+
+        return $data;
+    }
+    
+    /**
      * Definimos qué columna es la que determina si un registro es duplicado.
      * En este caso, el RNC/Cédula (tax_id).
      */
@@ -42,6 +97,10 @@ class ClientsImport implements ToModel, WithHeadingRow, WithValidation, WithBatc
 
     public function model(array $row)
     {
+        // Si la columna crítica está vacía tras el mapeo, ignoramos la fila o lanzamos error
+        if (!isset($row['rnc_cedula']) || empty($row['rnc_cedula'])) {
+            return null; 
+        }
         return new Client([
             'type'                   => strtolower($row['tipo']) == 'empresa' ? 'company' : 'individual',
             'estado_cliente_id'      => $this->estadosClientes[$row['estado_cliente']] ?? null,
