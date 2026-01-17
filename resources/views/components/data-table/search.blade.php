@@ -5,9 +5,14 @@
 ])
 
 <div class="relative w-full md:w-72">
-    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+    <button 
+        type="button"
+        class="absolute inset-y-0 left-0 flex items-center pl-3 cursor-pointer hover:text-indigo-600 transition-colors"
+        onclick="this.closest('div').querySelector('input').form.dispatchEvent(new Event('submit'))"
+        title="Buscar"
+    >
         <x-heroicon-s-magnifying-glass class="w-4 h-4 text-gray-400" />
-    </span>
+    </button>
     <input 
         type="text" 
         name="{{ $name }}" 
