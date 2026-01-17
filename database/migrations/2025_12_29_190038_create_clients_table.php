@@ -41,9 +41,6 @@ return new class extends Migration
                 ->nullable()
                 ->unique();
 
-            // Control operativo
-            $table->boolean('active')->default(true);
-
             $table->timestamps();
             $table->softDeletes();
 

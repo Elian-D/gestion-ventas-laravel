@@ -26,12 +26,8 @@ class Client extends Model
         'city',
         'tax_identifier_type_id',
         'tax_id',
-        'active',
     ];
 
-    protected $casts = [
-        'active' => 'boolean',
-    ];
 
     /* ===========================
      |      RELACIONES
@@ -80,7 +76,7 @@ class Client extends Model
      */
     public function getPuedeOperarAttribute(): bool
     {
-        return $this->active && $this->estadoCliente->puedeOperar();
+        return $this->estadoCliente->puedeOperar();
     }
 
     /**
@@ -108,16 +104,5 @@ class Client extends Model
                     ->first();
 
         return $default?->code ?? 'ID Fiscal';
-    }
-
-
-    /* ===========================
-     |    COMPORTAMIENTO
-     =========================== */
-
-    public function toggleActivo(): void
-    {
-        $this->active = ! $this->active;
-        $this->save();
     }
 }
