@@ -2,39 +2,66 @@
     @forelse($clients as $client)
         <tr class="hover:bg-gray-50 transition border-b border-gray-100">
 
-            @if(isset($bulkActions) && $bulkActions)
+<tr class="hover:bg-gray-50 transition border-b border-gray-100">
+            @if($bulkActions)
                 <td class="px-4 py-4 text-center">
-                    <input type="checkbox" 
-                        value="{{ $client->id }}" 
-                        class="row-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                    <input type="checkbox" value="{{ $client->id }}" class="row-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                 </td>
             @endif
 
             @if(in_array('id', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-500 ">#{{ $client->id }}</td>
+                <td class="px-6 py-4 text-sm text-gray-500">#{{ $client->id }}</td>
             @endif
 
-            @if(in_array('cliente', $visibleColumns))
-                <td class="px-6 py-4">
-                    <div class="flex flex-col">
-                        <span class="font-bold text-gray-900 text-base md:text-sm">{{ $client->display_name }}</span>
-                        <span class="text-xs text-gray-500">{{ $client->tax_id ?? 'Sin ID' }}</span>
-                    </div>
+            @if(in_array('name', $visibleColumns))
+                <td class="px-6 py-4 text-sm ">
+                    @if($client->commercial_name)
+                        <span class="text-gray-900">{{ $client->commercial_name }}</span>
+                    @else
+                        <span class="text-gray-900">{{ $client->name }}</span>
+                    @endif
+                </td>
+            @endif
+
+            @if(in_array('tax_identifier_types', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-700">
+                    {{ $client->tax_label ?? '—' }}
+                </td>
+            @endif
+
+            @if(in_array('tax_id', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-700">
+                    {{ $client->tax_id ?? '—' }}
+                </td>
+            @endif
+
+
+
+            @if(in_array('type', $visibleColumns))
+                <td class="px-6 py-4 text-xs text-gray-700">
+                    {{ $client->type === 'company' ? 'Empresa' : 'Individual' }}
+                </td>
+            @endif
+
+            @if(in_array('email', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-blue-600">
+                    {{ $client->email ?? '—' }}
+                </td>
+            @endif
+
+            @if(in_array('phone', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    {{ $client->phone ?? '—' }}
                 </td>
             @endif
 
             @if(in_array('city', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-700">
-                    {{ $client->city }}
-                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">{{ $client->city }}</td>
             @endif
 
             @if(in_array('state', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-600">
-                    {{ $client->state->name ?? '—' }}
-                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">{{ $client->state->name ?? '—' }}</td>
             @endif
-
 
             @if(in_array('estado_cliente', $visibleColumns))
                 <td class="px-6 py-4">
@@ -45,8 +72,8 @@
             @endif
 
             @if(in_array('estado_operativo', $visibleColumns))
-                <td class="px-6 py-4">
-                    <span class="px-2 py-1 text-xs {{ $client->active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full font-bold">
+                <td class="px-6 py-4 text-center">
+                    <span class="px-2 py-1 text-[10px] {{ $client->active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full font-bold uppercase">
                         {{ $client->active ? 'Activo' : 'Inactivo' }}
                     </span>
                 </td>
@@ -64,6 +91,7 @@
                 </td>
             @endif
 
+            
             <td class="px-6 py-4">
                 <div class="flex items-center gap-3 mt-2 md:mt-0">
                     {{-- BOTÓN RADICAL: VER TODO (MODAL) --}}

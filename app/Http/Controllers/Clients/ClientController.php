@@ -43,22 +43,24 @@ class ClientController extends Controller
                 : collect();
 
         $allColumns = [
-            'id' => 'ID',
-            'cliente' => 'Cliente',
-            'city' => 'Ciudad',
-            'state' => 'Estado (Ubicacion)',
-            'estado_cliente' => 'Estado del Cliente',
+            'id'               => 'ID',
+            'name'             => 'Nombre Cliente',
+            'tax_identifier_types' => 'Tipo Identificador Fiscal',
+            'tax_id'           => 'Identificador Fiscal',
+            'type'             => 'Tipo de Cliente',
+            'email'            => 'Email',
+            'phone'            => 'Teléfono',
+            'city'             => 'Ciudad',
+            'state'            => 'Estado/Provincia',
+            'estado_cliente'   => 'Estado del Cliente',
             'estado_operativo' => 'Estado Operativo',
-            'created_at' => 'Fecha Creación',
-            'updated_at' => 'Última Actualización'
+            'created_at'       => 'Fecha Creación',
+            'updated_at'       => 'Última Actualización'
         ];
-
-        $defaultDesktop = ['id', 'cliente', 'city', 'state', 'estado_cliente', 'estado_operativo'];
-        $defaultMobile = ['id','cliente'];
+        $defaultDesktop = ['id', 'name', 'tax_id', 'city', 'state', 'estado_cliente', 'estado_operativo'];
+        $defaultMobile = ['id','name'];
 
         $visibleColumns = $request->input('columns', $defaultDesktop);
-        
-
         $perPage = $request->input('per_page', 10);
 
         $clients = (new ClientFilters($request))
