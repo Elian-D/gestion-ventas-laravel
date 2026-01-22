@@ -66,7 +66,7 @@ class ClientController extends Controller
             ->apply(
                 Client::query()
                     ->with([
-                        'estadoCliente:id,nombre,permite_operar,clase_fondo,clase_texto',
+                        'estadoCliente:id,nombre,clase_fondo,clase_texto',
                         'state:id,name',
                         'taxIdentifierType:id,name,code',
                     ])
