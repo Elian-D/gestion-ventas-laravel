@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: 'Estado del Cliente',
                 source: 'estadosClientes'
             },
-            business_type: {
+/*             business_type: {
                 label: 'Tipo de Negocio',
                 source: 'tiposNegocio'
-            },
+            }, */
             search: {
                 label: 'Búsqueda'
             }

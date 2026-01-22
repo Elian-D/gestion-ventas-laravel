@@ -11,7 +11,7 @@ class ClientFilters extends QueryFilter
         return [
             'search'           => ClientSearchFilter::class,
             'estado_cliente'   => ClientBusinessStatusFilter::class,
-            'business_type'    => ClientBusinessFilter::class,
+            // 'business_type'    => ClientBusinessFilter::class,
         ];
     }
 }

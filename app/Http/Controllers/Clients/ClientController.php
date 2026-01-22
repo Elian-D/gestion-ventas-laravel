@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Clients;
 
 use App\Exports\Clients\ClientsTemplateExport;
 use App\Models\Clients\Client;
-use App\Models\Clients\BusinessType;
+// use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
@@ -76,7 +76,7 @@ class ClientController extends Controller
 
         
         $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
-        $tiposNegocio = BusinessType::select('id', 'nombre')->get();
+        // $tiposNegocio = BusinessType::select('id', 'nombre')->get();
 
         if ($request->ajax()) {
             return view('clients.partials.table', compact(
@@ -92,7 +92,7 @@ class ClientController extends Controller
         return view('clients.index', compact(
         'clients', 
         'estadosClientes', 
-        'tiposNegocio', 
+        // 'tiposNegocio', 
         'states',
         'allColumns', 
         'visibleColumns', 
