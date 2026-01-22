@@ -72,14 +72,6 @@ class Client extends Model
     }
 
     /**
-     * Atajo para saber si el cliente puede realizar operaciones financieras
-     */
-    public function getPuedeOperarAttribute(): bool
-    {
-        return $this->estadoCliente->puedeOperar();
-    }
-
-    /**
      * Retorna la sigla o nombre del identificador fiscal real del cliente.
      * Ejemplo: "RNC", "Cédula", "DNI", etc.
      */

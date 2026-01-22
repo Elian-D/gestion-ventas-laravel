@@ -14,71 +14,41 @@ class EstadosCliente extends Model
 
     protected $fillable = [
         'nombre',
+        'client_state_category_id',
         'activo',
-        'permite_operar',
-        'permite_facturar',
         'clase_fondo',
         'clase_texto',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
-        'permite_operar' => 'boolean',
-        'permite_facturar' => 'boolean',
     ];
 
     /* ===========================
-     |  SCOPES DEL CATÁLOGO
+     |  RELACIONES
      =========================== */
 
-    // Estados utilizables
+    public function categoria()
+    {
+        return $this->belongsTo(ClientStateCategory::class, 'client_state_category_id');
+    }
+
+    /* ===========================
+     |  SCOPES DE CATÁLOGO
+     =========================== */
+
     public function scopeActivos($query)
     {
         return $query->where('activo', true);
     }
 
-    // Estados deshabilitados
     public function scopeInactivos($query)
     {
         return $query->where('activo', false);
     }
 
-    // Scope flexible por estado (activo/inactivo)
-    public function scopeFiltrarPorEstado($query, ?string $estado)
-    {
-        return match ($estado) {
-            'activo' => $query->activos(),
-            'inactivo' => $query->inactivos(),
-            default => $query,
-        };
-    }
-
-    /**
-     * Scope flexible por nombre del estado
-     * Ej: EstadosCliente::porNombre('Moroso')->first()
-     */
     public function scopePorNombre($query, string $nombre)
     {
         return $query->whereRaw('LOWER(nombre) = ?', [strtolower($nombre)]);
-    }
-
-    /* ===========================
-     |  COMPORTAMIENTO
-     =========================== */
-
-    public function toggleActivo(): void
-    {
-        $this->activo = ! $this->activo;
-        $this->save();
-    }
-
-    public function puedeOperar(): bool
-    {
-        return $this->activo && $this->permite_operar;
-    }
-
-    public function puedeFacturar(): bool
-    {
-        return $this->activo && $this->permite_facturar;
     }
 }

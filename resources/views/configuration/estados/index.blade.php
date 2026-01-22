@@ -105,18 +105,11 @@
                             </div>
                         </td>
                         
-                        {{-- COLUMNA 2: PERMISOS (Iconos siempre visibles) --}}
-                        <td class="block md:table-cell px-6 py-4 text-sm text-gray-600 w-full md:w-2/12">
-                            <div class="flex gap-4">
-                                <div class="flex items-center" title="Permite Operar">
-                                    <x-heroicon-s-cog-6-tooth class="w-4 h-4 {{ $estado->permite_operar ? 'text-blue-600' : 'text-gray-300' }}" />
-                                    <span class="ml-1 text-xs {{ $estado->permite_operar ? 'text-blue-700 font-medium' : 'text-gray-400' }}">Operar</span>
-                                </div>
-                                <div class="flex items-center" title="Permite Facturar">
-                                    <x-heroicon-s-credit-card class="w-4 h-4 {{ $estado->permite_facturar ? 'text-green-600' : 'text-gray-300' }}" />
-                                    <span class="ml-1 text-xs {{ $estado->permite_facturar ? 'text-green-700 font-medium' : 'text-gray-400' }}">Facturar</span>
-                                </div>
-                            </div>
+                        <td class="hidden md:table-cell px-6 py-4 w-2/12">
+                            <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-700">
+                                <x-heroicon-s-tag class="w-3.5 h-3.5" />
+                                {{ $estado->categoria->name ?? 'Sin categoría' }}
+                            </span>
                         </td>
 
                         {{-- COLUMNA 3: PREVIEW (Oculto en móvil) --}}
@@ -182,16 +175,19 @@
                     <x-text-input id="nombre" name="nombre" type="text" class="mt-1 block w-full" required />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" name="permite_operar" value="1" checked class="rounded text-indigo-600">
-                        <span class="ml-2 text-sm text-gray-700 font-medium">Permitir Operar</span>
-                    </label>
-                    <label class="flex items-center cursor-pointer">
-                        <input type="checkbox" name="permite_facturar" value="1" checked class="rounded text-indigo-600">
-                        <span class="ml-2 text-sm text-gray-700 font-medium">Permitir Facturar</span>
-                    </label>
+                <div>
+                    <x-input-label value="Categoría del Estado" />
+                    <select name="client_state_category_id" required
+                        class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Seleccione una categoría</option>
+                        @foreach($categorias as $categoria)
+                            <option value="{{ $categoria->id }}">
+                                {{ $categoria->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+
 
                 <div x-data="{ selectedColor: 'gray' }">
                     <x-input-label value="Color del Badge" class="mb-2" />
@@ -232,18 +228,19 @@
                     <x-text-input name="nombre" type="text" class="mt-1 block w-full" value="{{ $estado->nombre }}" required />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <label class="flex items-center">
-                        <input type="hidden" name="permite_operar" value="0">
-                        <input type="checkbox" name="permite_operar" value="1" {{ $estado->permite_operar ? 'checked' : '' }} class="rounded text-indigo-600">
-                        <span class="ml-2 text-sm text-gray-700 font-medium">Permitir Operar</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="hidden" name="permite_facturar" value="0">
-                        <input type="checkbox" name="permite_facturar" value="1" {{ $estado->permite_facturar ? 'checked' : '' }} class="rounded text-indigo-600">
-                        <span class="ml-2 text-sm text-gray-700 font-medium">Permitir Facturar</span>
-                    </label>
+                <div>
+                    <x-input-label value="Categoría del Estado" />
+                    <select name="client_state_category_id" required
+                        class="mt-1 block w-full rounded-md border-gray-300">
+                        @foreach($categorias as $categoria)
+                            <option value="{{ $categoria->id }}"
+                                {{ $estado->client_state_category_id === $categoria->id ? 'selected' : '' }}>
+                                {{ $categoria->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+
 
                 @php $currentColor = explode('-', $estado->clase_fondo)[1] ?? 'gray'; @endphp
                 <div x-data="{ selectedColor: '{{ $currentColor }}' }">

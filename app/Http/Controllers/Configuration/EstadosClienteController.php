@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Configuration\ClientStateCategory;
 
 class EstadosClienteController extends Controller
 {
@@ -27,28 +28,34 @@ class EstadosClienteController extends Controller
         ];
     }
     
-    /**
-     * Muestra el listado de estados de clientes con filtros y paginación
-     */
-    public function index(Request $request) {
-        // Obtener parámetros de búsqueda y filtro de estado de la solicitud
-        $search = $request->query('search'); 
-        $estadoFiltro = $request->query('estado'); // activo | inactivo | null 
 
-        // Construir query con filtros dinámicos, ordenar por nombre y paginar
+
+    public function index(Request $request)
+    {
+        $search = $request->query('search');
+        $estadoFiltro = $request->query('estado');
+
         $estados = EstadosCliente::query()
+            ->with('categoria') // 🔥 eager loading
             ->when($search, fn ($q) =>
                 $q->where('nombre', 'like', "%{$search}%")
             )
-            ->filtrarPorEstado($estadoFiltro)
             ->orderBy('nombre')
             ->paginate(10)
             ->withQueryString();
 
+        // ✅ contar una sola vez
+        $activosCount = EstadosCliente::activos()->count();
 
-        // Retornar vista con estados y parámetros de filtrado
-        return view('configuration.estados.index', compact('estados', 'search', 'estadoFiltro'));
+        // categorías para los modales
+        $categorias = ClientStateCategory::orderBy('name')->get();
+
+        return view(
+            'configuration.estados.index',
+            compact('estados', 'search', 'estadoFiltro', 'activosCount', 'categorias')
+        );
     }
+
 
 
 /**
@@ -58,9 +65,8 @@ class EstadosClienteController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|unique:estados_clientes,nombre',
+            'client_state_category_id' => 'required|exists:client_state_categories,id',
             'color_base' => ['required', 'string', Rule::in($this->allowedColors)],
-            'permite_operar' => 'required|boolean',
-            'permite_facturar' => 'required|boolean',
         ]);
 
 
@@ -68,9 +74,8 @@ class EstadosClienteController extends Controller
 
         $estado = EstadosCliente::create(array_merge([
             'nombre' => $request->nombre,
+            'client_state_category_id' => $request->client_state_category_id,
             'activo' => true,
-            'permite_operar' => $request->boolean('permite_operar'),
-            'permite_facturar' => $request->boolean('permite_facturar'),
         ], $styleClasses));
 
 
@@ -91,21 +96,15 @@ class EstadosClienteController extends Controller
                 'string',
                 Rule::unique('estados_clientes')->ignore($estado->id),
             ],
+            'client_state_category_id' => 'required|exists:client_state_categories,id',
             'color_base' => ['required', 'string', Rule::in($this->allowedColors)],
-            'permite_operar' => 'required|boolean',
-            'permite_facturar' => 'required|boolean',
         ]);
 
-        $data = [
+
+        $estado->update(array_merge([
             'nombre' => $request->nombre,
-            'permite_operar' => $request->boolean('permite_operar'),
-            'permite_facturar' => $request->boolean('permite_facturar'),
-        ];
-
-        $styleClasses = $this->buildStyleClasses($request->color_base);
-        $data = array_merge($data, $styleClasses);
-
-        $estado->update($data);
+            'client_state_category_id' => $request->client_state_category_id,
+        ], $this->buildStyleClasses($request->color_base)));
 
 
         // ... (redirección)
