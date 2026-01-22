@@ -43,15 +43,6 @@
                         </option>
                     @endforeach
                 </x-data-table.filter-select>
-
-<!--                 <x-data-table.filter-select label="Tipo de Negocio" name="business_type" formId="clients-filters">
-                    <option value="">Todos los tipos</option>
-                    @foreach($tiposNegocio as $tipo)
-                        <option value="{{ $tipo->id }}" @selected(request('business_type') == $tipo->id)>
-                            {{ $tipo->nombre }}
-                        </option>
-                    @endforeach
-                </x-data-table.filter-select> -->
             </x-data-table.filter-dropdown>
         </div>
 

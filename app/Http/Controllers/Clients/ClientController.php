@@ -76,7 +76,6 @@ class ClientController extends Controller
 
         
         $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
-        // $tiposNegocio = BusinessType::select('id', 'nombre')->get();
 
         if ($request->ajax()) {
             return view('clients.partials.table', compact(
@@ -92,7 +91,6 @@ class ClientController extends Controller
         return view('clients.index', compact(
         'clients', 
         'estadosClientes', 
-        // 'tiposNegocio', 
         'states',
         'allColumns', 
         'visibleColumns', 
