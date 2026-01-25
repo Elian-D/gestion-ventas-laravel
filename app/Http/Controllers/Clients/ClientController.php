@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Clients;
 
 use App\Exports\Clients\ClientsTemplateExport;
 use App\Models\Clients\Client;
-// use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
@@ -16,8 +15,10 @@ use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\Clients\ClientsExport;
+use App\Http\Requests\Clients\BulkClientRequest;
 use App\Imports\ClientsImport;
 use App\Services\Client\ClientCatalogService;
+use App\Services\Client\ClientService;
 use App\Tables\ClientTable;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -70,61 +71,31 @@ class ClientController extends Controller
     /**
      * Acciones masivas
      */
-    public function bulk(Request $request)
+    public function bulk(BulkClientRequest $request, ClientService $clientService)
     {
-        $allowedActions = ['delete', 'change_status', 'change_geo_state'];
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:clients,id',
-            'action' => 'required|in:' . implode(',', $allowedActions),
-            'value' => 'nullable'
-        ]);
-
-        $ids = $request->ids;
-        $action = $request->action;
-        $value = $request->value;
-
-        $count = count($ids);
-
-        $actionLabel = match ($action) {
-            'delete'     => 'eliminado',
-            'change_status' => 'actualizado el estado',
-            'change_geo_state' => 'actualizado la ubicación',
-            default => throw new \Exception("Acción desconocida para la etiqueta: " . $request->action),
-        };
-
         try {
+            $count = $clientService->performBulkAction(
+                $request->ids, 
+                $request->action, 
+                $request->value
+            );
 
-            DB::transaction(function () use ($ids, $action, $value) {
-                $query = Client::whereIn('id', $ids);
+            $label = $clientService->getActionLabel($request->action);
+            $message = "Se han {$label} correctamente {$count} registros.";
 
-                match ($action) {
-                    'delete'     => $query->delete(),
-                    'change_status' => $query->update(['estado_cliente_id' => $value]),
-                    'change_geo_state' => $query->update(['state_id' => $value]),
-                    default => throw new \Exception("Acción no permitida"),
-                };
-
-            });
-
-            // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
-            $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
-            session()->flash('success', $mensaje);
+            session()->flash('success', $message);
 
             return response()->json([
-                'success' => true, 
-                'message' => $mensaje
+                'success' => true,
+                'message' => $message
             ]);
-            
+
         } catch (\Exception $e) {
-            // Logueamos el error real para nosotros
-            Log::error("Error en acción masiva: " . $e->getMessage());
-            
-            // Enviamos un mensaje amigable al usuario
+            Log::error("Error en acción masiva de clientes: " . $e->getMessage());
+
             return response()->json([
-                'success' => false, 
-                'message' => 'No se pudo completar la operación. Verifique las restricciones de los registros.'
+                'success' => false,
+                'message' => 'No se pudo completar la operación masiva.'
             ], 422);
         }
     }
