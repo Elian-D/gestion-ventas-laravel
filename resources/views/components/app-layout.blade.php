@@ -114,7 +114,7 @@
                 
                 {{-- CONTENIDO VARIABLE --}}
                 {{-- AÑADIDO: Se añade el margen solo en PC y lo controla x-data para compensar el sidebar. --}}
-                <main class="p-6 transition-all duration-300 w-full overflow-x-hidden">
+                <main class="p-6 transition-all duration-300 w-full">
                     {{ $slot }}
                 </main>
 
