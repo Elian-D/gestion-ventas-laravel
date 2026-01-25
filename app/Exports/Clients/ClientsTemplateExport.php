@@ -17,8 +17,9 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 'Pérez Servicios', 
                 'juan@example.com', 
                 '809-000-0000', 
-                'Monseñor Nouel', // Asegúrate que este nombre exista en tu DB
+                'Monseñor Nouel',
                 'Bonao', 
+                'Av. Libertad #123',
                 'Cédula de Identidad y Electoral', 
                 '001-0000000-0', 
                 'Activo'
@@ -31,6 +32,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
                 '809-555-5555', 
                 'La Vega', 
                 'La Vega', 
+                'Calle Principal #456',
                 'Registro Nacional del Contribuyente', 
                 '130123456', 
                 'Prospecto'
@@ -42,7 +44,7 @@ class ClientsTemplateExport implements FromCollection, WithHeadings, ShouldAutoS
     {
         return [
             'tipo', 'nombre_o_razon_social', 'nombre_comercial', 'email', 
-            'telefono', 'provincia_estado', 'ciudad', 'tipo_identificacion', 
+            'telefono', 'provincia_estado', 'ciudad', 'direccion', 'tipo_identificacion', 
             'rnc_cedula', 'estado_cliente'
         ];
     }

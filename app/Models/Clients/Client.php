@@ -24,6 +24,7 @@ class Client extends Model
         'phone',
         'state_id',
         'city',
+        'address',
         'tax_identifier_type_id',
         'tax_id',
     ];

@@ -31,6 +31,8 @@ return new class extends Migration
             // Ubicación del cliente (geográfica, país heredado)
             $table->unsignedMediumInteger('state_id');
             $table->string('city', 100);
+            $table->string('address')->nullable();
+
 
             // Identificación fiscal
             $table->foreignId('tax_identifier_type_id')

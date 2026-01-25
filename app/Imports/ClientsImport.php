@@ -23,10 +23,16 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
     private static $initialized = false;
     private static $firstChunk = true;
 
-    const EXPECTED_HEADERS = [
+    // Columnas que el sistema NECESITA para procesar
+    const REQUIRED_HEADERS = [
         'tipo', 'nombre_o_razon_social', 'nombre_comercial', 'email', 'telefono',
-        'provincia_estado', 'ciudad', 'tipo_identificacion', 'rnc_cedula',
+        'provincia_estado', 'ciudad', 'direccion', 'tipo_identificacion', 'rnc_cedula',
         'estado_cliente',
+    ];
+
+    // Columnas que el sistema IGNORARÁ si vienen en el archivo (del export)
+    const IGNORED_HEADERS = [
+        'fecha_registro', 'ultima_actualizacion'
     ];
 
     public function __construct()
@@ -48,7 +54,6 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
 
     public function collection(Collection $rows)
     {
-        // Validar headers solo una vez
         if (self::$firstChunk && $rows->isNotEmpty()) {
             $this->validateHeaders($rows->first());
             self::$firstChunk = false;
@@ -74,6 +79,7 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
                 'phone'                  => $row['telefono'] ?? null,
                 'state_id'               => self::$states[$row['provincia_estado']] ?? null,
                 'city'                   => $row['ciudad'],
+                'address'                => $row['direccion'] ?? null,
                 'tax_identifier_type_id' => self::$taxTypes[$row['tipo_identificacion']] ?? null,
                 'tax_id'                 => $taxId,
                 'updated_at'             => now(),
@@ -82,19 +88,16 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
         }
 
         if (!empty($dataToUpsert)) {
-            // ✅ OPTIMIZACIÓN CRÍTICA: Usar transacción y deshabilitar checks temporalmente
             DB::transaction(function () use ($dataToUpsert) {
-                // Desactivar verificaciones FK temporalmente
                 DB::statement('SET FOREIGN_KEY_CHECKS=0');
                 
                 Client::upsert(
                     $dataToUpsert,
-                    ['tax_id'],
+                    ['tax_id'], // Clave única para decidir si inserta o actualiza
                     ['type', 'estado_cliente_id', 'name', 'commercial_name', 'email', 
-                    'phone', 'state_id', 'city', 'tax_identifier_type_id', 'updated_at']
+                     'phone', 'state_id', 'city', 'address', 'tax_identifier_type_id', 'updated_at']
                 );
                 
-                // Reactivar verificaciones
                 DB::statement('SET FOREIGN_KEY_CHECKS=1');
             });
         }
@@ -104,23 +107,21 @@ class ClientsImport implements ToCollection, WithHeadingRow, WithChunkReading, S
     {
         $fileHeaders = array_keys($firstRow->toArray());
 
-        $missing = array_diff(self::EXPECTED_HEADERS, $fileHeaders);
+        // 1. Validar que no falte ninguna columna obligatoria
+        $missing = array_diff(self::REQUIRED_HEADERS, $fileHeaders);
         if (!empty($missing)) {
             throw ValidationException::withMessages([
-                'file' => "Faltan columnas: " . implode(', ', $missing)
+                'file' => "Faltan columnas obligatorias: " . implode(', ', $missing)
             ]);
         }
 
-        $extra = array_diff($fileHeaders, self::EXPECTED_HEADERS);
-        if (!empty($extra)) {
-            throw ValidationException::withMessages([
-                'file' => "Columnas adicionales: " . implode(', ', $extra)
-            ]);
-        }
+        // 2. Validar si hay columnas extra que NO están ni en obligatorias ni en ignoradas
+        $allAllowed = array_merge(self::REQUIRED_HEADERS, self::IGNORED_HEADERS);
+        $unknown = array_diff($fileHeaders, $allAllowed);
 
-        if ($fileHeaders !== self::EXPECTED_HEADERS) {
+        if (!empty($unknown)) {
             throw ValidationException::withMessages([
-                'file' => "Orden incorrecto de columnas."
+                'file' => "El archivo contiene columnas no reconocidas: " . implode(', ', $unknown)
             ]);
         }
     }

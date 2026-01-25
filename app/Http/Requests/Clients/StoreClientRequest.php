@@ -24,6 +24,7 @@ class StoreClientRequest extends FormRequest
             'estado_cliente_id'      => 'required|exists:estados_clientes,id',
             'state_id'               => 'required|exists:states,id',
             'city'                   => 'required|string|max:100',
+            'address'                => 'nullable|string|max:500',
             'tax_identifier_type_id' => 'required|exists:tax_identifier_types,id',
             'tax_id'                 => 'required|string|max:50', 
         ];
