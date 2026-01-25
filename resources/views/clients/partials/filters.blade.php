@@ -35,6 +35,7 @@
         <div class="flex items-center gap-2">
             <x-data-table.per-page-selector formId="clients-filters" />
             <x-data-table.filter-dropdown>
+
                 <x-data-table.filter-select label="Estado del Cliente" name="estado_cliente" formId="clients-filters">
                     <option value="">Todos los estados</option>
                     @foreach($estadosClientes as $estado)
@@ -43,6 +44,34 @@
                         </option>
                     @endforeach
                 </x-data-table.filter-select>
+
+                {{-- Filtro de Ubicación --}}
+                <x-data-table.filter-select label="Provincia/Estado" name="state" formId="clients-filters">
+                    <option value="">Todas las ubicaciones</option>
+                    @foreach($states as $state)
+                        <option value="{{ $state->id }}" @selected(request('state') == $state->id)>
+                            {{ $state->name }}
+                        </option>
+                    @endforeach
+                </x-data-table.filter-select>
+
+                {{-- Filtro de Tipo de Cliente --}}
+                <x-data-table.filter-select label="Tipo de Persona" name="type" formId="clients-filters">
+                    <option value="">Todos los tipos</option>
+                    <option value="física" @selected(request('type') == 'física')>Persona Física</option>
+                    <option value="jurídica" @selected(request('type') == 'jurídica')>Persona Jurídica</option>
+                </x-data-table.filter-select>
+
+                {{-- Filtro de Tipo de Identificador --}}
+                <x-data-table.filter-select label="Tipo Identificador" name="tax_type" formId="clients-filters">
+                    <option value="">Todos los documentos</option>
+                    @foreach($taxIdentifierTypes as $taxType)
+                        <option value="{{ $taxType->id }}" @selected(request('tax_type') == $taxType->id)>
+                            {{ $taxType->name }}
+                        </option>
+                    @endforeach
+                </x-data-table.filter-select>
+
             </x-data-table.filter-dropdown>
         </div>
 

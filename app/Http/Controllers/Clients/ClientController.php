@@ -77,6 +77,13 @@ class ClientController extends Controller
         
         $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
 
+        $taxIdentifierTypes = $countryId 
+                ? TaxIdentifierType::byCountry($countryId)
+                    ->select('id', 'code', 'name')
+                    ->orderBy('name')
+                    ->get() 
+                : collect();
+
         if ($request->ajax()) {
             return view('clients.partials.table', compact(
                 'clients',
@@ -90,7 +97,8 @@ class ClientController extends Controller
 
         return view('clients.index', compact(
         'clients', 
-        'estadosClientes', 
+        'estadosClientes',
+        'taxIdentifierTypes', 
         'states',
         'allColumns', 
         'visibleColumns', 
