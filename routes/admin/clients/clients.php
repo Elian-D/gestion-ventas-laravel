@@ -47,15 +47,15 @@ Route::group([], function () {
         ->name('destroy');
 
     // Gestión de Papelera (Soft Deletes Trait)
-    Route::get('/eliminados', [ClientController::class, 'eliminados'])
+    Route::get('/eliminados', [ClientController::class, 'eliminadas'])
         ->middleware('permission:clients restore')
         ->name('eliminados');
 
-    Route::patch('/{id}/restaurar', [ClientController::class, 'restore'])
+    Route::patch('/{id}/restaurar', [ClientController::class, 'restaurar'])
         ->middleware('permission:clients restore')
         ->name('restore');
 
-    Route::delete('/{id}/forzar-eliminacion', [ClientController::class, 'forceDelete'])
+    Route::delete('/{id}/forzar-eliminacion', [ClientController::class, 'borrarDefinitivo'])
         ->middleware('permission:clients delete')
-        ->name('force-delete');
+        ->name('borrarDefinitivo');
 });
