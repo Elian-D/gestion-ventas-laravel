@@ -56,11 +56,9 @@
                 </x-data-table.filter-select>
 
                 {{-- Filtro de Tipo de Cliente --}}
-                <x-data-table.filter-select label="Tipo de Persona" name="type" formId="clients-filters">
-                    <option value="">Todos los tipos</option>
-                    <option value="física" @selected(request('type') == 'física')>Persona Física</option>
-                    <option value="jurídica" @selected(request('type') == 'jurídica')>Persona Jurídica</option>
-                </x-data-table.filter-select>
+                <x-data-table.filter-toggle label="Tipo de Persona" name="type" 
+                    :options="['' => 'Todos', 'individual' => 'Física', 'company' => 'Jurídica']" formId="clients-filters" />
+
 
                 {{-- Filtro de Tipo de Identificador --}}
                 <x-data-table.filter-select label="Tipo Identificador" name="tax_type" formId="clients-filters">
