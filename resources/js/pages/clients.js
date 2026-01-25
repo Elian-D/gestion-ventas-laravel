@@ -31,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: 'Indentificador Fiscal',
                 source: 'tax_type'
             },
+            from_date: {
+                label: 'Creado desde',
+            },
+            to_date: {
+                label: 'Creado hasta',
+            },
             search: {
                 label: 'Búsqueda'
             }
