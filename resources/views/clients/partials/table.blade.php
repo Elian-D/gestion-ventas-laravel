@@ -116,4 +116,4 @@
         </tr>
     @endforelse
 </x-data-table>
-@include('clients.modals')
+@include('clients.partials.modals')
