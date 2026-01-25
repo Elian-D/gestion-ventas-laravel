@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PermissionSeeder\ConfigPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\GeographyPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\ClientPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\POSPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
 
