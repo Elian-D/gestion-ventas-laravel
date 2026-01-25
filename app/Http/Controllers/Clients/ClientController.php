@@ -17,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\Clients\ClientsExport;
 use App\Imports\ClientsImport;
+use App\Services\Client\ClientCatalogService;
+use App\Tables\ClientTable;
 use Maatwebsite\Excel\Facades\Excel;
 
 use Maatwebsite\Excel\Validators\ValidationException;
@@ -27,85 +29,42 @@ class ClientController extends Controller
 
 
 
-    public function index(Request $request)
+    public function index(Request $request, ClientCatalogService $catalogService)
     {
-        // Autorizamos que se pueden hacer bulk actions
-        $bulkActions = true;
-
-        $config = general_config();
-        $countryId = $config?->country_id;
-
-        $states = $countryId 
-                ? State::byCountry($countryId)
-                    ->select('id', 'name')
-                    ->orderBy('name')
-                    ->get() 
-                : collect();
-
-        $allColumns = [
-            'id'               => 'ID',
-            'name'             => 'Nombre Cliente',
-            'tax_identifier_types' => 'Tipo Identificador Fiscal',
-            'tax_id'           => 'Identificador Fiscal',
-            'type'             => 'Tipo de Cliente',
-            'email'            => 'Email',
-            'phone'            => 'Teléfono',
-            'city'             => 'Ciudad',
-            'state'            => 'Estado/Provincia',
-            'estado_cliente'   => 'Estado del Cliente',
-            'created_at'       => 'Fecha Creación',
-            'updated_at'       => 'Última Actualización'
-        ];
-        $defaultDesktop = ['id', 'name', 'tax_id', 'city', 'state', 'estado_cliente'];
-        $defaultMobile = ['id','name'];
-
-        $visibleColumns = $request->input('columns', $defaultDesktop);
+        // 1. Parámetros de UI
+        $visibleColumns = $request->input('columns', ClientTable::defaultDesktop());
         $perPage = $request->input('per_page', 10);
 
+        // 2. Ejecución del Pipeline de Filtros
         $clients = (new ClientFilters($request))
-            ->apply(
-                Client::query()
-                    ->with([
-                        'estadoCliente:id,nombre,clase_fondo,clase_texto',
-                        'state:id,name',
-                        'taxIdentifierType:id,name,code',
-                    ])
-            )
+            ->apply(Client::query()->withIndexRelations())
             ->paginate($perPage)
             ->withQueryString();
 
-        
-        $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
-
-        $taxIdentifierTypes = $countryId 
-                ? TaxIdentifierType::byCountry($countryId)
-                    ->select('id', 'code', 'name')
-                    ->orderBy('name')
-                    ->get() 
-                : collect();
-
+        // 3. Respuesta AJAX (Solo la tabla)
         if ($request->ajax()) {
-            return view('clients.partials.table', compact(
-                'clients',
-                'allColumns',
-                'visibleColumns',
-                'defaultDesktop',
-                'defaultMobile',
-                'bulkActions'
-                ))->render();
+            return view('clients.partials.table', [
+                'clients'        => $clients,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => ClientTable::allColumns(),
+                'defaultDesktop' => ClientTable::defaultDesktop(),
+                'defaultMobile'  => ClientTable::defaultMobile(),
+                'bulkActions'    => true,
+            ])->render();
         }
 
-        return view('clients.index', compact(
-        'clients', 
-        'estadosClientes',
-        'taxIdentifierTypes', 
-        'states',
-        'allColumns', 
-        'visibleColumns', 
-        'defaultDesktop',
-        'defaultMobile',
-        'bulkActions'
-    ));
+        // 4. Respuesta Vista Completa
+        return view('clients.index', array_merge(
+            [
+                'clients'        => $clients,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => ClientTable::allColumns(),
+                'defaultDesktop' => ClientTable::defaultDesktop(),
+                'defaultMobile'  => ClientTable::defaultMobile(),
+                'bulkActions'    => true,
+            ],
+            $catalogService->getForFilters() // Inyecta states, taxIdentifierTypes, etc.
+        ));
     }
 
     /**

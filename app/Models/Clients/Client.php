@@ -97,4 +97,17 @@ class Client extends Model
 
         return $default?->code ?? 'ID Fiscal';
     }
+
+    /* ===========================
+    |      SCOPES
+    =========================== */
+
+    public function scopeWithIndexRelations($query)
+{
+    return $query->with([
+        'estadoCliente:id,nombre,clase_fondo,clase_texto',
+        'state:id,name',
+        'taxIdentifierType:id,name,code',
+    ]);
+}
 }
