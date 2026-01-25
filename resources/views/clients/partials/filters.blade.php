@@ -34,7 +34,23 @@
 
         <div class="flex items-center gap-2">
             <x-data-table.per-page-selector formId="clients-filters" />
+
             <x-data-table.filter-dropdown>
+
+                {{-- Filtro de Tipo de Cliente --}}
+                <x-data-table.filter-toggle label="Tipo de Cliente" name="type" 
+                    :options="['' => 'Todos', 'individual' => 'Individuales', 'company' => 'Empresas']" formId="clients-filters" />
+
+
+                {{-- Filtro de Tipo de Identificador --}}
+                <x-data-table.filter-select label="Tipo Identificador" name="tax_type" formId="clients-filters">
+                    <option value="">Todos los documentos</option>
+                    @foreach($taxIdentifierTypes as $taxType)
+                        <option value="{{ $taxType->id }}" @selected(request('tax_type') == $taxType->id)>
+                            {{ $taxType->name }}
+                        </option>
+                    @endforeach
+                </x-data-table.filter-select>
 
                 <x-data-table.filter-select label="Estado del Cliente" name="estado_cliente" formId="clients-filters">
                     <option value="">Todos los estados</option>
@@ -55,20 +71,10 @@
                     @endforeach
                 </x-data-table.filter-select>
 
-                {{-- Filtro de Tipo de Cliente --}}
-                <x-data-table.filter-toggle label="Tipo de Persona" name="type" 
-                    :options="['' => 'Todos', 'individual' => 'Física', 'company' => 'Jurídica']" formId="clients-filters" />
-
-
-                {{-- Filtro de Tipo de Identificador --}}
-                <x-data-table.filter-select label="Tipo Identificador" name="tax_type" formId="clients-filters">
-                    <option value="">Todos los documentos</option>
-                    @foreach($taxIdentifierTypes as $taxType)
-                        <option value="{{ $taxType->id }}" @selected(request('tax_type') == $taxType->id)>
-                            {{ $taxType->name }}
-                        </option>
-                    @endforeach
-                </x-data-table.filter-select>
+                <x-data-table.filter-date-range 
+                    label="Fecha de Registro" 
+                    formId="clients-filters" 
+                />
 
             </x-data-table.filter-dropdown>
         </div>
