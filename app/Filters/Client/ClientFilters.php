@@ -13,7 +13,9 @@ class ClientFilters extends QueryFilter
             'estado_cliente'   => ClientBusinessStatusFilter::class,
             'state'          => ClientStateFilter::class,        
             'type'           => ClientTypeFilter::class,         
-            'tax_type'       => ClientTaxIdentifierFilter::class 
+            'tax_type'       => ClientTaxIdentifierFilter::class,
+            'from_date' => ClientDateFilter::class,
+            'to_date'   => ClientDateFilter::class,
         ];
     }
 }
