@@ -26,7 +26,6 @@ class POSService
             match ($action) {
                 'delete'           => $query->delete(),
                 'change_active'    => $query->update(['active' => $value]),
-                'change_type'      => $query->update(['business_type_id' => $value]),
                 'change_geo_state' => $query->update(['state_id' => $value]),
                 'change_client'    => $query->update(['client_id' => $value]),
                 default => throw new \InvalidArgumentException("Acción no soportada"),
@@ -41,7 +40,6 @@ class POSService
         return match ($action) {
             'delete'           => 'eliminado',
             'change_active'    => 'actualizado el estado operativo',
-            'change_type'      => 'actualizado el tipo de negocio',
             'change_geo_state' => 'actualizado la ubicación',
             'change_client'    => 'actualizado el cliente asociado',
             default            => 'procesado',

@@ -15,7 +15,7 @@ class StorePointOfSaleRequest extends FormRequest
     {
         return [
             'client_id'        => 'required|exists:clients,id',
-            'business_type_id' => 'required|exists:business_types,id',
+            'business_type_id' => 'prohibited',
             'name'             => 'required|string|max:150',
             'state_id'         => 'required|exists:states,id',
             'city'             => 'required|string|max:100',

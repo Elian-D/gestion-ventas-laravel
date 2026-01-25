@@ -13,7 +13,7 @@ class BulkPointOfSaleRequest extends FormRequest
         return [
             'ids'    => 'required|array',
             'ids.*'  => 'exists:point_of_sales,id',
-            'action' => 'required|in:delete,change_active,change_type,change_geo_state,change_client',
+            'action' => 'required|in:delete,change_active,change_geo_state,change_client',
             'value'  => 'nullable'
         ];
     }

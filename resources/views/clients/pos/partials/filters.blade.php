@@ -10,16 +10,9 @@
             [
                 'id' => 'change_active',
                 'type' => 'select', 
-                'label' => 'Estado Op.', 
+                'label' => 'Estado Operativo', 
                 'icon' => 'heroicon-s-check-circle',
                 'options' => [['id' => '1', 'label' => 'Activar'], ['id' => '0', 'label' => 'Desactivar']]
-            ],
-            [
-                'id' => 'change_type',
-                'type' => 'select', 
-                'label' => 'Tipo Negocio', 
-                'icon' => 'heroicon-s-briefcase',
-                'options' => $businessTypes->map(fn($t) => ['id' => $t->id, 'label' => $t->nombre])
             ],
             [
                 'id' => 'change_client',
