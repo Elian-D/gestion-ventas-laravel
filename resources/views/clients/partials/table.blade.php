@@ -55,12 +55,17 @@
                 </td>
             @endif
 
+            @if(in_array('state', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-600">{{ $client->state->name ?? '—' }}</td>
+            @endif
+            
             @if(in_array('city', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-gray-700">{{ $client->city }}</td>
             @endif
 
-            @if(in_array('state', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-600">{{ $client->state->name ?? '—' }}</td>
+
+            @if(in_array('address', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-600">{{ $client->address ?? '—' }}</td>
             @endif
 
             @if(in_array('estado_cliente', $visibleColumns))

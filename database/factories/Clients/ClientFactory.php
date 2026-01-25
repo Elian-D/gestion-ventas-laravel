@@ -49,6 +49,7 @@ class ClientFactory extends Factory
                 ->value('id') ?? 1,
 
             'city' => fake()->city(),
+            'address' => fake()->address(),
 
             // 👇 Usando helper para filtrar por país
             'tax_identifier_type_id' => TaxIdentifierType::query()

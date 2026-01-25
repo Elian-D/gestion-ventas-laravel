@@ -44,7 +44,7 @@ class ClientsExport implements
         return $this->query
             ->select([
                 'id', 'type', 'name', 'commercial_name', 'email', 'phone',
-                'state_id', 'city', 'tax_identifier_type_id', 'tax_id',
+                'state_id', 'city', 'address', 'tax_identifier_type_id', 'tax_id',
                 'estado_cliente_id', 'created_at', 'updated_at'
             ])
             ->withoutGlobalScopes() // Desactiva scopes globales si tienes
@@ -55,7 +55,7 @@ class ClientsExport implements
     {
         return [
             'tipo', 'nombre_o_razon_social', 'nombre_comercial', 'email', 
-            'telefono', 'provincia_estado', 'ciudad', 'tipo_identificacion', 
+            'telefono', 'provincia_estado', 'ciudad', 'direccion', 'tipo_identificacion', 
             'rnc_cedula', 'estado_cliente', 'fecha_registro', 'ultima_actualizacion'
         ];
     }
@@ -73,6 +73,7 @@ class ClientsExport implements
             $data['phone'] ?? '',
             $this->statesCache[$data['state_id']] ?? '',
             $data['city'],
+            $data['address'] ?? '',
             $this->taxTypesCache[$data['tax_identifier_type_id']] ?? '',
             $data['tax_id'],
             $this->estadosCache[$data['estado_cliente_id']] ?? '',
@@ -85,8 +86,8 @@ class ClientsExport implements
     {
         return [
             'A' => 12, 'B' => 35, 'C' => 30, 'D' => 30, 'E' => 15,
-            'F' => 20, 'G' => 20, 'H' => 18, 'I' => 15, 'J' => 18,
-            'K' => 20, 'L' => 20,
+            'F' => 20, 'G' => 20, 'H' => 40, 'I' => 15, 'J' => 18,
+            'K' => 20, 'L' => 20, 'M' => 20,
         ];
     }
 
