@@ -14,8 +14,9 @@ class ClientTable
             'type'                 => 'Tipo de Cliente',
             'email'                => 'Email',
             'phone'                => 'Teléfono',
-            'city'                 => 'Ciudad',
             'state'                => 'Estado/Provincia',
+            'city'                 => 'Ciudad',
+            'address'              => 'Dirección',
             'estado_cliente'       => 'Estado del Cliente',
             'created_at'           => 'Fecha Creación',
             'updated_at'           => 'Última Actualización'
@@ -24,7 +25,7 @@ class ClientTable
 
     public static function defaultDesktop(): array
     {
-        return ['id', 'name', 'tax_id', 'city', 'state', 'estado_cliente'];
+        return ['id', 'name', 'tax_identifier_types','tax_id', 'estado_cliente'];
     }
 
     public static function defaultMobile(): array

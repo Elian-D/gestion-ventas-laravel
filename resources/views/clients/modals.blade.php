@@ -70,7 +70,7 @@
                             <x-heroicon-s-map-pin class="w-4 h-4"/> Dirección
                         </h4>
                         <p class="text-sm text-gray-700 leading-relaxed italic">
-                            {{ $client->city }}, {{ $client->state->name }}.
+                            {{ $client->address }}, {{ $client->city }}, {{ $client->state->name }}.
                         </p>
                     </div>
                 </div>

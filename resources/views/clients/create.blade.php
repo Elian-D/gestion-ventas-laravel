@@ -28,16 +28,28 @@
                             <x-input-label value="Nombre Completo / Razón Social" />
                             <x-text-input name="name" class="w-full mt-1" :value="old('name', $client->name ?? '')" required />
                         </div>
-                        <div class="md:col-span-2">
-                            <x-input-label value="RNC / Cédula" />
-                            <x-text-input name="tax_id" class="w-full mt-1" :value="old('tax_id', $client->tax_id ?? '')" />
-                        </div>
+<div class="md:col-span-2">
+    <x-input-label value="Número de Identificador Fiscal" />
+    <x-text-input name="tax_id" class="w-full mt-1" />
+</div>
                         <div class="md:col-span-3">
                             <x-input-label value="Tipo de Cliente" />
                             <select name="type" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
                                 <option value="individual" {{ (isset($client) && $client->type == 'individual') ? 'selected' : '' }}>Persona Física</option>
                                 <option value="company" {{ (isset($client) && $client->type == 'company') ? 'selected' : '' }}>Empresa / Corporativo</option>
                             </select>
+                            <div class="md:col-span-2">
+    <x-input-label value="Tipo de Identificador Fiscal" />
+    <select name="tax_identifier_type_id"
+            class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500">
+        @foreach($taxIdentifierTypes as $type)
+            <option value="{{ $type->id }}">
+                {{ $type->code }} – {{ $type->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
                         </div>
                         <div class="md:col-span-3">
                             <x-input-label value="Estado de Cliente (Operativo)" />
