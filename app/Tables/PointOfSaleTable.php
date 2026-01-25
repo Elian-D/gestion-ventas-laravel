@@ -13,10 +13,11 @@ class PointOfSaleTable
             'business_type_id'=> 'Tipo Negocio',
             'state_id'        => 'Provincia',
             'city'            => 'Ciudad',
-            'address'         => 'Dirección',
             'contact_name'    => 'Contacto',
             'contact_phone'   => 'Teléfono Contacto',
             'active'          => 'Estado',
+            'created_at'      => 'Fecha Creación',
+            'updated_at'      => 'Última Actualización'
         ];
     }
 
@@ -27,6 +28,6 @@ class PointOfSaleTable
 
     public static function defaultMobile(): array
     {
-        return ['code', 'name', 'active'];
+        return ['code', 'name'];
     }
 }

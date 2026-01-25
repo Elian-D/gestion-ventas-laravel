@@ -106,7 +106,7 @@ class PointOfSale extends Model
     public function scopeWithIndexRelations($query)
     {
         return $query->with([
-            'client:id,name,commercial_name',
+            'client:id,name,commercial_name,tax_id',
             'businessType:id,nombre',
             'state:id,name',
         ]);
