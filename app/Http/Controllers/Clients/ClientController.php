@@ -7,16 +7,15 @@ use App\Models\Clients\Client;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
-use App\Models\Configuration\TaxIdentifierType;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\Clients\ClientsExport;
 use App\Http\Requests\Clients\BulkClientRequest;
 use App\Http\Requests\Clients\StoreClientRequest;
+use App\Http\Requests\Clients\UpdateClientRequest;
 use App\Imports\ClientsImport;
 use App\Services\Client\ClientCatalogService;
 use App\Services\Client\ClientService;
@@ -161,16 +160,10 @@ class ClientController extends Controller
     /**
      * Mostrar formulario de creación
      */
-    public function create()
+    public function create(ClientCatalogService $catalogService)
     {
-        $config = general_config();
-        $estados = EstadosCliente::activos()->get();
-        $states = State::orderBy('name')->get();
-        $types = ['individual' => 'Persona Física', 'company' => 'Empresa / Jurídica'];
-        // Pasamos el tax_label por defecto basado en la config
-    $defaultTaxLabel = $config->taxIdentifierType->code ?? 'Tax ID';
 
-        return view('clients.create', compact('estados', 'states', 'types', 'defaultTaxLabel'));
+        return view('clients.create', $catalogService->getForForm());
     }
 
     /**
@@ -189,33 +182,22 @@ class ClientController extends Controller
     /**
      * Mostrar formulario de edición
      */
-    public function edit(Client $client)
+    public function edit(Client $client, ClientCatalogService $catalogService)
     {
-        $estados = EstadosCliente::activos()->get();
-        $states = State::orderBy('name')->get();
-        $types = ['individual' => 'Persona Física', 'company' => 'Empresa / Jurídica'];
 
-        return view('clients.edit', compact('client', 'estados', 'states', 'types'));
+        return view('clients.edit', array_merge(
+            ['client' => $client],
+            $catalogService->getForForm() // Reutiliza la misma lógica de estados, países e IDs
+        ));
     }
 
     /**
      * Actualizar cliente
      */
-    public function update(Request $request, Client $client)
+    public function update(UpdateClientRequest $request, Client $client, ClientService $clientService)
     {
-        $data = $request->validate([
-            'type' => ['required', Rule::in(['individual', 'company'])],
-            'name' => 'required|string|max:255',
-            'commercial_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'estado_cliente_id' => 'required|exists:estados_clientes,id',
-            'state_id' => 'required|exists:states,id',
-            'city' => 'required|string|max:100',
-            'tax_id' => 'nullable|string|max:50',
-        ]);
-
-        $client->update($data);
+        // El Request ya autorizó y validó los datos
+        $clientService->updateClient($client, $request->validated());
 
         return redirect()
             ->route('clients.index')

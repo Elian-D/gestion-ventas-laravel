@@ -13,6 +13,11 @@ class ClientService
         return Client::create($data);
     }
 
+    public function updateClient(Client $client, array $data): bool
+    {
+        return $client->update($data);
+    }
+
     public function performBulkAction(array $ids, string $action, $value = null): int
     {
         return DB::transaction(function () use ($ids, $action, $value) {
