@@ -3,57 +3,49 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Clients\PointOfSaleController;
 
-Route::group(['prefix' => 'puntos-de-venta', 'as' => 'pos.'], function () {
+// Quitamos el prefix 'pos' de aquí porque el archivo se cargará 
+// dentro de un grupo que ya debería manejar la estructura.
+Route::group(['as' => 'pos.'], function () {
     
-    // Listado y AJAX
-    Route::get('/', [PointOfSaleController::class, 'index'])
-        ->middleware('permission:pos index')
-        ->name('index');
-
-    // Creación
-    Route::get('/crear', [PointOfSaleController::class, 'create'])
-        ->middleware('permission:pos create')
-        ->name('create');
-
-    Route::post('/', [PointOfSaleController::class, 'store'])
-        ->middleware('permission:pos create')
-        ->name('store');
-
-    // Edición
-    Route::get('/{pos}/editar', [PointOfSaleController::class, 'edit'])
-        ->middleware('permission:pos edit')
-        ->name('edit');
-
-    Route::put('/{pos}', [PointOfSaleController::class, 'update'])
-        ->middleware('permission:pos edit')
-        ->name('update');
-
-    // Acciones Masivas
-    Route::post('/bulk-action', [PointOfSaleController::class, 'bulk'])
-        ->middleware('permission:pos edit')
-        ->name('bulk');
-
-    // Import/Export
-    Route::get('/export', [PointOfSaleController::class, 'export'])->name('export');
-    Route::get('/import', [PointOfSaleController::class, 'showImportForm'])->name('import.view');
-    Route::post('/import', [PointOfSaleController::class, 'import'])->name('import.process');
-    Route::get('/import-template', [PointOfSaleController::class, 'downloadTemplate'])->name('template');
-
-    // Eliminación
-    Route::delete('/{pos}', [PointOfSaleController::class, 'destroy'])
-        ->middleware('permission:pos delete')
-        ->name('destroy');
-
-    // Papelera (Trait SoftDeletes)
-    Route::get('/eliminados', [PointOfSaleController::class, 'eliminadas'])
+    // 1. RUTAS ESTÁTICAS (Antes del resource para evitar conflictos con {pos})
+    Route::get('pos/eliminados', [PointOfSaleController::class, 'eliminadas'])
         ->middleware('permission:pos restore')
         ->name('eliminados');
 
-    Route::patch('/{id}/restaurar', [PointOfSaleController::class, 'restaurar'])
+    Route::get('pos/export', [PointOfSaleController::class, 'export'])
+        ->name('export');
+
+    Route::get('pos/import-template', [PointOfSaleController::class, 'downloadTemplate'])
+        ->name('template');
+
+    Route::get('pos/import', [PointOfSaleController::class, 'showImportForm'])
+        ->name('import.view');
+
+    Route::post('pos/import', [PointOfSaleController::class, 'import'])
+        ->name('import.process');
+
+    Route::post('pos/bulk-action', [PointOfSaleController::class, 'bulk'])
+        ->middleware('permission:pos edit')
+        ->name('bulk');
+
+    // 2. RESOURCE CON NOMBRE 'pos'
+    // Esto generará admin/clients/pos, admin/clients/pos/create, etc.
+    Route::resource('pos', PointOfSaleController::class)
+        ->parameters(['pos' => 'pos']) 
+        ->names([
+            'index'   => 'index',
+            'create'  => 'create',
+            'edit'    => 'edit',
+            'update'  => 'update',
+            'destroy' => 'destroy',
+        ]);
+
+    // 3. RUTAS CON IDs (Al final)
+    Route::patch('pos/{id}/restaurar', [PointOfSaleController::class, 'restaurar'])
         ->middleware('permission:pos restore')
         ->name('restore');
 
-    Route::delete('/{id}/forzar-eliminacion', [PointOfSaleController::class, 'borrarDefinitivo'])
+    Route::delete('pos/{id}/forzar-eliminacion', [PointOfSaleController::class, 'borrarDefinitivo'])
         ->middleware('permission:pos delete')
         ->name('borrarDefinitivo');
 });

@@ -36,10 +36,12 @@ class PointOfSaleController extends Controller
 
         // 3. Respuesta para peticiones AJAX (DataTable)
         if ($request->ajax()) {
-            return view('pos.partials.table', [
+            return view('clients.pos.partials.table', [
                 'pos'            => $pos,
                 'visibleColumns' => $visibleColumns,
                 'allColumns'     => PointOfSaleTable::allColumns(),
+                'defaultDesktop' => PointOfSaleTable::defaultDesktop(),
+                'defaultMobile'  => PointOfSaleTable::defaultMobile(),
                 'bulkActions'    => true,
             ])->render();
         }
@@ -73,17 +75,19 @@ class PointOfSaleController extends Controller
             $label = $posService->getActionLabel($request->action);
             $message = "Se han {$label} correctamente {$count} puntos de venta.";
 
-            if ($request->ajax()) {
-                return response()->json(['success' => true, 'message' => $message]);
-            }
+            session()->flash('success', $message);
 
-            return redirect()->back()->with('success', $message);
+            return response()->json([
+                'success' => true,
+                'message' => $message
+            ]);
 
         } catch (\Exception $e) {
-            Log::error("Error en bulk action POS: " . $e->getMessage());
+            Log::error("Error en acción masiva de pos: " . $e->getMessage());
+
             return response()->json([
-                'success' => false, 
-                'message' => 'Error al procesar la acción masiva.'
+                'success' => false,
+                'message' => 'No se pudo completar la operación masiva.'
             ], 422);
         }
     }
