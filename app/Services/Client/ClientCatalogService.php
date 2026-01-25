@@ -22,6 +22,29 @@ class ClientCatalogService
                 : collect(),
                 
             'estadosClientes' => EstadosCliente::select('id', 'nombre')->get(),
+            
+        ];
+    }
+
+    public function getForForm(): array
+    {
+        $config = general_config();
+        $countryId = $config?->country_id;
+
+        return [
+            'estados' => EstadosCliente::activos()->get(),
+            'types'   => [
+                'individual' => 'Persona Física', 
+                'company'    => 'Empresa / Jurídica'
+            ],
+            // Filtramos estados solo del país configurado
+            'states' => $countryId 
+                ? State::byCountry($countryId)->select('id', 'name')->orderBy('name')->get()
+                : collect(),
+            // Tipos de ID Fiscal (RNC, Cédula, etc.) del país
+            'taxIdentifierTypes' => $countryId 
+                ? TaxIdentifierType::byCountry($countryId)->select('id', 'code', 'name')->orderBy('name')->get()
+                : collect(),
         ];
     }
 }

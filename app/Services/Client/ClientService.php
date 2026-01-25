@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\DB;
 
 class ClientService
 {
+
+    public function createClient(array $data): Client
+    {
+        return Client::create($data);
+    }
+
     public function performBulkAction(array $ids, string $action, $value = null): int
     {
         return DB::transaction(function () use ($ids, $action, $value) {

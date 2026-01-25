@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\Clients\ClientsExport;
 use App\Http\Requests\Clients\BulkClientRequest;
+use App\Http\Requests\Clients\StoreClientRequest;
 use App\Imports\ClientsImport;
 use App\Services\Client\ClientCatalogService;
 use App\Services\Client\ClientService;
@@ -171,35 +172,14 @@ class ClientController extends Controller
 
         return view('clients.create', compact('estados', 'states', 'types', 'defaultTaxLabel'));
     }
-    
+
     /**
      * Almacenar nuevo cliente
      */
-    public function store(Request $request)
+    public function store(StoreClientRequest $request, ClientService $clientService)
     {
-        $config = general_config();
-        $data = $request->validate([
-            'type' => ['required', Rule::in(['individual', 'company'])],
-            'name' => 'required|string|max:255',
-            'commercial_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'estado_cliente_id' => 'required|exists:estados_clientes,id',
-            'state_id' => 'required|exists:states,id',
-            'city' => 'required|string|max:100',
-            'tax_id' => 'nullable|string|max:50',
-        ]);
-
-        $entityType = ($data['type'] === 'individual') ? 'person' : 'company';
-
-        $identifier = TaxIdentifierType::where('country_id', $config->country_id)
-        ->where(function($q) use ($entityType) {
-            $q->where('entity_type', $entityType)->orWhere('entity_type', 'both');
-        })->first();
-
-        $data['tax_identifier_type_id'] = $identifier?->id;
-        
-        $client = Client::create($data);
+        // El Request ya validó que el tax_identifier_type_id sea correcto
+        $client = $clientService->createClient($request->validated());
 
         return redirect()
             ->route('clients.index')
