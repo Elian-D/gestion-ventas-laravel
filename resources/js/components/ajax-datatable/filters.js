@@ -31,6 +31,7 @@ export const clearAllFilters = (ctx) => {
     ctx.form.querySelectorAll('input[type="text"], input[type="search"]').forEach(i => i.value = '');
     ctx.form.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
     ctx.form.querySelectorAll('input[type="radio"]').forEach(r => r.checked = (r.value === ''));
+    ctx.form.querySelectorAll('input[type="date"]').forEach(d => d.value = '');
 
     if (ctx.form.querySelector('[name="per_page"]')) ctx.form.querySelector('[name="per_page"]').value = currentPerPage;
     ctx.form.querySelectorAll('input[name="columns[]"]').forEach(cb => cb.checked = selectedCols.includes(cb.value));
