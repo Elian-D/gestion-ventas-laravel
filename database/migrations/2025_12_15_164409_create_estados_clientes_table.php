@@ -19,12 +19,12 @@ return new class extends Migration
             // Control del catálogo
             $table->boolean('activo')->default(true);
 
-            // Comportamiento de negocio
-            $table->boolean('permite_operar')->default(true);
-            $table->boolean('permite_facturar')->default(true);
-
             $table->string('clase_fondo', 100)->nullable();
             $table->string('clase_texto', 100)->nullable();
+
+            $table->foreignId('client_state_category_id')
+                ->constrained('client_state_categories')
+                ->restrictOnDelete();
 
             $table->timestamps();
             $table->softDeletes();

@@ -9,7 +9,18 @@ class ClientPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        Permission::firstOrCreate(['name' => 'configure business types']);
-        Permission::firstOrCreate(['name' => 'configure equipment types']);
+        $permissions = [
+            'configure business types', // Gestionar tipo de negocios
+            'configure equipment types', // Gestionar tipo de equipos
+            'clients index',    // Ver listado
+            'clients create',   // Crear nuevos
+            'clients edit',     // Editar y activar/desactivar
+            'clients delete',   // Borrar y purgar papelera
+            'clients restore',  // Ver papelera y restaurar
+        ];
+
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
     }
 }

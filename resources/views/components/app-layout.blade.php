@@ -46,7 +46,7 @@
         <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['clientes*']">
             Clientes
             <x-slot name="submenu">
-                <x-sidebar.subitem href="/clientes">Lista de Clientes</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/">Lista de Clientes</x-sidebar.subitem>
                 <x-sidebar.subitem href="/points-of-sale">Puntos de Venta</x-sidebar.subitem>
                 <x-sidebar.subitem href="/equipments">Equipos / Activos</x-sidebar.subitem>
                 <x-sidebar.subitem href="/admin/clients/tipos-negocios">Tipos de Negocio</x-sidebar.subitem>
@@ -103,7 +103,7 @@
             </div>
 
             {{-- CONTENIDO PRINCIPAL --}}
-            <div class="flex-1 flex flex-col transition-all duration-300 ml-0"
+            <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 ml-0"
                 :class="{
                     'sm:ml-64': isSidebarOpen,
                     'sm:ml-20': !isSidebarOpen
@@ -114,7 +114,7 @@
                 
                 {{-- CONTENIDO VARIABLE --}}
                 {{-- AÑADIDO: Se añade el margen solo en PC y lo controla x-data para compensar el sidebar. --}}
-                <main class="p-6 transition-all duration-300">
+                <main class="p-6 transition-all duration-300 w-full">
                     {{ $slot }}
                 </main>
 
