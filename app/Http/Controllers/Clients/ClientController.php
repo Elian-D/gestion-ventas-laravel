@@ -104,7 +104,8 @@ class ClientController extends Controller
     public function export(Request $request) 
     {
         // 1. Aplicamos tus filtros existentes
-        $query = (new ClientFilters($request))->apply(Client::query());
+        $query = (new ClientFilters($request))
+        ->apply(Client::query()->withIndexRelations());
 
         // 2. IMPORTANTE: Ignoramos las columnas seleccionadas de la vista    
         return Excel::download(
