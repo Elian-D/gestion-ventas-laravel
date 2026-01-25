@@ -12,6 +12,7 @@ use App\Tables\PointOfSaleTable;
 use App\Http\Requests\PointOfSale\BulkPointOfSaleRequest;
 use App\Http\Requests\PointOfSale\StorePointOfSaleRequest;
 use App\Http\Requests\PointOfSale\UpdatePointOfSaleRequest;
+use App\Models\Clients\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -121,7 +122,7 @@ class PointOfSaleController extends Controller
 
     public function destroy(PointOfSale $pos)
     {
-        return $this->destroyTrait($pos);
+        return $this->destroyTrait($pos, 'client');
     }
 
     /* Configuración del Trait para la papelera */
