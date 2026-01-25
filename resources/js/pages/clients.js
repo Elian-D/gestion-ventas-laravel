@@ -16,10 +16,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: 'Estado del Cliente',
                 source: 'estadosClientes'
             },
-/*             business_type: {
-                label: 'Tipo de Negocio',
-                source: 'tiposNegocio'
-            }, */
+            state: {
+                label: 'Estado',
+                source: 'state'
+            },
+            type: {
+                label: 'Tipo de Cliente',
+                values: {
+                    'individual': 'Individual',
+                    'company': 'Compañía'
+                }
+            },
+            tax_type: {
+                label: 'Indentificador Fiscal',
+                source: 'tax_type'
+            },
             search: {
                 label: 'Búsqueda'
             }
