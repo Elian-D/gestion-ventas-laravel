@@ -107,7 +107,7 @@ class PointOfSale extends Model
     {
         return $query->with([
             'client:id,name,commercial_name',
-            'businessType:id,name',
+            'businessType:id,nombre',
             'state:id,name',
         ]);
     }
