@@ -4,19 +4,22 @@ namespace App\Http\Controllers\Clients;
 
 use App\Exports\Clients\ClientsTemplateExport;
 use App\Models\Clients\Client;
-// use App\Models\Clients\BusinessType;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Http\Controllers\Controller;
-use App\Models\Configuration\TaxIdentifierType;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Filters\Client\ClientFilters;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exports\Clients\ClientsExport;
+use App\Http\Requests\Clients\BulkClientRequest;
+use App\Http\Requests\Clients\StoreClientRequest;
+use App\Http\Requests\Clients\UpdateClientRequest;
 use App\Imports\ClientsImport;
+use App\Services\Client\ClientCatalogService;
+use App\Services\Client\ClientService;
+use App\Tables\ClientTable;
 use Maatwebsite\Excel\Facades\Excel;
 
 use Maatwebsite\Excel\Validators\ValidationException;
@@ -27,145 +30,72 @@ class ClientController extends Controller
 
 
 
-    public function index(Request $request)
+    public function index(Request $request, ClientCatalogService $catalogService)
     {
-        // Autorizamos que se pueden hacer bulk actions
-        $bulkActions = true;
-
-        $config = general_config();
-        $countryId = $config?->country_id;
-
-        $states = $countryId 
-                ? State::byCountry($countryId)
-                    ->select('id', 'name')
-                    ->orderBy('name')
-                    ->get() 
-                : collect();
-
-        $allColumns = [
-            'id'               => 'ID',
-            'name'             => 'Nombre Cliente',
-            'tax_identifier_types' => 'Tipo Identificador Fiscal',
-            'tax_id'           => 'Identificador Fiscal',
-            'type'             => 'Tipo de Cliente',
-            'email'            => 'Email',
-            'phone'            => 'Teléfono',
-            'city'             => 'Ciudad',
-            'state'            => 'Estado/Provincia',
-            'estado_cliente'   => 'Estado del Cliente',
-            'created_at'       => 'Fecha Creación',
-            'updated_at'       => 'Última Actualización'
-        ];
-        $defaultDesktop = ['id', 'name', 'tax_id', 'city', 'state', 'estado_cliente'];
-        $defaultMobile = ['id','name'];
-
-        $visibleColumns = $request->input('columns', $defaultDesktop);
+        // 1. Parámetros de UI
+        $visibleColumns = $request->input('columns', ClientTable::defaultDesktop());
         $perPage = $request->input('per_page', 10);
 
+        // 2. Ejecución del Pipeline de Filtros
         $clients = (new ClientFilters($request))
-            ->apply(
-                Client::query()
-                    ->with([
-                        'estadoCliente:id,nombre,clase_fondo,clase_texto',
-                        'state:id,name',
-                        'taxIdentifierType:id,name,code',
-                    ])
-            )
+            ->apply(Client::query()->withIndexRelations())
             ->paginate($perPage)
             ->withQueryString();
 
-        
-        $estadosClientes = EstadosCliente::select('id', 'nombre')->get();
-
-        $taxIdentifierTypes = $countryId 
-                ? TaxIdentifierType::byCountry($countryId)
-                    ->select('id', 'code', 'name')
-                    ->orderBy('name')
-                    ->get() 
-                : collect();
-
+        // 3. Respuesta AJAX (Solo la tabla)
         if ($request->ajax()) {
-            return view('clients.partials.table', compact(
-                'clients',
-                'allColumns',
-                'visibleColumns',
-                'defaultDesktop',
-                'defaultMobile',
-                'bulkActions'
-                ))->render();
+            return view('clients.partials.table', [
+                'clients'        => $clients,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => ClientTable::allColumns(),
+                'defaultDesktop' => ClientTable::defaultDesktop(),
+                'defaultMobile'  => ClientTable::defaultMobile(),
+                'bulkActions'    => true,
+            ])->render();
         }
 
-        return view('clients.index', compact(
-        'clients', 
-        'estadosClientes',
-        'taxIdentifierTypes', 
-        'states',
-        'allColumns', 
-        'visibleColumns', 
-        'defaultDesktop',
-        'defaultMobile',
-        'bulkActions'
-    ));
+        // 4. Respuesta Vista Completa
+        return view('clients.index', array_merge(
+            [
+                'clients'        => $clients,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => ClientTable::allColumns(),
+                'defaultDesktop' => ClientTable::defaultDesktop(),
+                'defaultMobile'  => ClientTable::defaultMobile(),
+                'bulkActions'    => true,
+            ],
+            $catalogService->getForFilters() // Inyecta states, taxIdentifierTypes, etc.
+        ));
     }
 
     /**
      * Acciones masivas
      */
-    public function bulk(Request $request)
+    public function bulk(BulkClientRequest $request, ClientService $clientService)
     {
-        $allowedActions = ['delete', 'change_status', 'change_geo_state'];
-
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'exists:clients,id',
-            'action' => 'required|in:' . implode(',', $allowedActions),
-            'value' => 'nullable'
-        ]);
-
-        $ids = $request->ids;
-        $action = $request->action;
-        $value = $request->value;
-
-        $count = count($ids);
-
-        $actionLabel = match ($action) {
-            'delete'     => 'eliminado',
-            'change_status' => 'actualizado el estado',
-            'change_geo_state' => 'actualizado la ubicación',
-            default => throw new \Exception("Acción desconocida para la etiqueta: " . $request->action),
-        };
-
         try {
+            $count = $clientService->performBulkAction(
+                $request->ids, 
+                $request->action, 
+                $request->value
+            );
 
-            DB::transaction(function () use ($ids, $action, $value) {
-                $query = Client::whereIn('id', $ids);
+            $label = $clientService->getActionLabel($request->action);
+            $message = "Se han {$label} correctamente {$count} registros.";
 
-                match ($action) {
-                    'delete'     => $query->delete(),
-                    'change_status' => $query->update(['estado_cliente_id' => $value]),
-                    'change_geo_state' => $query->update(['state_id' => $value]),
-                    default => throw new \Exception("Acción no permitida"),
-                };
-
-            });
-
-            // GUARDAMOS EN SESIÓN para que el Toast de index.blade.php lo lea al recargar
-            $mensaje = "Se han {$actionLabel} correctamente {$count} registros.";
-            session()->flash('success', $mensaje);
+            session()->flash('success', $message);
 
             return response()->json([
-                'success' => true, 
-                'message' => $mensaje
+                'success' => true,
+                'message' => $message
             ]);
-            
+
         } catch (\Exception $e) {
-            // Logueamos el error real para nosotros
-            Log::error("Error en acción masiva: " . $e->getMessage());
-            
-            // Enviamos un mensaje amigable al usuario
+            Log::error("Error en acción masiva de clientes: " . $e->getMessage());
+
             return response()->json([
-                'success' => false, 
-                'message' => 'No se pudo completar la operación. Verifique las restricciones de los registros.'
+                'success' => false,
+                'message' => 'No se pudo completar la operación masiva.'
             ], 422);
         }
     }
@@ -174,7 +104,8 @@ class ClientController extends Controller
     public function export(Request $request) 
     {
         // 1. Aplicamos tus filtros existentes
-        $query = (new ClientFilters($request))->apply(Client::query());
+        $query = (new ClientFilters($request))
+        ->apply(Client::query()->withIndexRelations());
 
         // 2. IMPORTANTE: Ignoramos las columnas seleccionadas de la vista    
         return Excel::download(
@@ -230,46 +161,19 @@ class ClientController extends Controller
     /**
      * Mostrar formulario de creación
      */
-    public function create()
+    public function create(ClientCatalogService $catalogService)
     {
-        $config = general_config();
-        $estados = EstadosCliente::activos()->get();
-        $states = State::orderBy('name')->get();
-        $types = ['individual' => 'Persona Física', 'company' => 'Empresa / Jurídica'];
-        // Pasamos el tax_label por defecto basado en la config
-    $defaultTaxLabel = $config->taxIdentifierType->code ?? 'Tax ID';
 
-        return view('clients.create', compact('estados', 'states', 'types', 'defaultTaxLabel'));
+        return view('clients.create', $catalogService->getForForm());
     }
-    
+
     /**
      * Almacenar nuevo cliente
      */
-    public function store(Request $request)
+    public function store(StoreClientRequest $request, ClientService $clientService)
     {
-        $config = general_config();
-        $data = $request->validate([
-            'type' => ['required', Rule::in(['individual', 'company'])],
-            'name' => 'required|string|max:255',
-            'commercial_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'estado_cliente_id' => 'required|exists:estados_clientes,id',
-            'state_id' => 'required|exists:states,id',
-            'city' => 'required|string|max:100',
-            'tax_id' => 'nullable|string|max:50',
-        ]);
-
-        $entityType = ($data['type'] === 'individual') ? 'person' : 'company';
-
-        $identifier = TaxIdentifierType::where('country_id', $config->country_id)
-        ->where(function($q) use ($entityType) {
-            $q->where('entity_type', $entityType)->orWhere('entity_type', 'both');
-        })->first();
-
-        $data['tax_identifier_type_id'] = $identifier?->id;
-        
-        $client = Client::create($data);
+        // El Request ya validó que el tax_identifier_type_id sea correcto
+        $client = $clientService->createClient($request->validated());
 
         return redirect()
             ->route('clients.index')
@@ -279,33 +183,22 @@ class ClientController extends Controller
     /**
      * Mostrar formulario de edición
      */
-    public function edit(Client $client)
+    public function edit(Client $client, ClientCatalogService $catalogService)
     {
-        $estados = EstadosCliente::activos()->get();
-        $states = State::orderBy('name')->get();
-        $types = ['individual' => 'Persona Física', 'company' => 'Empresa / Jurídica'];
 
-        return view('clients.edit', compact('client', 'estados', 'states', 'types'));
+        return view('clients.edit', array_merge(
+            ['client' => $client],
+            $catalogService->getForForm() // Reutiliza la misma lógica de estados, países e IDs
+        ));
     }
 
     /**
      * Actualizar cliente
      */
-    public function update(Request $request, Client $client)
+    public function update(UpdateClientRequest $request, Client $client, ClientService $clientService)
     {
-        $data = $request->validate([
-            'type' => ['required', Rule::in(['individual', 'company'])],
-            'name' => 'required|string|max:255',
-            'commercial_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'estado_cliente_id' => 'required|exists:estados_clientes,id',
-            'state_id' => 'required|exists:states,id',
-            'city' => 'required|string|max:100',
-            'tax_id' => 'nullable|string|max:50',
-        ]);
-
-        $client->update($data);
+        // El Request ya autorizó y validó los datos
+        $clientService->updateClient($client, $request->validated());
 
         return redirect()
             ->route('clients.index')
