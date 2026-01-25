@@ -15,11 +15,27 @@ class BusinessType extends Model
     protected $fillable = [
         'nombre',
         'activo',
+        'prefix',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
     ];
+
+    /* ===========================
+    |  COMPORTAMIENTO AUTOMÁTICO
+     =========================== */
+    protected static function booted()
+    {
+        static::creating(function ($businessType) {
+            if (empty($businessType->prefix)) {
+                $businessType->prefix = strtoupper(
+                    substr(preg_replace('/[^A-Za-z]/', '', $businessType->nombre), 0, 3)
+                );
+            }
+        });
+    }
+
 
     /* ===========================
      |  SCOPES DEL CATÁLOGO

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('nombre', 100)->unique(); // Nombre del tipo de negocio
+            $table->string('prefix', 10)->unique(); // COL, DRI, FAR
 
             $table->boolean('activo')->default(true);
 
