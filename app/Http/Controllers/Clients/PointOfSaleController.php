@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Exports\PointOfSale\PointsOfSaleExport;
 use App\Http\Controllers\Controller;
 use App\Models\Clients\PointOfSale;
 use App\Traits\SoftDeletesTrait;
@@ -15,6 +16,7 @@ use App\Http\Requests\PointOfSale\UpdatePointOfSaleRequest;
 use App\Models\Clients\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PointOfSaleController extends Controller
 {
@@ -91,6 +93,21 @@ class PointOfSaleController extends Controller
                 'message' => 'No se pudo completar la operación masiva.'
             ], 422);
         }
+    }
+
+    public function export(Request $request) 
+    {
+        // 1. Aplicamos filtros (ajusta PointOfSaleFilters y withIndexRelations a tus nombres reales)
+        $query = (new PointOfSaleFilters($request))
+                    ->apply(PointOfSale::query());
+
+        // 2. Ejecutar descarga
+        $fileName = 'puntos-de-venta-' . now()->format('d-m-Y-H-i') . '.xlsx';
+        
+        return Excel::download(
+            new PointsOfSaleExport($query), 
+            $fileName
+        );
     }
 
     public function create(POSCatalogService $catalogService)

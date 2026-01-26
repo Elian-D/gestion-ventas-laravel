@@ -15,15 +15,6 @@ Route::group(['as' => 'pos.'], function () {
     Route::get('pos/export', [PointOfSaleController::class, 'export'])
         ->name('export');
 
-    Route::get('pos/import-template', [PointOfSaleController::class, 'downloadTemplate'])
-        ->name('template');
-
-    Route::get('pos/import', [PointOfSaleController::class, 'showImportForm'])
-        ->name('import.view');
-
-    Route::post('pos/import', [PointOfSaleController::class, 'import'])
-        ->name('import.process');
-
     Route::post('pos/bulk-action', [PointOfSaleController::class, 'bulk'])
         ->middleware('permission:pos edit')
         ->name('bulk');
