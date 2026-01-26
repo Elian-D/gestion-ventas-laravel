@@ -14,6 +14,7 @@ class EquipmentType extends Model
 
     protected $fillable = [
         'nombre',
+        'prefix',
         'activo',
     ];
 
@@ -22,22 +23,43 @@ class EquipmentType extends Model
     ];
 
     /* ===========================
-     |  SCOPES DEL CATÁLOGO
+     |  COMPORTAMIENTO AUTOMÁTICO
      =========================== */
 
-    // Tipos de negocio habilitados
+
+    protected static function booted()
+    {
+        static::saving(function ($type) {
+            if (
+                empty($type->prefix) ||
+                $type->isDirty('nombre')
+            ) {
+                $type->prefix = self::makePrefix($type->nombre);
+            }
+        });
+    }
+
+    public static function makePrefix(string $name): string
+    {
+        return strtoupper(
+            substr(preg_replace('/[^A-Za-z]/', '', $name), 0, 3)
+        );
+    }
+
+    /* ===========================
+     |  SCOPES
+     =========================== */
+
     public function scopeActivos($query)
     {
         return $query->where('activo', true);
     }
 
-    // Tipos de negocio deshabilitados
     public function scopeInactivos($query)
     {
         return $query->where('activo', false);
     }
 
-    // Scope flexible por estado (activo/inactivo)
     public function scopeFiltrarPorEstado($query, ?string $estado)
     {
         return match ($estado) {
@@ -48,12 +70,9 @@ class EquipmentType extends Model
     }
 
     /* ===========================
-     |  COMPORTAMIENTO
+     |  UTILIDAD
      =========================== */
 
-    /**
-     * Alternar el estado activo/inactivo
-     */
     public function toggleActivo(): void
     {
         $this->activo = ! $this->activo;

@@ -16,12 +16,18 @@ return new class extends Migration
 
             $table->string('nombre', 100)->unique();
 
+            // Prefijo para generación de códigos (FRE, ANQ, etc.)
+            $table->string('prefix', 10)
+                ->nullable()
+                ->index()
+                ->unique();
+
+
             $table->boolean('activo')->default(true);
 
             $table->timestamps();
             $table->softDeletes();
         });
-
     }
 
     /**
