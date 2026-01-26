@@ -26,7 +26,7 @@ class POSCatalogService
         $countryId = general_config()?->country_id;
 
         return [
-            'clients'       => Client::select('id', 'name')->orderBy('name')->get(),
+            'clients'       => Client::select('id', 'name', 'tax_id')->orderBy('name')->get(),
             'businessTypes' => BusinessType::select('id', 'nombre')->orderBy('nombre')->get(),
             'states'        => $countryId 
                 ? State::byCountry($countryId)->select('id', 'name')->orderBy('name')->get()
