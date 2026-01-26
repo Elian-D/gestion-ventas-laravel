@@ -148,6 +148,34 @@
                 <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 shadow-lg px-8">Actualizar Punto de Venta</x-primary-button>
             </div>
         </form>
+                        
+        @can('pos regenerate-code')
+        <div class="mt-4 border border-yellow-200 bg-yellow-50 p-4 rounded">
+            <p class="text-sm text-yellow-700 font-medium">
+                Reasignar Tipo de Negocio y Regenerar Código
+            </p>
+
+            <form method="POST" 
+                action="{{ route('clients.pos.regenerate-code', $pos) }}" 
+                class="mt-2">
+                @csrf
+                @method('PATCH')
+
+                <select name="business_type_id" class="w-full rounded border-gray-300">
+                    @foreach($businessTypes as $type)
+                        <option value="{{ $type->id }}">
+                            {{ $type->nombre }} ({{ $type->prefix }})
+                        </option>
+                    @endforeach
+                </select>
+
+                <button class="mt-3 px-4 py-2 bg-yellow-600 text-white rounded">
+                    Regenerar código
+                </button>
+            </form>
+        </div>
+        @endcan
+
     </div>
 
     <script>

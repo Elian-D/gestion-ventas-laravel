@@ -18,6 +18,7 @@ class POSPermissionsSeeder extends Seeder
             'pos edit',     // Editar y realizar acciones masivas
             'pos delete',   // Mover a papelera y eliminación definitiva
             'pos restore',  // Ver papelera y restaurar registros
+            'pos regenerate-code' // Regenerar código de punto de venta, solo para usuarios autorizados
         ];
 
         foreach ($permissions as $permission) {
