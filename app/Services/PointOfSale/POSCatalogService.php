@@ -27,7 +27,7 @@ class POSCatalogService
 
         return [
             'clients'       => Client::select('id', 'name', 'tax_id')->orderBy('name')->get(),
-            'businessTypes' => BusinessType::select('id', 'nombre')->orderBy('nombre')->get(),
+            'businessTypes' => BusinessType::select('id', 'nombre', 'prefix')->orderBy('nombre')->get(),
             'states'        => $countryId 
                 ? State::byCountry($countryId)->select('id', 'name')->orderBy('name')->get()
                 : collect(),

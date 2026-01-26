@@ -31,6 +31,10 @@ class PointOfSale extends Model
         'active',
     ];
 
+
+    /* ===========================
+     | COMPORTAMIENTO AUTOMÁTICO
+     =========================== */
     protected static function booted()
     {
         static::created(function ($pos) {
@@ -53,6 +57,32 @@ class PointOfSale extends Model
             $pos->syncOriginal();
         });
     }
+
+    /* ===========================
+     |  FUNCIONES AUXILIARES
+     =========================== */
+
+    public function regenerateCodeForBusinessType(int $businessTypeId): void
+    {
+        // Forzamos recarga real
+        $businessType = BusinessType::query()->findOrFail($businessTypeId);
+
+        $newCode = sprintf(
+            '%s-%05d',
+            strtoupper($businessType->prefix),
+            $this->id
+        );
+
+        $this->forceFill([
+            'business_type_id' => $businessType->id,
+            'code' => $newCode,
+        ])->saveQuietly();
+
+        // Limpiamos relaciones cacheadas
+        $this->unsetRelation('businessType');
+    }
+
+
 
     /* ===========================
      |      RELACIONES

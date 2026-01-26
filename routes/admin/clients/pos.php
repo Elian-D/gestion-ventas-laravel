@@ -31,6 +31,13 @@ Route::group(['as' => 'pos.'], function () {
             'destroy' => 'destroy',
         ]);
 
+    // 2.5 RUTA ADICIONAL PARA REGENERAR CÓDIGO
+    Route::patch('pos/{pos}/regenerate-code', 
+        [PointOfSaleController::class, 'regenerateCode']
+    )->middleware('permission:pos regenerate-code')
+    ->name('regenerate-code');
+
+
     // 3. RUTAS CON IDs (Al final)
     Route::patch('pos/{id}/restaurar', [PointOfSaleController::class, 'restaurar'])
         ->middleware('permission:pos restore')
