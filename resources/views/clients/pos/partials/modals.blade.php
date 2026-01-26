@@ -98,7 +98,7 @@
                             </h4>
                             <div class="flex flex-col gap-2 italic">
                                 <div class="flex justify-between items-center text-xs">
-                                    <span class="text-gray-400">Fecha de alta:</span>
+                                    <span class="text-gray-400">Fecha de creación:</span>
                                     <span class="font-medium text-gray-600">{{ $item->created_at->format('d/m/Y h:i A') }}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-xs">
