@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PermissionSeeder\ConfigPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\GeographyPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\ClientPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\POSPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
 
@@ -39,6 +40,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\ClientsConfigSeeders\BusinessTypeSeeder::class,
             \Database\Seeders\ClientsConfigSeeders\EquipmentTypeSeeder::class,
             \Database\Seeders\ClientsConfigSeeders\ClientSeeder::class,
+            \Database\Seeders\ClientsConfigSeeders\PointOfSaleSeeder::class,
         ]);
     }
 }

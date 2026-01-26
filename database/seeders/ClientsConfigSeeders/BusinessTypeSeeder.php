@@ -25,10 +25,16 @@ class BusinessTypeSeeder extends Seeder
             'Supermercado / Abarrotes'
         ];
 
+
         foreach ($tiposNegocio as $nombre) {
+            $prefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $nombre), 0, 3));
+
             BusinessType::updateOrCreate(
                 ['nombre' => $nombre],
-                ['activo' => true]  
+                [
+                    'activo' => true,
+                    'prefix' => $prefix
+                ]
             );
         }
     }

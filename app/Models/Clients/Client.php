@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Configuration\ConfiguracionGeneral;
 use App\Models\Configuration\TaxIdentifierType;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
 {
@@ -33,6 +34,11 @@ class Client extends Model
     /* ===========================
      |      RELACIONES
      =========================== */
+
+    public function pos(): HasMany
+    {
+        return $this->hasMany(PointOfSale::class, 'client_id');
+    }
 
     /**
      * Obtiene el estado operativo del cliente (Moroso, Activo, etc.)

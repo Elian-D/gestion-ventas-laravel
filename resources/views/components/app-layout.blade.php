@@ -47,7 +47,7 @@
             Clientes
             <x-slot name="submenu">
                 <x-sidebar.subitem href="/admin/clients/">Lista de Clientes</x-sidebar.subitem>
-                <x-sidebar.subitem href="/points-of-sale">Puntos de Venta</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
                 <x-sidebar.subitem href="/equipments">Equipos / Activos</x-sidebar.subitem>
                 <x-sidebar.subitem href="/admin/clients/tipos-negocios">Tipos de Negocio</x-sidebar.subitem>
                 <x-sidebar.subitem href="/admin/clients/tipos-equipos">Tipos de Equipos</x-sidebar.subitem>
