@@ -60,15 +60,6 @@ class EquipmentType extends Model
         return $query->where('activo', false);
     }
 
-    public function scopeFiltrarPorEstado($query, ?string $estado)
-    {
-        return match ($estado) {
-            'activo' => $query->activos(),
-            'inactivo' => $query->inactivos(),
-            default => $query,
-        };
-    }
-
     /* ===========================
      |  UTILIDAD
      =========================== */
