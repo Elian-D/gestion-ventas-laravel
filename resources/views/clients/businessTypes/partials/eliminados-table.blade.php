@@ -21,7 +21,7 @@
 
             <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
-                    <form action="{{ route('clients.equipos.restaurar', $businessType->id) }}" method="POST">
+                    <form action="{{ route('clients.businessTypes.restaurar', $businessType->id) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-lg">
                             <x-heroicon-s-arrow-path class="w-5 h-5" />
