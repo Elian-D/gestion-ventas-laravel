@@ -20,25 +20,36 @@ Route::group(['as' => 'pos.'], function () {
         ->name('bulk');
 
     // 2. RESOURCE CON NOMBRE 'pos'
-    // Esto generará admin/clients/pos, admin/clients/pos/create, etc.
-    Route::resource('pos', PointOfSaleController::class)
-        ->parameters(['pos' => 'pos']) 
-        ->names([
-            'index'   => 'index',
-            'create'  => 'create',
-            'edit'    => 'edit',
-            'update'  => 'update',
-            'destroy' => 'destroy',
-        ]);
 
-    // 2.5 RUTA ADICIONAL PARA REGENERAR CÓDIGO
-    Route::patch('pos/{pos}/regenerate-code', 
-        [PointOfSaleController::class, 'regenerateCode']
-    )->middleware('permission:pos regenerate-code')
-    ->name('regenerate-code');
+    // Listado principal y búsqueda
+    Route::get('pos/', [PointOfSaleController::class, 'index'])
+        ->middleware('permission:pos index')
+        ->name('index');
 
+    // Creación
+    Route::get('pos/create', [PointOfSaleController::class, 'create'])
+        ->middleware('permission:pos create')
+        ->name('create');
 
-    // 3. RUTAS CON IDs (Al final)
+    Route::post('pos/store', [PointOfSaleController::class, 'store'])
+        ->middleware('permission:pos create')
+        ->name('store');
+
+    // Edición
+    Route::get('pos/{pos}/editar', [PointOfSaleController::class, 'edit'])
+        ->middleware('permission:pos edit')
+        ->name('edit');
+
+    Route::put('pos/{pos}', [PointOfSaleController::class, 'update'])
+        ->middleware('permission:pos edit')
+        ->name('update');
+
+    // Eliminación (Soft Delete)
+    Route::delete('pos/{pos}', [PointOfSaleController::class, 'destroy'])
+        ->middleware('permission:pos delete')
+        ->name('destroy');
+
+        // 3. RUTAS CON IDs (Al final)
     Route::patch('pos/{id}/restaurar', [PointOfSaleController::class, 'restaurar'])
         ->middleware('permission:pos restore')
         ->name('restore');

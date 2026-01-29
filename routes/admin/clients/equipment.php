@@ -19,17 +19,35 @@ Route::group(['as' => 'equipment.'], function () {
         ->middleware('permission:equipment edit')
         ->name('bulk');
 
-    // Resource principal
-    Route::resource('equipments', EquipmentController::class)
-        ->parameters(['equipments' => 'equipment'])
-        ->names([
-            'index'   => 'index',
-            'create'  => 'create',
-            'store'   => 'store',
-            'edit'    => 'edit',
-            'update'  => 'update',
-            'destroy' => 'destroy',
-        ]);
+
+    // Listado principal y búsqueda
+    Route::get('equipments/', [EquipmentController::class, 'index'])
+        ->middleware('permission:equipment index')
+        ->name('index');
+
+    // Creación
+    Route::get('equipments/create', [EquipmentController::class, 'create'])
+        ->middleware('permission:equipment create')
+        ->name('create');
+
+    Route::post('equipments/store', [EquipmentController::class, 'store'])
+        ->middleware('permission:equipment create')
+        ->name('store');
+
+    // Edición
+    Route::get('equipments/{equipment}/editar', [EquipmentController::class, 'edit'])
+        ->middleware('permission:equipment edit')
+        ->name('edit');
+
+    Route::put('equipments/{equipment}', [EquipmentController::class, 'update'])
+        ->middleware('permission:equipment edit')
+        ->name('update');
+
+    // Eliminación (Soft Delete)
+    Route::delete('equipments/{id}', [EquipmentController::class, 'destroy'])
+        ->middleware('permission:equipment delete')
+        ->name('destroy');
+
 
     // Restaurar
     Route::patch('equipments/{id}/restaurar', [EquipmentController::class, 'restaurar'])

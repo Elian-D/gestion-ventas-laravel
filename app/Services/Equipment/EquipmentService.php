@@ -9,41 +9,33 @@ use Illuminate\Support\Str;
 
 class EquipmentService
 {
-    /**
-     * Crear un equipo
-     */
+
     public function create(array $data): Equipment
     {
         return DB::transaction(function () use ($data) {
-
-            $equipment = Equipment::create($data);
-
-            // Generar código solo si no viene forzado
-            if (empty($equipment->code)) {
-                $equipment->code = $this->generateCode($equipment);
-                $equipment->save();
-            }
-
-            return $equipment;
+            // El evento booted -> created del modelo llamará a generateCode automáticamente
+            return Equipment::create($data);
         });
     }
 
-    /**
-     * Actualizar un equipo
-     */
     public function update(Equipment $equipment, array $data): bool
     {
         return DB::transaction(function () use ($equipment, $data) {
+            $oldTypeId = $equipment->equipment_type_id;
+            
+            $updated = $equipment->update($data);
 
-            $equipment->update($data);
+            // Si cambió el tipo o se marcó el checkbox de regenerar
+            if ($updated) {
+                $typeChanged = isset($data['equipment_type_id']) && $data['equipment_type_id'] != $oldTypeId;
+                $forceRegenerate = isset($data['regenerate_code']) && $data['regenerate_code'] == '1';
 
-            // Si cambió el tipo de equipo, se regenera el código
-            if (array_key_exists('equipment_type_id', $data)) {
-                $equipment->code = $this->generateCode($equipment);
-                $equipment->save();
+                if ($typeChanged || $forceRegenerate) {
+                    $equipment->generateCode();
+                }
             }
 
-            return true;
+            return $updated;
         });
     }
 
@@ -83,18 +75,4 @@ class EquipmentService
         };
     }
 
-    /**
-     * Generar código del equipo
-     * Ejemplo: FRZ-8F3A2
-     */
-    protected function generateCode(Equipment $equipment): string
-    {
-        $type = EquipmentType::findOrFail($equipment->equipment_type_id);
-
-        return sprintf(
-            '%s-%s',
-            Str::upper($type->prefix),
-            Str::upper(Str::random(5))
-        );
-    }
 }
