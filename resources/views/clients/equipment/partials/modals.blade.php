@@ -121,46 +121,13 @@
     </div>
 </x-modal>
 
-{{-- MODAL ELIMINAR EQUIPO --}}
-<x-modal name="confirm-deletion-{{ $item->id }}" maxWidth="md">
-    <form method="post" action="{{ route('clients.equipment.destroy', $item) }}" class="p-6">
-        @csrf 
-        @method('delete')
-
-        {{-- Header de Advertencia --}}
-        <div class="flex items-center gap-3 mb-4 text-red-600">
-            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                <x-heroicon-s-exclamation-triangle class="w-6 h-6" />
-            </div>
-            <h2 class="text-lg font-bold">¿Desactivar Equipo?</h2>
-        </div>
-
-        {{-- Cuerpo del Mensaje --}}
-        <p class="text-sm text-gray-600 leading-relaxed">
-            El equipo <span class="font-bold text-gray-900">{{ $item->name }} ({{ $item->code }})</span> será movido a la papelera.
-        </p>
-
-        {{-- Nota Contextual --}}
-        <div class="mt-4 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg">
-            <div class="flex gap-2">
-                <x-heroicon-s-information-circle class="w-4 h-4 text-amber-600 flex-shrink-0" />
-                <p class="text-[11px] text-amber-800 leading-tight">
-                    <strong>Aviso de Inventario:</strong> Al enviar a papelera, el equipo dejará de aparecer en los reportes de activos del Punto de Venta <span class="font-semibold">{{ $item->pointOfSale->name ?? 'asignado' }}</span>.
-                </p>
-            </div>
-        </div>
-
-        {{-- Acciones --}}
-        <div class="mt-8 flex justify-end items-center">
-            <x-secondary-button x-on:click="$dispatch('close')" class="border-none shadow-none hover:bg-gray-100">
-                Cancelar
-            </x-secondary-button>
-
-            <x-danger-button class="ms-3 shadow-lg shadow-red-100">
-                <x-heroicon-s-trash class="w-4 h-4 mr-2" />
-                Confirmar Eliminación
-            </x-danger-button>
-        </div>
-    </form>
-</x-modal>
+    <x-ui.confirm-deletion-modal 
+        :id="$item->id"
+        :title="'¿Eliminar Equipo?'"
+        :itemName="$item->name"
+        :type="'el equipo'"
+        :route="route('clients.equipment.destroy', $item)"
+        >
+        <strong>Aviso:</strong> Esta operación se puede deshacer desde la papelera.
+    </x-ui.confirm-deletion-modal>
 @endforeach
