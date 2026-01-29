@@ -133,35 +133,15 @@
             </div>
         </x-modal>
 
-        {{-- MODAL ELIMINAR (SIN CAMBIOS SEGÚN TU INSTRUCCIÓN) --}}
-        <x-modal name="confirm-deletion-{{ $client->id }}" maxWidth="md">
-            <form method="post" action="{{ route('clients.destroy', $client) }}" class="p-6">
-                @csrf @method('delete')
-                <h2 class="text-lg font-medium text-gray-900">
-                    ¿Enviar Cliente a la papelera?
-                </h2>
-                <p class="mt-2 text-sm text-gray-600">
-                    El cliente
-                    <span class="font-semibold text-gray-900">
-                        {{ $client->nombre }}
-                    </span>
-                    será movida a la
-                    <span class="font-semibold text-yellow-600">papelera</span>.
-                </p>
-                <p class="mt-1 text-sm text-gray-500">
-                    Esta acción se puede revertir desde la papelera.
-                </p>
-                <div class="mt-6 flex justify-end">
-                    <x-secondary-button x-on:click="$dispatch('close')">
-                        {{ __('Cancelar') }}
-                    </x-secondary-button>
-                    <x-danger-button class="ms-3">
-                        <x-heroicon-s-trash class="w-4 h-4 mr-2" />
-                        {{ __('Eliminar Cliente') }}
-                    </x-danger-button>
-                </div>
-            </form>
-        </x-modal>
+    <x-ui.confirm-deletion-modal 
+    :id="$client->id"
+    :title="'¿Eliminar Cliente?'"
+    :itemName="$client->name"
+    :type="'el cliente'"
+    :route="route('clients.destroy', $client)"
+    >
+    <strong>Aviso:</strong> Esta operación se puede deshacer desde la papelera.
+    </x-ui.confirm-deletion-modal>
     @endforeach
 
     

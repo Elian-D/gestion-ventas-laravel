@@ -126,29 +126,13 @@
         </div>
     </x-modal>
 
-    {{-- MODAL ELIMINAR --}}
-    <x-modal name="confirm-deletion-{{ $item->id }}" maxWidth="md">
-        <form method="post" action="{{ route('clients.pos.destroy', $item) }}" class="p-6">
-            @csrf @method('delete')
-            <div class="flex items-center gap-3 mb-4 text-red-600">
-                <x-heroicon-s-exclamation-triangle class="w-8 h-8" />
-                <h2 class="text-lg font-bold">¿Desactivar Punto de Venta?</h2>
-            </div>
-            <p class="text-sm text-gray-600">
-                El POS <span class="font-bold text-gray-900">{{ $item->name }} ({{ $item->code }})</span> será movido a la papelera.
-            </p>
-            <p class="mt-2 p-3 bg-yellow-50 border-l-4 border-yellow-400 text-[12px] text-yellow-700">
-                <strong>Nota:</strong> Si hay un cliente que tiene registrado este punto de venta, se recomienda que desactive el punto de venta.
-            </p>
-            <div class="mt-6 flex justify-end">
-                <x-secondary-button x-on:click="$dispatch('close')">
-                    Cancelar
-                </x-secondary-button>
-                <x-danger-button class="ms-3">
-                    <x-heroicon-s-trash class="w-4 h-4 mr-2" />
-                    Confirmar Eliminación
-                </x-danger-button>
-            </div>
-        </form>
-    </x-modal>
+    <x-ui.confirm-deletion-modal 
+        :id="$item->id"
+        :title="'¿Eliminar Punto de Venta?'"
+        :itemName="$item->name"
+        :type="'el punto de venta'"
+        :route="route('clients.pos.destroy', $item)"
+        >
+        <strong>Aviso:</strong> Esta operación se puede deshacer desde la papelera.
+    </x-ui.confirm-deletion-modal>
 @endforeach

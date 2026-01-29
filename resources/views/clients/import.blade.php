@@ -1,6 +1,7 @@
 
 
 <x-app-layout>
+    <x-ui.toasts />
     <x-data-table.import.main-container 
         title="Clientes" 
         uploadRoute="clients.import.process"

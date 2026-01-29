@@ -46,7 +46,7 @@
 
                     {{-- Borrado Definitivo --}}
                     <button type="button" 
-                            @click="$dispatch('open-modal', 'confirm-delete-pos-{{ $pos->id }}')"
+                            @click="$dispatch('open-modal', 'confirm-deletion-{{ $pos->id }}')"
                             title="Eliminar permanentemente"
                             class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         <x-heroicon-s-trash class="w-5 h-5" />
@@ -54,28 +54,6 @@
                 </div>
             </td>
         </tr>
-
-        {{-- Modal de Confirmación Definitiva --}}
-        <x-modal name="confirm-delete-pos-{{ $pos->id }}" maxWidth="md">
-            <form action="{{ route('clients.pos.borrarDefinitivo', $pos->id) }}" method="POST" class="p-3">
-                @csrf 
-                @method('DELETE')
-                <div class="text-center p-6">
-                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                        <x-heroicon-s-exclamation-triangle class="h-6 w-6 text-red-600" />
-                    </div>
-                    <h2 class="text-lg font-bold text-gray-900">¿Eliminar permanentemente?</h2>
-                    <p class="mt-2 text-sm text-gray-500">
-                        Esta acción borrará el punto de venta <strong>{{ $pos->name }}</strong> definitivamente.
-                        Se perderán las coordenadas y datos de contacto asociados.
-                    </p>
-                </div>
-                <div class="flex justify-center gap-3 p-3">
-                    <x-secondary-button x-on:click="$dispatch('close')">Cancelar</x-secondary-button>
-                    <x-danger-button>Sí, eliminar para siempre</x-danger-button>
-                </div>
-            </form>
-        </x-modal>
 
     @empty
         <tr>
@@ -88,3 +66,16 @@
         </tr>
     @endforelse
 </x-data-table>
+
+@foreach($items as $pos)
+
+    <x-ui.confirm-deletion-modal 
+        :id="$pos->id"
+        :title="'¿Eliminar Permanentemente?'"
+        :itemName="$pos->name"
+        :route="route('clients.pos.borrarDefinitivo', $pos->id)"
+        :description="'Estás a punto de borrar definitivamente el punto de venta <strong>' . $pos->name . '</strong>.'"
+    >
+        <strong>Aviso Crítico:</strong> Esta operación borrará todos los datos asociados y no se puede deshacer.
+    </x-ui.confirm-deletion-modal>
+@endforeach
