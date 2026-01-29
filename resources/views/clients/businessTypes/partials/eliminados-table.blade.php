@@ -49,7 +49,7 @@
         :id="$businessType->id"
         :title="'¿Eliminar Permanentemente?'"
         :itemName="$businessType->nombre"
-        :route="route('clients.negocios.borrarDefinitivo', $businessType->id)"
+        :route="route('clients.businessTypes.borrarDefinitivo', $businessType->id)"
         :description="'Estás a punto de borrar definitivamente el tipo de negocio <strong>' . $businessType->nombre . '</strong>.'"
     >
         <strong>Aviso Crítico:</strong> Esta operación borrará todos los datos asociados y no se puede deshacer.

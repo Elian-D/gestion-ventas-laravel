@@ -50,7 +50,7 @@
                 <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
                 <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
                 <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Negocio</x-sidebar.subitem>
-                <x-sidebar.subitem href="/admin/clients/tipos-equipos">Tipos de Equipos</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Equipos</x-sidebar.subitem>
             </x-slot>
         </x-sidebar.dropdown>
 
