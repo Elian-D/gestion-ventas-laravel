@@ -136,10 +136,12 @@ class EquipmentController extends Controller
             ->with('success', "Equipo {$equipment->code} actualizado correctamente.");
     }
 
-    public function destroy(Equipment $equipment)
+    public function destroy($id)
     {
-        return $this->destroyTrait($equipment, 'client');
+        $equipment = Equipment::findOrFail($id);
+        return $this->destroyTrait($equipment);
     }
+
 
     /* ===== Configuración del Trait ===== */
     protected function getModelClass(): string { return Equipment::class; }

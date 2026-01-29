@@ -73,7 +73,7 @@
         :id="$equipment->id"
         :title="'¿Eliminar Permanentemente?'"
         :itemName="$equipment->name"
-        :route="route('clients.borrarDefinitivo', $equipment->id)"
+        :route="route('clients.equipment.borrarDefinitivo', $equipment->id)"
         :description="'Estás a punto de borrar definitivamente el equipo <strong>' . $equipment->name . '</strong>.'"
     >
         <strong>Aviso Crítico:</strong> Esta operación borrará todos los datos asociados y no se puede deshacer.
