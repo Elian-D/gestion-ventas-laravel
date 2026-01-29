@@ -33,56 +33,43 @@ class PointOfSale extends Model
 
 
     /* ===========================
-     | COMPORTAMIENTO AUTOMÁTICO
-     =========================== */
+    | COMPORTAMIENTO AUTOMÁTICO
+    =========================== */
     protected static function booted()
     {
-        static::created(function ($pos) {
-            // Aseguramos que la relación businessType esté disponible para obtener el prefijo
-            // Si no está cargada, la cargamos al vuelo
-            $prefix = $pos->businessType ? $pos->businessType->prefix : 'POS';
-
-            $generatedCode = sprintf(
-                '%s-%05d',
-                strtoupper($prefix),
-                $pos->id
-            );
-
-            // Usamos updateQuietly para que no se dispare el evento 'updated'
-            $pos->updateQuietly([
-                'code' => $generatedCode
-            ]);
-
-            // Sincronizamos la instancia actual para que getDisplayNameAttribute funcione de inmediato
-            $pos->syncOriginal();
+        static::created(function (PointOfSale $pos) {
+            $pos->generateCode();
         });
     }
 
     /* ===========================
-     |  FUNCIONES AUXILIARES
-     =========================== */
+    |  GENERACIÓN DE CÓDIGO
+    =========================== */
 
-    public function regenerateCodeForBusinessType(int $businessTypeId): void
+    /**
+     * Genera y guarda el código basado en prefijo + ID
+     */
+    public function generateCode(): void
     {
-        // Forzamos recarga real
-        $businessType = BusinessType::query()->findOrFail($businessTypeId);
+        // Cargamos la relación si no existe para evitar errores
+        if (!$this->businessType) {
+            $this->load('businessType');
+        }
 
-        $newCode = sprintf(
+        $prefix = $this->businessType ? $this->businessType->prefix : 'POS';
+
+        $generatedCode = sprintf(
             '%s-%05d',
-            strtoupper($businessType->prefix),
+            strtoupper($prefix),
             $this->id
         );
 
-        $this->forceFill([
-            'business_type_id' => $businessType->id,
-            'code' => $newCode,
-        ])->saveQuietly();
-
-        // Limpiamos relaciones cacheadas
-        $this->unsetRelation('businessType');
+        $this->updateQuietly([
+            'code' => $generatedCode
+        ]);
+        
+        $this->syncOriginal();
     }
-
-
 
     /* ===========================
      |      RELACIONES
