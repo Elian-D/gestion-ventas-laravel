@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Clients;
 
+use App\Filters\BusinessTypes\BusinessTypesFilters;
 use App\Http\Controllers\Controller;
 use App\Models\Clients\BusinessType;
+use App\Tables\BusinessTypesTable;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,29 +14,36 @@ class BusinessTypeController extends Controller
 {
     use SoftDeletesTrait;
 
-    /**
-     * Muestra el listado de tipos de negocios con filtros y paginación
-     */
-    public function index(Request $request) {
-        // Obtener parámetros de búsqueda y filtro de estado de la solicitud
-        $search = $request->query('search'); 
-        $estadoFiltro = $request->query('estado'); // activo | inactivo | null 
+    public function index(Request $request)
+    {
+        $visibleColumns = $request->input('columns', BusinessTypesTable::defaultDesktop());
+        $perPage = $request->input('per_page', 10);
 
-        // Construir query con filtros dinámicos, ordenar por nombre y paginar
-        $tipoNegocio = BusinessType::query()
-            ->when($search, fn ($q) =>
-                $q->where('nombre', 'like', "%{$search}%")
-            )
-            ->filtrarPorEstado($estadoFiltro)
-            ->orderBy('nombre')
-            ->paginate(10)
+        $businessTypes = (new BusinessTypesFilters($request))
+            ->apply(BusinessType::query())
+            ->paginate($perPage)
             ->withQueryString();
 
+        if ($request->ajax()) {
+            return view('clients.negocios.partials.table', [
+                'businessTypes'   => $businessTypes,
+                'visibleColumns'  => $visibleColumns,
+                'allColumns'      => BusinessTypesTable::allColumns(),
+                'defaultDesktop'  => BusinessTypesTable::defaultDesktop(),
+                'defaultMobile'   => BusinessTypesTable::defaultMobile(),
+            ])->render();
+        }
 
-        // Retornar vista con estados y parámetros de filtrado
-        return view('clients.negocios.index', compact('tipoNegocio', 'search', 'estadoFiltro'));
+        return view('clients.negocios.index', array_merge(
+            [
+                'businessTypes'  => $businessTypes,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => BusinessTypesTable::allColumns(),
+                'defaultDesktop' => BusinessTypesTable::defaultDesktop(),
+                'defaultMobile'  => BusinessTypesTable::defaultMobile(),
+            ],
+        ));
     }
-
 
     /**
      * Crear Tipos de Negocio
@@ -43,12 +52,13 @@ class BusinessTypeController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|unique:business_types,nombre',
+            'activo' => 'sometimes|boolean',
         ]);
 
 
         $negocio = BusinessType::create([
             'nombre' => $request->nombre,
-            'activo' => true,
+            'activo' => $request->activo
         ]);
 
 
@@ -65,9 +75,20 @@ class BusinessTypeController extends Controller
     public function update(Request $request, BusinessType $negocio) {
         $request->validate([
             'nombre' => 'required|string|' . Rule::unique('business_types')->ignore($negocio->id),
+            'activo' => 'sometimes|boolean',
         ]);
 
-        $data = ['nombre' => $request->nombre];
+        $data = ['nombre' => $request->nombre, 'activo' => $request->activo];
+
+        if ($negocio->activo) {
+            $activosCount = BusinessType::activos()->count();
+            
+            if ($activosCount <= 1) {
+                return redirect()
+                    ->route('clients.negocios.index')
+                    ->with('error', 'No se puede desactivar. Deben existir al menos 1 estados activos en el catálogo.');
+            }
+        }
 
         $negocio->update($data);
 
@@ -83,10 +104,10 @@ class BusinessTypeController extends Controller
         if ($negocio->activo) {
             $activosCount = BusinessType::activos()->count();
             
-            if ($activosCount <= 2) {
+            if ($activosCount <= 1) {
                 return redirect()
                     ->route('clients.negocios.index')
-                    ->with('error', 'No se puede desactivar. Deben existir al menos 2 estados activos en el catálogo.');
+                    ->with('error', 'No se puede desactivar. Deben existir al menos 1 estados activos en el catálogo.');
             }
         }
         $negocio->toggleActivo();
