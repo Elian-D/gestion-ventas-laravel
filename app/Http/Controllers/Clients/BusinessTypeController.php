@@ -119,9 +119,10 @@ class BusinessTypeController extends Controller
 
 
     // Elimina la BusinessType si no tiene relaciones (o desactiva la eliminación por defecto).
-    public function destroy(BusinessType $negocio)
+    public function destroy($id)
     {
-        return $this->destroyTrait($negocio, null);
+        $businessType = BusinessType::findOrFail($id);
+        return $this->destroyTrait($businessType);
     }
 
     // Métodos abstractos que el trait necesita

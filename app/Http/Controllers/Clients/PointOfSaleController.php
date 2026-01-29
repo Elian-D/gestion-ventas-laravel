@@ -139,7 +139,7 @@ class PointOfSaleController extends Controller
 
     public function destroy(PointOfSale $pos)
     {
-        return $this->destroyTrait($pos, 'client');
+        return $this->destroyTrait($pos, null);
     }
 
     /* Configuración del Trait para la papelera */
