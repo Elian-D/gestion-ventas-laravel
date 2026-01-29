@@ -66,11 +66,15 @@ class RoleController extends Controller
         {
             $permissions = Permission::all();
 
-            // Agrupar permisos por categoría (puedes usar prefijo o un campo group)
+            // Agrupar permisos por módulo usando prefijo del nombre
             $groupedPermissions = $permissions->groupBy(function($perm) {
-                if(str_starts_with($perm->name, 'role')) return 'Roles';
+                if(str_starts_with($perm->name, 'roles')) return 'Roles';
                 if(str_starts_with($perm->name, 'dashboard')) return 'Dashboard';
-                if(str_starts_with($perm->name, 'user')) return 'Usuarios';
+                if(str_starts_with($perm->name, 'users')) return 'Usuarios';
+                if(str_starts_with($perm->name, 'provincias') ||
+                str_starts_with($perm->name, 'municipios') ||
+                str_starts_with($perm->name, 'sectores')) return 'Geografía';
+                if(str_starts_with($perm->name, 'config')) return 'Configuración';
                 return 'Otros';
             });
 
