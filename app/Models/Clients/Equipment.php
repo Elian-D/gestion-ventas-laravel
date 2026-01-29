@@ -20,6 +20,7 @@ class Equipment extends Model
         'model',
         'notes',
         'active',
+        'code',
     ];
 
     protected static function booted()
@@ -49,19 +50,21 @@ class Equipment extends Model
 
     public function generateCode(): void
     {
+        // Carga la relación si no existe para evitar el error de prefix sobre null
         if (!$this->equipmentType) {
-            return;
+            $this->load('equipmentType');
         }
+
+        $prefix = $this->equipmentType ? $this->equipmentType->prefix : 'EQ';
 
         $this->updateQuietly([
             'code' => sprintf(
                 '%s-%05d',
-                strtoupper($this->equipmentType->prefix),
+                strtoupper($prefix),
                 $this->id
             )
         ]);
     }
-
 
     /* ===========================
      |      SCOPES
@@ -76,13 +79,5 @@ class Equipment extends Model
             'equipmentType:id,nombre,prefix',
             'pointOfSale:id,name,address',
         ]);
-    }
-
-    /**
-     * Regenera el código (ADMIN ONLY)
-     */
-    public function regenerateCode(): void
-    {
-        $this->generateCode();
     }
 }
