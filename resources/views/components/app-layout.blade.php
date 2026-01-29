@@ -34,58 +34,59 @@
         {{-- ELIMINADA la clase ml-XX para que el sidebar FLOTE cuando esté colapsado. --}}
         <div class="flex min-h-screen bg-gray-100"> 
             
-            {{-- SIDEBAR --}}
-            <x-sidebar.layout>
-                
-                {{-- GRUPO 1: Menú Principal --}}
-                <x-sidebar.group>
-                    <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
-                        Dashboard
-                    </x-sidebar.item>
-                    
-                    <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['clientes']">
-                        Clientes
-                        <x-slot name="submenu">
-                            <x-sidebar.subitem href="/clientes">Lista</x-sidebar.subitem>
-                        </x-slot>
-                    </x-sidebar.dropdown>
-                    
-                    <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
-                        Ventas
-                    </x-sidebar.item>
-                    
-                    <x-sidebar.item href="/rutas" icon="heroicon-s-map">
-                        Rutas
-                    </x-sidebar.item>
-                </x-sidebar.group>
+{{-- SIDEBAR --}}
+<x-sidebar.layout>
+    
+    {{-- GRUPO 1: Menú Principal --}}
+    <x-sidebar.group>
+        <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
+            Dashboard
+        </x-sidebar.item>
 
+        <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['clientes*']">
+            Clientes
+            <x-slot name="submenu">
+                <x-sidebar.subitem href="/admin/clients/">Lista de Clientes</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Negocio</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
+                <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipos</x-sidebar.subitem>
+            </x-slot>
+        </x-sidebar.dropdown>
 
-                {{-- GRUPO 2: Usuarios y Permisos --}}
-                <x-sidebar.group>
-                    <x-sidebar.title>Usuarios</x-sidebar.title>
-                    
-                    <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
-                        Usuarios
-                    </x-sidebar.item>
+        <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
+            Ventas
+        </x-sidebar.item>
 
-                    <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
-                        Roles y Permisos
-                    </x-sidebar.item>
-                </x-sidebar.group>
+        <x-sidebar.item href="/rutas" icon="heroicon-s-map">
+            Rutas
+        </x-sidebar.item>
+    </x-sidebar.group>
 
-                                
-                {{-- GRUPO 3: Configuración --}}
-                <x-sidebar.group>
-                    <x-sidebar.title>Configuración</x-sidebar.title>
+    {{-- GRUPO 2: Usuarios y Permisos --}}
+    <x-sidebar.group>
+        <x-sidebar.title>Usuarios</x-sidebar.title>
 
-                    <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
-                        Configuración
-                    </x-sidebar.item>
-                    
-                </x-sidebar.group>
+        <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
+            Usuarios
+        </x-sidebar.item>
 
+        <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
+            Roles y Permisos
+        </x-sidebar.item>
+    </x-sidebar.group>
 
-            </x-sidebar.layout>
+    {{-- GRUPO 3: Configuración --}}
+    <x-sidebar.group>
+        <x-sidebar.title>Configuración</x-sidebar.title>
+
+        <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
+            Configuración
+        </x-sidebar.item>
+    </x-sidebar.group>
+
+</x-sidebar.layout>
+
 
             
             {{-- OVERLAY (Fondo oscuro para móviles) --}}
@@ -102,7 +103,7 @@
             </div>
 
             {{-- CONTENIDO PRINCIPAL --}}
-            <div class="flex-1 flex flex-col transition-all duration-300 ml-0"
+            <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 ml-0"
                 :class="{
                     'sm:ml-64': isSidebarOpen,
                     'sm:ml-20': !isSidebarOpen
@@ -113,7 +114,7 @@
                 
                 {{-- CONTENIDO VARIABLE --}}
                 {{-- AÑADIDO: Se añade el margen solo en PC y lo controla x-data para compensar el sidebar. --}}
-                <main class="p-6 transition-all duration-300">
+                <main class="p-6 transition-all duration-300 w-full">
                     {{ $slot }}
                 </main>
 

@@ -10,31 +10,45 @@ class EstadosCliente extends Model
 {
     use HasFactory, SoftDeletes;
 
-    /**
-     * Los atributos que se pueden asignar masivamente
-     */
-    protected $fillable = ['nombre', 'estado', 'clase_fondo', 'clase_texto'];
+    protected $table = 'estados_clientes';
+
+    protected $fillable = [
+        'nombre',
+        'client_state_category_id',
+        'activo',
+        'clase_fondo',
+        'clase_texto',
+    ];
 
     protected $casts = [
-    'estado' => 'boolean',
-];
+        'activo' => 'boolean',
+    ];
 
+    /* ===========================
+     |  RELACIONES
+     =========================== */
 
-    // Scopes para filtrar por estado
-    public function scopeActivo($query)
+    public function categoria()
     {
-        return $query->where('estado', true);
+        return $this->belongsTo(ClientStateCategory::class, 'client_state_category_id');
     }
 
-    public function scopeInactivo($query)
+    /* ===========================
+     |  SCOPES DE CATÁLOGO
+     =========================== */
+
+    public function scopeActivos($query)
     {
-        return $query->where('estado', false);
+        return $query->where('activo', true);
     }
 
-    // Alternar estado
-    public function toggleEstado(): void
+    public function scopeInactivos($query)
     {
-        $this->estado = ! $this->estado;
-        $this->save();
+        return $query->where('activo', false);
+    }
+
+    public function scopePorNombre($query, string $nombre)
+    {
+        return $query->whereRaw('LOWER(nombre) = ?', [strtolower($nombre)]);
     }
 }

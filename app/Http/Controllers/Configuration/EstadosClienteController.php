@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Models\Configuration\ClientStateCategory;
 
 class EstadosClienteController extends Controller
 {
@@ -27,26 +28,34 @@ class EstadosClienteController extends Controller
         ];
     }
     
-    /**
-     * Muestra el listado de estados de clientes con filtros y paginación
-     */
-    public function index(Request $request) {
-        // Obtener parámetros de búsqueda y filtro de estado de la solicitud
-        $search = $request->query('search'); 
-        $estado = $request->query('estado'); 
 
-        // Construir query con filtros dinámicos, ordenar por nombre y paginar
+
+    public function index(Request $request)
+    {
+        $search = $request->query('search');
+        $estadoFiltro = $request->query('estado');
+
         $estados = EstadosCliente::query()
-            ->when($search, fn($q) => $q->where('nombre', 'like', "%{$search}%"))
-            ->when($estado === 'activo', fn($q) => $q->activo())
-            ->when($estado === 'inactivo', fn($q) => $q->inactivo())
+            ->with('categoria') // 🔥 eager loading
+            ->when($search, fn ($q) =>
+                $q->where('nombre', 'like', "%{$search}%")
+            )
             ->orderBy('nombre')
             ->paginate(10)
             ->withQueryString();
 
-        // Retornar vista con estados y parámetros de filtrado
-        return view('configuration.estados.index', compact('estados', 'search', 'estado'));
+        // ✅ contar una sola vez
+        $activosCount = EstadosCliente::activos()->count();
+
+        // categorías para los modales
+        $categorias = ClientStateCategory::orderBy('name')->get();
+
+        return view(
+            'configuration.estados.index',
+            compact('estados', 'search', 'estadoFiltro', 'activosCount', 'categorias')
+        );
     }
+
 
 
 /**
@@ -56,16 +65,19 @@ class EstadosClienteController extends Controller
     {
         $request->validate([
             'nombre' => 'required|string|unique:estados_clientes,nombre',
-            'color_base' => ['required', 'string', Rule::in($this->allowedColors)], // NUEVA VALIDACIÓN
+            'client_state_category_id' => 'required|exists:client_state_categories,id',
+            'color_base' => ['required', 'string', Rule::in($this->allowedColors)],
         ]);
 
-        // Construir las clases de estilo
+
         $styleClasses = $this->buildStyleClasses($request->color_base);
 
         $estado = EstadosCliente::create(array_merge([
             'nombre' => $request->nombre,
-            'estado' => true // Por defecto 'true'
-        ], $styleClasses)); // UNIR con las clases de estilo
+            'client_state_category_id' => $request->client_state_category_id,
+            'activo' => true,
+        ], $styleClasses));
+
 
         // ... (redirección)
         return redirect()
@@ -84,20 +96,16 @@ class EstadosClienteController extends Controller
                 'string',
                 Rule::unique('estados_clientes')->ignore($estado->id),
             ],
-            'color_base' => ['required', 'string', Rule::in($this->allowedColors)], // NUEVA VALIDACIÓN
+            'client_state_category_id' => 'required|exists:client_state_categories,id',
+            'color_base' => ['required', 'string', Rule::in($this->allowedColors)],
         ]);
 
-        // 2. Preparación de los datos
-        $data = [
-            'nombre' => $request->nombre,
-        ];
-        
-        // Construir las clases de estilo
-        $styleClasses = $this->buildStyleClasses($request->color_base);
-        $data = array_merge($data, $styleClasses); // UNIR con las clases de estilo
 
-        // 3. Actualización del registro
-        $estado->update($data);
+        $estado->update(array_merge([
+            'nombre' => $request->nombre,
+            'client_state_category_id' => $request->client_state_category_id,
+        ], $this->buildStyleClasses($request->color_base)));
+
 
         // ... (redirección)
         return redirect()
@@ -105,16 +113,24 @@ class EstadosClienteController extends Controller
             ->with('success', 'Estado de cliente "' . $estado->nombre . '" actualizado exitosamente.');
     }
 
-    public function toggleEstado(EstadosCliente $estado) {
-        $estado->toggleEstado();
+    public function toggleEstado(EstadosCliente $estado)
+    {
+        if ($estado->activo) {
+            $activosCount = EstadosCliente::activos()->count();
+            
+            if ($activosCount <= 2) {
+                return redirect()
+                    ->route('configuration.estados.index')
+                    ->with('error', 'No se puede desactivar. Deben existir al menos 2 estados activos en el catálogo.');
+            }
+        }
+        $estado->toggleActivo();
 
         return redirect()
             ->route('configuration.estados.index')
-            ->with(
-                'success',
-                'Estado actualizado para "' . $estado->nombre . '".'
-            );
+            ->with('success', 'Estado actualizado para "' . $estado->nombre . '".');
     }
+
 
     // Elimina la EstadosCliente si no tiene relaciones (o desactiva la eliminación por defecto).
     public function destroy(EstadosCliente $estado)

@@ -13,13 +13,23 @@ return new class extends Migration
     {
         Schema::create('estados_clientes', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->boolean('estado')->default(true);
+
+            $table->string('nombre')->unique();
+
+            // Control del catálogo
+            $table->boolean('activo')->default(true);
+
+            $table->string('clase_fondo', 100)->nullable();
+            $table->string('clase_texto', 100)->nullable();
+
+            $table->foreignId('client_state_category_id')
+                ->constrained('client_state_categories')
+                ->restrictOnDelete();
+
             $table->timestamps();
-            $table->string('clase_fondo', 100)->default('bg-gray-200'); // Ejemplo de clase por defecto
-            $table->string('clase_texto', 100)->default('text-gray-800'); // Ejemplo de clase por defecto
             $table->softDeletes();
         });
+
     }
 
     /**
