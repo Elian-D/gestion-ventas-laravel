@@ -12,26 +12,6 @@
                 :back-route="route('clients.equipment.index')" />
 
             <div class="p-8 space-y-10">
-                
-                {{-- Sección Especial: Gestión de Código (Solo Admin) --}}
-                @can('equipment regenerate-code')
-                <section class="bg-amber-50/50 p-4 rounded-lg border border-amber-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h4 class="text-sm font-bold text-amber-800">Control de Identificador</h4>
-                            <p class="text-xs text-amber-600">El código actual es único. Regenerarlo cambiará su correlativo según el tipo.</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm font-mono font-bold bg-white px-3 py-1 border rounded shadow-sm">{{ $equipment->code }}</span>
-                            <div class="flex items-center">
-                                <input type="checkbox" name="regenerate_code" value="1" id="reg_code" class="rounded text-amber-600 focus:ring-amber-500 h-4 w-4">
-                                <label for="reg_code" class="ml-2 text-xs font-bold text-amber-700 uppercase cursor-pointer">Regenerar código</label>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                @endcan
-
                 {{-- Sección 1: Identificación --}}
                 <section>
                     <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
@@ -45,15 +25,34 @@
                             <x-text-input name="name" class="w-full mt-1" :value="old('name', $equipment->name)" required />
                         </div>
 
+                        {{-- En la Sección 1: Identificación --}}
                         <div>
                             <x-input-label value="Tipo de Equipo" />
-                            <select name="equipment_type_id" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm bg-gray-50">
-                                @foreach($equipmentTypes as $type)
-                                    <option value="{{ $type->id }}" {{ old('equipment_type_id', $equipment->equipment_type_id) == $type->id ? 'selected' : '' }}>
-                                        {{ $type->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            
+                            @can('equipment regenerate-code')
+                                {{-- Usuario Admin: Puede cambiar tipo y el checkbox decide si regenera el código --}}
+                                <div class="space-y-2 mt-1">
+                                    <select name="equipment_type_id" class="w-full rounded-md border-amber-300 bg-amber-50 shadow-sm focus:ring-indigo-500 text-sm">
+                                        @foreach($equipmentTypes as $type)
+                                            <option value="{{ $type->id }}" {{ old('equipment_type_id', $equipment->equipment_type_id) == $type->id ? 'selected' : '' }}>
+                                                {{ $type->nombre }} ({{ $type->prefix }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-[10px] text-amber-600 mt-1 italic">* Tienes permiso para cambiar el tipo. El código se regenerará al actualizar.</p>
+                                </div>
+                            @else
+                                {{-- Usuario Normal: Solo lectura --}}
+                                <select disabled class="w-full mt-1 rounded-md border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed shadow-sm text-sm">
+                                    @foreach($equipmentTypes as $type)
+                                        <option value="{{ $type->id }}" {{ $equipment->equipment_type_id == $type->id ? 'selected' : '' }}>
+                                            {{ $type->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <input type="hidden" name="equipment_type_id" value="{{ $equipment->equipment_type_id }}">
+                                <p class="text-[10px] text-gray-400 mt-1 italic">* Para cambiar el tipo, contacte al administrador.</p>
+                            @endcan
                         </div>
 
                         <div>
