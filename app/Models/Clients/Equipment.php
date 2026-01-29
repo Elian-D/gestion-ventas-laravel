@@ -62,6 +62,22 @@ class Equipment extends Model
         ]);
     }
 
+
+    /* ===========================
+     |      SCOPES
+     =========================== */
+
+    /**
+     * Relaciones necesarias para el index AJAX
+     */
+    public function scopeWithIndexRelations($query)
+    {
+        return $query->with([
+            'equipmentType:id,nombre,prefix',
+            'pointOfSale:id,name,address',
+        ]);
+    }
+
     /**
      * Regenera el código (ADMIN ONLY)
      */
