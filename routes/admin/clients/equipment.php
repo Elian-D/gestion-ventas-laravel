@@ -25,6 +25,7 @@ Route::group(['as' => 'equipment.'], function () {
         ->names([
             'index'   => 'index',
             'create'  => 'create',
+            'store'   => 'store',
             'edit'    => 'edit',
             'update'  => 'update',
             'destroy' => 'destroy',
