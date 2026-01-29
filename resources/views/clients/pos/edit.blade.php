@@ -39,15 +39,31 @@
                         </div>
 
                         <div>
-                            <x-input-label value="Tipo de Negocio (No editable)" />
-                            <select disabled class="w-full mt-1 rounded-md border-gray-200 bg-gray-200 text-gray-500 cursor-not-allowed shadow-sm text-sm border-dashed">
-                                @foreach($businessTypes as $type)
-                                    <option value="{{ $type->id }}" {{ $pos->business_type_id == $type->id ? 'selected' : '' }}>
-                                        {{ $type->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="text-[10px] text-gray-400 mt-1 italic">* Para cambiar el tipo, contacte al administrador.</p>
+                            <x-input-label value="Tipo de Negocio" />
+                            
+                            @can('pos regenerate-code')
+                                {{-- Usuario con permiso: Puede editar y el Service regenerará el código --}}
+                                <select name="business_type_id" class="w-full mt-1 rounded-md border-amber-300 bg-amber-50 shadow-sm focus:ring-indigo-500 text-sm">
+                                    @foreach($businessTypes as $type)
+                                        <option value="{{ $type->id }}" {{ old('business_type_id', $pos->business_type_id) == $type->id ? 'selected' : '' }}>
+                                            {{ $type->nombre }} ({{ $type->prefix }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="text-[10px] text-amber-600 mt-1 italic">* Tienes permiso para cambiar el tipo. El código se regenerará al actualizar.</p>
+                            @else
+                                {{-- Usuario sin permiso: Solo lectura --}}
+                                <select disabled class="w-full mt-1 rounded-md border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed shadow-sm text-sm">
+                                    @foreach($businessTypes as $type)
+                                        <option value="{{ $type->id }}" {{ $pos->business_type_id == $type->id ? 'selected' : '' }}>
+                                            {{ $type->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                {{-- Campo oculto para que el valor no se pierda en el request si no tiene permiso --}}
+                                <input type="hidden" name="business_type_id" value="{{ $pos->business_type_id }}">
+                                <p class="text-[10px] text-gray-400 mt-1 italic">* Para cambiar el tipo, contacte al administrador.</p>
+                            @endcan
                         </div>
                     </div>
                 </section>
@@ -148,34 +164,6 @@
                 <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 shadow-lg px-8">Actualizar Punto de Venta</x-primary-button>
             </div>
         </form>
-                        
-        @can('pos regenerate-code')
-        <div class="mt-4 border border-yellow-200 bg-yellow-50 p-4 rounded">
-            <p class="text-sm text-yellow-700 font-medium">
-                Reasignar Tipo de Negocio y Regenerar Código
-            </p>
-
-            <form method="POST" 
-                action="{{ route('clients.pos.regenerate-code', $pos) }}" 
-                class="mt-2">
-                @csrf
-                @method('PATCH')
-
-                <select name="business_type_id" class="w-full rounded border-gray-300">
-                    @foreach($businessTypes as $type)
-                        <option value="{{ $type->id }}">
-                            {{ $type->nombre }} ({{ $type->prefix }})
-                        </option>
-                    @endforeach
-                </select>
-
-                <button class="mt-3 px-4 py-2 bg-yellow-600 text-white rounded">
-                    Regenerar código
-                </button>
-            </form>
-        </div>
-        @endcan
-
     </div>
 
     <script>
