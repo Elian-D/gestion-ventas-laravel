@@ -142,20 +142,6 @@ class PointOfSaleController extends Controller
         return $this->destroyTrait($pos, 'client');
     }
 
-    public function regenerateCode(Request $request, PointOfSale $pos)
-    {
-        $request->validate([
-            'business_type_id' => ['required', 'exists:business_types,id'],
-        ]);
-
-        $pos->regenerateCodeForBusinessType($request->business_type_id);
-
-        return redirect()
-            ->route('clients.pos.edit', $pos)
-            ->with('success', 'Código del Punto de Venta regenerado correctamente.');
-    }
-
-
     /* Configuración del Trait para la papelera */
     protected function getModelClass(): string { return PointOfSale::class; }
     protected function getViewFolder(): string { return 'clients.pos'; }
