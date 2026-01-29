@@ -10,3 +10,6 @@ Alpine.start();
 import './pages/clients'
 import './pages/pos'
 import './pages/equipments'
+import './pages/equipmentsTypes'
+import './pages/businessTypes'
+
