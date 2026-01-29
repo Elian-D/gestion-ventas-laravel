@@ -8,7 +8,7 @@
                 <x-page-toolbar title="Gestión de Tipos Equipos">
                     <x-slot name="actions">
 
-                    <a href="{{ route('clients.equipos.eliminados') }}"
+                    <a href="{{ route('clients.equipmentTypes.eliminados') }}"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
                         <x-heroicon-s-trash class="w-4 h-4 mr-2" />
                         Papelera
@@ -22,11 +22,11 @@
                 </x-page-toolbar>
 
                 {{-- FILTROS --}}
-                @include('clients.equipos.partials.filters')
+                @include('clients.equipmentTypes.partials.filters')
 
                 {{-- TABLA AJAX --}}
                 <div id="equipmentsTypes-table" class="w-full overflow-hidden">
-                    @include('clients.equipos.partials.table')
+                    @include('clients.equipmentTypes.partials.table')
                 </div>
             </div>
         </div>

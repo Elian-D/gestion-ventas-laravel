@@ -58,7 +58,7 @@
                         $isLastActives = $item->activo && $businessTypes->where('activo', true)->count() <= 1; 
                     @endphp
 
-                    <form action="{{ route('clients.negocios.toggle', $item) }}" method="POST">
+                    <form action="{{ route('clients.businessTypes.toggle', $item) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit" 
                             {{ $isLastActives ? 'disabled' : '' }}
@@ -90,4 +90,4 @@
     @endforelse
 </x-data-table>
 
-@include('clients.negocios.partials.modals')
+@include('clients.businessTypes.partials.modals')

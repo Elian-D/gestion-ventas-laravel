@@ -25,7 +25,7 @@ class EquipmentTypeController extends Controller
             ->withQueryString();
 
         if ($request->ajax()) {
-            return view('clients.equipos.partials.table', [
+            return view('clients.equipmentTypes.partials.table', [
                 'equipmentsTypes' => $equipmentsTypes,
                 'visibleColumns'  => $visibleColumns,
                 'allColumns'      => EquipmentTypesTable::allColumns(),
@@ -34,7 +34,7 @@ class EquipmentTypeController extends Controller
             ])->render();
         }
 
-        return view('clients.equipos.index', array_merge(
+        return view('clients.equipmentTypes.index', array_merge(
             [
                 'equipmentsTypes'     => $equipmentsTypes,
                 'visibleColumns' => $visibleColumns,
@@ -64,7 +64,7 @@ class EquipmentTypeController extends Controller
 
         // ... (redirección)
         return redirect()
-            ->route('clients.equipos.index')
+            ->route('clients.equipmentTypes.index')
             ->with('success', 'Tipo de equipo "' . $equipo->nombre . '" creado exitosamente.');
     }
 
@@ -85,7 +85,7 @@ class EquipmentTypeController extends Controller
             
             if ($activosCount <= 1) {
                 return redirect()
-                    ->route('clients.equipos.index')
+                    ->route('clients.equipmentTypes.index')
                     ->with('error', 'No se puede desactivar. Deben existir al menos 1 estados activos en el catálogo.');
             }
         }
@@ -95,7 +95,7 @@ class EquipmentTypeController extends Controller
 
         // ... (redirección)
         return redirect()
-            ->route('clients.equipos.index')
+            ->route('clients.equipmentTypes.index')
             ->with('success', 'Tipo de equipo "' . $equipo->nombre . '" actualizado exitosamente.');
     }
 
@@ -106,14 +106,14 @@ class EquipmentTypeController extends Controller
             
             if ($activosCount <= 1) {
                 return redirect()
-                    ->route('clients.equipos.index')
+                    ->route('clients.equipmentTypes.index')
                     ->with('error', 'No se puede desactivar. Deben existir al menos 1 estados activos en el catálogo.');
             }
         }
         $equipo->toggleActivo();
 
         return redirect()
-            ->route('clients.equipos.index')
+            ->route('clients.equipmentTypes.index')
             ->with('success', 'Estado actualizado para "' . $equipo->nombre . '".');
     }
 
@@ -126,8 +126,8 @@ class EquipmentTypeController extends Controller
 
     // Métodos abstractos que el trait necesita
     protected function getModelClass(): string { return \App\Models\Clients\EquipmentType::class; }
-    protected function getViewFolder(): string { return 'clients.equipos'; }
-    protected function getRouteIndex(): string { return 'clients.equipos.index'; }
-    protected function getRouteEliminadas(): string { return 'clients.equipos.eliminados'; }
+    protected function getViewFolder(): string { return 'clients.equipmentTypes'; }
+    protected function getRouteIndex(): string { return 'clients.equipmentTypes.index'; }
+    protected function getRouteEliminadas(): string { return 'clients.equipmentTypes.eliminados'; }
     protected function getEntityName(): string { return 'Tipo de Equipo'; }
 }

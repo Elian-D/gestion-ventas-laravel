@@ -21,7 +21,7 @@
 
             <td class="px-6 py-4 text-right">
                 <div class="flex justify-end gap-2">
-                    <form action="{{ route('clients.equipos.restaurar', $equipmentType->id) }}" method="POST">
+                    <form action="{{ route('clients.equipmentTypes.restaurar', $equipmentType->id) }}" method="POST">
                         @csrf @method('PATCH')
                         <button type="submit" class="p-2 text-green-600 hover:bg-green-50 rounded-lg">
                             <x-heroicon-s-arrow-path class="w-5 h-5" />
@@ -49,7 +49,7 @@
         :id="$equipmentType->id"
         :title="'¿Eliminar Permanentemente?'"
         :itemName="$equipmentType->nombre"
-        :route="route('clients.equipos.borrarDefinitivo', $equipmentType->id)"
+        :route="route('clients.equipmentTypes.borrarDefinitivo', $equipmentType->id)"
         :description="'Estás a punto de borrar definitivamente el tipo de equipo <strong>' . $equipmentType->nombre . '</strong>.'"
     >
         <strong>Aviso Crítico:</strong> Esta operación borrará todos los datos asociados y no se puede deshacer.

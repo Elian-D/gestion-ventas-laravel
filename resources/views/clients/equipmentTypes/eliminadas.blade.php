@@ -6,7 +6,7 @@
         {{-- TOOLBAR --}}
         <x-page-toolbar title="Papelera de Tippos de Equipos" subtitle="Tipos de Equipos eliminados recientemente">
             <x-slot name="actions">
-                <a href="{{ route('clients.equipos.index') }}" 
+                <a href="{{ route('clients.equipmentTypes.index') }}" 
                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                     <x-heroicon-s-arrow-left class="w-4 h-4 mr-2" />
                     Volver a Tipos Equipos
@@ -30,7 +30,7 @@
             </div>
 
             <div>
-                @include('clients.equipos.partials.eliminados-table', ['items' => $items])
+                @include('clients.equipmentTypes.partials.eliminados-table', ['items' => $items])
             </div>
         </div>
     </div>

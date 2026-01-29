@@ -25,7 +25,7 @@ class BusinessTypeController extends Controller
             ->withQueryString();
 
         if ($request->ajax()) {
-            return view('clients.negocios.partials.table', [
+            return view('clients.businessTypes.partials.table', [
                 'businessTypes'   => $businessTypes,
                 'visibleColumns'  => $visibleColumns,
                 'allColumns'      => BusinessTypesTable::allColumns(),
@@ -34,7 +34,7 @@ class BusinessTypeController extends Controller
             ])->render();
         }
 
-        return view('clients.negocios.index', array_merge(
+        return view('clients.businessTypes.index', array_merge(
             [
                 'businessTypes'  => $businessTypes,
                 'visibleColumns' => $visibleColumns,
@@ -64,7 +64,7 @@ class BusinessTypeController extends Controller
 
         // ... (redirección)
         return redirect()
-            ->route('clients.negocios.index')
+            ->route('clients.businessTypes.index')
             ->with('success', 'Tipo de negocio "' . $negocio->nombre . '" creado exitosamente.');
     }
 
@@ -85,7 +85,7 @@ class BusinessTypeController extends Controller
             
             if ($activosCount <= 1) {
                 return redirect()
-                    ->route('clients.negocios.index')
+                    ->route('clients.businessTypes.index')
                     ->with('error', 'No se puede desactivar. Deben existir al menos 1 estados activos en el catálogo.');
             }
         }
@@ -95,7 +95,7 @@ class BusinessTypeController extends Controller
 
         // ... (redirección)
         return redirect()
-            ->route('clients.negocios.index')
+            ->route('clients.businessTypes.index')
             ->with('success', 'Tipo de negocio "' . $negocio->nombre . '" actualizado exitosamente.');
     }
 
@@ -106,14 +106,14 @@ class BusinessTypeController extends Controller
             
             if ($activosCount <= 1) {
                 return redirect()
-                    ->route('clients.negocios.index')
+                    ->route('clients.businessTypes.index')
                     ->with('error', 'No se puede desactivar. Deben existir al menos 1 estados activos en el catálogo.');
             }
         }
         $negocio->toggleActivo();
 
         return redirect()
-            ->route('clients.negocios.index')
+            ->route('clients.businessTypes.index')
             ->with('success', 'Estado actualizado para "' . $negocio->nombre . '".');
     }
 
@@ -126,8 +126,8 @@ class BusinessTypeController extends Controller
 
     // Métodos abstractos que el trait necesita
     protected function getModelClass(): string { return \App\Models\Clients\BusinessType::class; }
-    protected function getViewFolder(): string { return 'clients.negocios'; }
-    protected function getRouteIndex(): string { return 'clients.negocios.index'; }
-    protected function getRouteEliminadas(): string { return 'clients.negocios.eliminados'; }
+    protected function getViewFolder(): string { return 'clients.businessTypes'; }
+    protected function getRouteIndex(): string { return 'clients.businessTypes.index'; }
+    protected function getRouteEliminadas(): string { return 'clients.businessTypes.eliminados'; }
     protected function getEntityName(): string { return 'Tipo de Negocio'; }
 }

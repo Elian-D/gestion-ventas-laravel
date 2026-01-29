@@ -8,7 +8,7 @@
                 <x-page-toolbar title="Gestión de Tipos de Negocios">
                     <x-slot name="actions">
 
-                    <a href="{{ route('clients.negocios.eliminados') }}"
+                    <a href="{{ route('clients.businessTypes.eliminados') }}"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100">
                         <x-heroicon-s-trash class="w-4 h-4 mr-2" />
                         Papelera
@@ -22,11 +22,11 @@
                 </x-page-toolbar>
 
                 {{-- FILTROS --}}
-                @include('clients.negocios.partials.filters')
+                @include('clients.businessTypes.partials.filters')
 
                 {{-- TABLA AJAX --}}
                 <div id="businessTypes-table" class="w-full overflow-hidden">
-                    @include('clients.negocios.partials.table')
+                    @include('clients.businessTypes.partials.table')
                 </div>
             </div>
         </div>
