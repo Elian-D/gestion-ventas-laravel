@@ -52,7 +52,7 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string|unique:categories,name',
-            'description' => 'sometimes|string',
+            'description' => 'nullable|string',
             'is_active' => 'sometimes|boolean',
         ]);
 
@@ -119,7 +119,7 @@ class CategoryController extends Controller
 
         return redirect()
             ->route('products.categories.index')
-            ->with('success', 'Estado actualizado para "' . $category->nombre . '".');
+            ->with('success', 'Estado actualizado para "' . $category->name . '".');
     }
 
 
