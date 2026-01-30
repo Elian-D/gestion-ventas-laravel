@@ -34,59 +34,73 @@
         {{-- ELIMINADA la clase ml-XX para que el sidebar FLOTE cuando esté colapsado. --}}
         <div class="flex min-h-screen bg-gray-100"> 
             
-{{-- SIDEBAR --}}
-<x-sidebar.layout>
-    
-    {{-- GRUPO 1: Menú Principal --}}
-    <x-sidebar.group>
-        <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
-            Dashboard
-        </x-sidebar.item>
+        {{-- SIDEBAR --}}
+        <x-sidebar.layout>
+            
+            {{-- Dashboard Independiente (Sin grupo) --}}
+            <div class="mb-6">
+                <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
+                    Dashboard
+                </x-sidebar.item>
+            </div>
 
-        <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['clientes*']">
-            Clientes
-            <x-slot name="submenu">
-                <x-sidebar.subitem href="/admin/clients/">Lista de Clientes</x-sidebar.subitem>
-                <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
-                <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Negocio</x-sidebar.subitem>
-                <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
-                <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipos</x-sidebar.subitem>
-            </x-slot>
-        </x-sidebar.dropdown>
+            {{-- GRUPO 1: Operaciones de Venta --}}
+            <x-sidebar.group>
+                <x-sidebar.title>Operaciones</x-sidebar.title>
+                
+                <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
+                    Ventas (POS)
+                </x-sidebar.item>
 
-        <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
-            Ventas
-        </x-sidebar.item>
+                <x-sidebar.item href="/rutas" icon="heroicon-s-map">
+                    Rutas y Entregas
+                </x-sidebar.item>
+            </x-sidebar.group>
 
-        <x-sidebar.item href="/rutas" icon="heroicon-s-map">
-            Rutas
-        </x-sidebar.item>
-    </x-sidebar.group>
+            {{-- GRUPO 2: Catálogos (Productos y Clientes) --}}
+            <x-sidebar.group>
+                <x-sidebar.title>Catálogos</x-sidebar.title>
 
-    {{-- GRUPO 2: Usuarios y Permisos --}}
-    <x-sidebar.group>
-        <x-sidebar.title>Usuarios</x-sidebar.title>
+                {{-- Dropdown de Productos (NUEVO) --}}
+                <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">
+                    Productos
+                    <x-slot name="submenu">
+                        <x-sidebar.subitem href="/admin/products">Lista de Productos</x-sidebar.subitem>
+                        <x-sidebar.subitem href="/admin/products/categories">Categorías</x-sidebar.subitem>
+                    </x-slot>
+                </x-sidebar.dropdown>
 
-        <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
-            Usuarios
-        </x-sidebar.item>
+                {{-- Dropdown de Clientes --}}
+                <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['admin/clients*']">
+                    Clientes
+                    <x-slot name="submenu">
+                        <x-sidebar.subitem href="/admin/clients">Lista de Clientes</x-sidebar.subitem>
+                        <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
+                        <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Negocio</x-sidebar.subitem>
+                        <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
+                        <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipos</x-sidebar.subitem>
+                    </x-slot>
+                </x-sidebar.dropdown>
+            </x-sidebar.group>
 
-        <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
-            Roles y Permisos
-        </x-sidebar.item>
-    </x-sidebar.group>
+            {{-- GRUPO 3: Sistema --}}
+            <x-sidebar.group>
+                <x-sidebar.title>Administración</x-sidebar.title>
 
-    {{-- GRUPO 3: Configuración --}}
-    <x-sidebar.group>
-        <x-sidebar.title>Configuración</x-sidebar.title>
+                <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
+                    Usuarios
+                </x-sidebar.item>
 
-        <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
-            Configuración
-        </x-sidebar.item>
-    </x-sidebar.group>
+                <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
+                    Roles y Permisos
+                </x-sidebar.item>
 
-</x-sidebar.layout>
+                <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
+                    Configuración
+                </x-sidebar.item>
+            </x-sidebar.group>
 
+        </x-sidebar.layout>
 
             
             {{-- OVERLAY (Fondo oscuro para móviles) --}}
