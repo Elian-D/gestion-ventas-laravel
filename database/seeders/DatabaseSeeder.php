@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PermissionSeeder\POSPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\EquipmentPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\ProductsPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\InventoryPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
 
@@ -49,6 +50,9 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\ProductsSeeders\CategorySeeder::class,
             \Database\Seeders\ProductsSeeders\UnitSeeder::class,
             \Database\Seeders\ProductsSeeders\ProductSeeder::class,
+
+            // Inventory Seeders
+            \Database\Seeders\InventorySeeders\WarehouseSeeder::class,
         ]);
     }
 }
