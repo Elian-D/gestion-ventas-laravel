@@ -15,4 +15,5 @@ import './pages/businessTypes'
 import './pages/category'
 import './pages/units'
 import './pages/products'
+import './pages/warehouses'
 
