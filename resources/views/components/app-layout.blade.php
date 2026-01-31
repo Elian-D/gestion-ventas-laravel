@@ -67,6 +67,7 @@
                     <x-slot name="submenu">
                         <x-sidebar.subitem href="/admin/products">Lista de Productos</x-sidebar.subitem>
                         <x-sidebar.subitem href="/admin/products/categories">Categorías</x-sidebar.subitem>
+                        <x-sidebar.subitem href="/admin/products/units">Unidad de Medida</x-sidebar.subitem>
                     </x-slot>
                 </x-sidebar.dropdown>
 
