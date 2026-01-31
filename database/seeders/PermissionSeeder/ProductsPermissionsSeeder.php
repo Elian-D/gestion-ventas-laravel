@@ -10,7 +10,8 @@ class ProductsPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            'configure categories', // Gestionar tipo de negocios
+            'configure categories', // Gestionar categorías de productos
+            'configure units', // Gestionar unidades de medida
         ];
 
         foreach ($permissions as $permission) {

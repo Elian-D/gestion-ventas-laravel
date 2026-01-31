@@ -47,6 +47,7 @@ class DatabaseSeeder extends Seeder
 
             // Products Seeders
             \Database\Seeders\ProductsSeeders\CategorySeeder::class,
+            \Database\Seeders\ProductsSeeders\UnitSeeder::class,
         ]);
     }
 }
