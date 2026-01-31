@@ -51,15 +51,18 @@ class UnitController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|unique:units,name',
-            'abbreviation' => 'nullable|string',
-            'is_active' => 'sometimes|boolean',
+            'name' => ['required', 'string'],
+            'abbreviation' => [
+                'required',
+                'string',
+                Rule::unique('units', 'abbreviation'),
+            ],
+            'is_active' => ['required', 'boolean'],
         ]);
-
 
         $unit = Unit::create([
             'name' => $request->name,
-            // 'abbreviation' => $request->abbreviation,
+            'abbreviation' => $request->abbreviation,
             'is_active' => $request->is_active
         ]);
 
@@ -73,10 +76,15 @@ class UnitController extends Controller
 
     public function update(Request $request, Unit $unit) {
         $request->validate([
-            'name' => ['required', 'string', Rule::unique('units')->ignore($unit->id)],
-            'abbreviation' => 'nullable|string',
-            'is_active' => 'sometimes|boolean',
+            'name' => ['required', 'string'],
+            'abbreviation' => [
+                'required',
+                'string',
+                Rule::unique('units', 'abbreviation')->ignore($unit->id),
+            ],
+            'is_active' => ['sometimes', 'boolean'],
         ]);
+
 
         // Convertimos el input a boolean para comparar correctamente
         $nuevoEstado = $request->boolean('is_active');
@@ -95,7 +103,7 @@ class UnitController extends Controller
 
         $unit->update([
             'name' => $request->name,
-            'description' => $request->description,
+            'abbreviation' => $request->abbreviation,
             'is_active' => $nuevoEstado, // Importante usar la variable ya procesada
         ]);
 
