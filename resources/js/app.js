@@ -12,4 +12,7 @@ import './pages/pos'
 import './pages/equipments'
 import './pages/equipmentsTypes'
 import './pages/businessTypes'
+import './pages/category'
+import './pages/units'
+import './pages/products'
 
