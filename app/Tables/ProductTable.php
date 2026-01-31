@@ -30,12 +30,9 @@ class ProductTable
             'sku',
             'name',
             'image_path',
-            'category_id',
             'price',
-            'unit_id',
             'stock',
             'is_active',
-            'description',
         ];
     }
 
