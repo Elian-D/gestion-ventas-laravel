@@ -15,8 +15,6 @@ class ProductTable
             'price'             => 'Precio',
             'cost'              => 'Costo',
             'unit_id'           => 'Unidad de Medida',
-            'stock'             => 'Stock',
-            'min_stock'         => 'Stock Mínimo',
             'is_active'         => 'Estado',
             'is_stockable'      => 'Gestionar Stock',
             'created_at'        => 'Fecha Creación',
@@ -31,7 +29,6 @@ class ProductTable
             'name',
             'image_path',
             'price',
-            'stock',
             'is_active',
         ];
     }

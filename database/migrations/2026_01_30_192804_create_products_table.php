@@ -28,19 +28,18 @@ return new class extends Migration
             $table->string('image_path')->nullable();
 
             // Contabilidad y Precios
+            // Nota: El precio y costo son globales o base.
             $table->decimal('price', 12, 2)->default(0);
             $table->decimal('cost', 12, 2)->default(0);
 
-            // Inventario Operativo
-            $table->integer('stock')->default(0);
-            $table->integer('min_stock')->default(5);
-
             // Flags
             $table->boolean('is_active')->default(true);
+            
+            // Este flag es vital: determina si el producto genera registros en inventory_stocks
             $table->boolean('is_stockable')->default(true);
 
             $table->timestamps();
-            $table->softDeletes(); // Requerido por tu checklist
+            $table->softDeletes(); 
         });
     }
 

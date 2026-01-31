@@ -25,10 +25,6 @@ class StoreProductRequest extends FormRequest
             'price'        => 'required|numeric|min:0',
             'cost'         => 'required|numeric|min:0',
             
-            // Stock
-            'stock'        => 'required|integer|min:0',
-            'min_stock'    => 'required|integer|min:0',
-            
             // Flags
             'is_active'    => 'boolean',
             'is_stockable' => 'boolean',

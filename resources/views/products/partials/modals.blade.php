@@ -19,7 +19,7 @@
                             <h3 class="text-xl font-bold text-gray-900 leading-tight">{{ $item->name }}</h3>
                             <div class="flex items-center gap-2 mt-1">
                                 <span class="text-xs font-mono font-semibold px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded border border-indigo-100 uppercase tracking-wider">
-                                    {{ $item->sku }}
+                                    {{ $item->sku ?? 'SIN SKU' }}
                                 </span>
                                 <span class="text-gray-400 text-xs">•</span>
                                 <span class="text-sm text-gray-500 font-medium italic">{{ $item->category->name ?? 'Sin categoría' }}</span>
@@ -28,17 +28,19 @@
                     </div>
 
                     {{-- Badge de Estado Activo --}}
-                    @if($item->is_active)
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset shadow-sm bg-emerald-100 text-emerald-700 ring-emerald-600/20">
-                            <span class="w-1.5 h-1.5 rounded-full mr-2 bg-emerald-500 animate-pulse"></span>
-                            Activo
-                        </span>
-                    @else
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset shadow-sm bg-red-100 text-red-700 ring-red-600/20">
-                            <span class="w-1.5 h-1.5 rounded-full mr-2 bg-red-500"></span>
-                            Inactivo
-                        </span>
-                    @endif
+                    <div class="flex flex-col gap-2 items-end">
+                        @if($item->is_active)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset shadow-sm bg-emerald-100 text-emerald-700 ring-emerald-600/20">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2 bg-emerald-500 animate-pulse"></span>
+                                Activo
+                            </span>
+                        @else
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 ring-inset shadow-sm bg-red-100 text-red-700 ring-red-600/20">
+                                <span class="w-1.5 h-1.5 rounded-full mr-2 bg-red-500"></span>
+                                Inactivo
+                            </span>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -68,7 +70,7 @@
                             @if($item->price > 0)
                                 <div class="mt-3 px-3">
                                     @php $margin = (($item->price - $item->cost) / $item->price) * 100; @endphp
-                                    <span class="text-[11px] text-gray-500 uppercase">Margen de utilidad: 
+                                    <span class="text-[11px] text-gray-500 uppercase">Margen de utilidad sugerido: 
                                         <span class="font-bold {{ $margin > 20 ? 'text-emerald-600' : 'text-amber-600' }}">
                                             {{ number_format($margin, 1) }}%
                                         </span>
@@ -104,55 +106,45 @@
                         </section>
                     </div>
 
-                    {{-- Columna Derecha: Inventario y Auditoría --}}
+                    {{-- Columna Derecha: Configuración Logística y Auditoría --}}
                     <div class="space-y-6">
                         <section>
                             <h4 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-amber-50 pb-2">
-                                <x-heroicon-s-cube class="w-4 h-4"/> Gestión de Inventario
+                                <x-heroicon-s-cog-6-tooth class="w-4 h-4"/> Logística y Almacén
                             </h4>
-                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                @if($item->is_stockable)
-                                    <div class="flex justify-between items-end mb-4">
-                                        <div>
-                                            <span class="text-[10px] text-gray-400 uppercase block">Stock Actual</span>
-                                            <p class="text-2xl font-black {{ $item->stock <= $item->min_stock ? 'text-red-600' : 'text-gray-800' }}">
-                                                {{ $item->stock }} <span class="text-sm font-medium text-gray-400">{{ $item->unit->abbreviation ?? '' }}</span>
-                                            </p>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-[10px] text-gray-400 uppercase block">Mínimo</span>
-                                            <p class="text-sm font-bold text-gray-600">{{ $item->min_stock }}</p>
-                                        </div>
-                                    </div>
-                                    {{-- Barra de progreso visual --}}
-                                    <div class="w-full bg-gray-200 rounded-full h-1.5">
-                                        @php $percent = $item->stock > 0 ? min(($item->stock / ($item->min_stock * 3)) * 100, 100) : 0; @endphp
-                                        <div class="h-1.5 rounded-full {{ $item->stock <= $item->min_stock ? 'bg-red-500' : 'bg-emerald-500' }}" style="width: {{ $percent }}%"></div>
-                                    </div>
-                                @else
-                                    <div class="py-4 text-center">
-                                        <p class="text-xs font-bold text-gray-400 uppercase">Producto no inventariable</p>
-                                        <p class="text-[10px] text-gray-400 italic">Ventas ilimitadas sin control de stock</p>
-                                    </div>
-                                @endif
+                            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 font-medium">Control de Inventario:</span>
+                                    @if($item->is_stockable)
+                                        <span class="text-[10px] font-bold uppercase py-1 px-2 bg-amber-100 text-amber-700 rounded-md">
+                                            Sujeto a Stock
+                                        </span>
+                                    @else
+                                        <span class="text-[10px] font-bold uppercase py-1 px-2 bg-gray-200 text-gray-600 rounded-md">
+                                            No Inventariable
+                                        </span>
+                                    @endif
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-2 italic leading-tight">
+                                    {{ $item->is_stockable 
+                                        ? '* Este producto requiere asignación en almacenes para ser vendido.' 
+                                        : '* Este producto se trata como servicio o activo libre.' }}
+                                </p>
                             </div>
                         </section>
 
                         <section>
                             <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-gray-50 pb-2">
-                                <x-heroicon-s-clock class="w-4 h-4"/> Historial de Registro
+                                <x-heroicon-s-clock class="w-4 h-4"/> Trazabilidad
                             </h4>
                             <div class="space-y-3 px-1">
                                 <div class="flex justify-between items-center text-xs">
-                                    <span class="text-gray-400">Creado el:</span>
-                                    <span class="font-medium text-gray-600">{{ $item->created_at->format('d/m/Y h:i A') }}</span>
+                                    <span class="text-gray-400">Fecha Registro:</span>
+                                    <span class="font-medium text-gray-600">{{ $item->created_at->format('d/m/Y') }}</span>
                                 </div>
                                 <div class="flex justify-between items-center text-xs">
-                                    <span class="text-gray-400">Modificado:</span>
+                                    <span class="text-gray-400">Última Edición:</span>
                                     <span class="font-medium text-gray-600">{{ $item->updated_at->diffForHumans() }}</span>
-                                </div>
-                                <div class="mt-4 pt-4 border-t border-dashed border-gray-100 flex items-center gap-2">
-                                    <span class="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-500 rounded font-mono">UUID: {{ Str::limit($item->id, 18) }}</span>
                                 </div>
                             </div>
                         </section>
@@ -162,8 +154,8 @@
                 {{-- Footer con acciones --}}
                 <div class="mt-10 pt-6 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2">
-                         <span class="text-[10px] text-gray-300 uppercase tracking-tighter font-mono italic text-center sm:text-left">
-                            Cátalogo de Productos v1.0
+                         <span class="text-[10px] text-gray-300 uppercase tracking-tighter font-mono italic">
+                            ID: {{ $item->id }}
                          </span>
                     </div>
                     <div class="flex gap-3 w-full sm:w-auto">
@@ -171,7 +163,7 @@
                             Cerrar
                         </x-secondary-button>
                         <a href="{{ route('products.edit', $item) }}" class="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-2 bg-indigo-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 transition duration-150 shadow-md shadow-indigo-100">
-                            <x-heroicon-s-pencil class="w-4 h-4 mr-2" /> Editar Producto
+                            <x-heroicon-s-pencil class="w-4 h-4 mr-2" /> Editar Ficha
                         </a>
                     </div>
                 </div>
@@ -187,6 +179,6 @@
         :type="'el producto'"
         :route="route('products.destroy', $item)"
         >
-        <strong>Atención:</strong> Si elimina este producto, no podrá ser seleccionado en futuras ventas del POS.
+        <strong>Atención:</strong> Esta acción marcará el producto como inactivo. El historial de sus movimientos de inventario pasados se mantendrá por integridad contable.
     </x-ui.confirm-deletion-modal>
 @endforeach

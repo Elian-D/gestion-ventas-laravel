@@ -55,32 +55,6 @@
                 <td class="px-6 py-4 text-sm text-gray-600">{{ $item->unit->name ?? '—' }} ({{ $item->unit->abbreviation ?? '' }})</td>
             @endif
 
-            @if(in_array('stock', $visibleColumns))
-                <td class="px-6 py-4 text-sm">
-                    @if($item->is_stockable)
-                        <span class="{{ $item->stock <= $item->min_stock ? 'text-red-600 font-bold' : 'text-gray-600' }}">
-                            {{ $item->stock }} {{ $item->unit->abbreviation ?? '' }}
-                        </span>
-                    @else
-                        <span class="whitespace-nowrap text-gray-400 flex items-center gap-1">
-                            <span class="text-[10px] uppercase font-bold text-gray-400">Sin límite</span>
-                        </span>
-                    @endif
-                </td>
-            @endif
-
-            @if(in_array('min_stock', $visibleColumns))
-                <td class="px-6 py-4 text-sm text-gray-600">
-                    @if($item->is_stockable)
-                    {{ $item->min_stock }} {{ $item->unit->abbreviation ?? '' }}
-                    @else
-                        <span class="whitespace-nowrap text-gray-400 flex items-center gap-1">
-                            <span class="text-[10px] uppercase font-bold text-gray-400">Sin límite</span>
-                        </span>
-                    @endif
-                </td>
-            @endif
-
             @if(in_array('is_active', $visibleColumns))
                 <td class="px-6 py-4">
                     <span class="px-2 py-1 text-xs rounded-full font-bold {{ $item->is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
