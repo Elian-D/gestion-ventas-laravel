@@ -12,6 +12,13 @@ class ProductsPermissionsSeeder extends Seeder
         $permissions = [
             'configure categories', // Gestionar categorías de productos
             'configure units', // Gestionar unidades de medida
+
+            'view products',
+            'create products',
+            'edit products',
+            'delete products',
+            'restore products',
+            'manage stock' // Permiso especial para el futuro módulo de inventario
         ];
 
         foreach ($permissions as $permission) {

@@ -24,10 +24,24 @@ class Unit extends Model
     /**
      * Relación: Una unidad tiene muchos productos
      */
-    // public function products()
-    // {
-    //     return $this->hasMany(Product::class);
-    // }
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    /* ===========================
+     |  SCOPES DEL CATÁLOGO
+     =========================== */
+
+    public function scopeActivos($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeInactivos($query)
+    {
+        return $query->where('is_active', false);
+    }
 
     /* ===========================
      |  COMPORTAMIENTO
