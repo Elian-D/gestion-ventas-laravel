@@ -41,6 +41,14 @@ class Product extends Model
     {
         return $this->belongsTo(Unit::class);
     }
+    
+    // Para saber el stock en todos los almacenes
+    public function stocks()
+    {
+        return $this->hasMany(\App\Models\Inventory\InventoryStock::class);
+    }
+
+
     /* ===========================
      |  SCOPES
      =========================== */
@@ -68,5 +76,11 @@ class Product extends Model
     public function scopeStockable(Builder $query): Builder
     {
         return $query->where('is_stockable', true);
+    }
+
+        // Para obtener la suma total de stock de este producto (el que borramos de la tabla)
+    public function getTotalStockAttribute()
+    {
+        return $this->stocks()->sum('quantity');
     }
 }

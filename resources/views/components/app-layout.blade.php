@@ -66,7 +66,7 @@
                         Inventario
                         <x-slot name="submenu">
                             <x-sidebar.subitem href="/admin/inventory/warehouses">Almacenes</x-sidebar.subitem>
-                            <x-sidebar.subitem href="/admin/inventory">Stock</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/inventory/stocks">Stock</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/inventory/movements">Movimientos</x-sidebar.subitem>
                         </x-slot>
                     </x-sidebar.dropdown>
