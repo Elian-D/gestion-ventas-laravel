@@ -60,6 +60,20 @@ class InventoryMovementController extends Controller
     {
         $movement = $this->service->register($request->validated());
 
+        // Obtenemos la URL de donde vino el usuario
+        $previousUrl = url()->previous();
+        
+        // Definimos la ruta del dashboard (ajusta el nombre si es distinto)
+        $dashboardRoute = route('inventory.dashboard.index');
+
+        // Si la URL anterior contiene la ruta del dashboard, redirigimos allá
+        if (str_contains($previousUrl, $dashboardRoute)) {
+            return redirect()
+                ->route('inventory.dashboard.index')
+                ->with('success', "Movimiento registrado: El stock de {$movement->product->name} ha sido actualizado.");
+        }
+
+        // Por defecto, redirigir al index de movimientos
         return redirect()
             ->route('inventory.movements.index')
             ->with('success', "Ajuste #{$movement->id} realizado con éxito.");
