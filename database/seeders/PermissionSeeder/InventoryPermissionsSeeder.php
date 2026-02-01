@@ -10,6 +10,8 @@ class InventoryPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            'view inventory dashboard',
+
             'configure warehouses', // Gestionar almacenes
             'inventory stocks index', // Ver balance de productos por alamacén
             'inventory stocks update', // Editar el min_stock cuando sea necesario

@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Inventory\InventoryDashboardController;
+
+
 
 // routes/admin/InventoryRoutesCondig.php
 Route::prefix('inventory')->as('inventory.')->group(function () {
@@ -13,5 +16,7 @@ Route::prefix('inventory')->as('inventory.')->group(function () {
     require __DIR__ . '/inventory/inventorystock.php';
     require __DIR__ . '/inventory/movements.php';
 
-/*     require __DIR__ . '/inventory/inventory.php'; */
+    Route::get('/dashboard', InventoryDashboardController::class)
+        ->middleware('permission: view inventory dashboard')
+        ->name('dashboard.index');
 });

@@ -10,6 +10,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -57,19 +58,22 @@
                 <x-sidebar.group>
                     <x-sidebar.title>Gestión</x-sidebar.title>
 
-                    {{-- Inventario --}}
-                    <x-sidebar.dropdown 
-                        id="inventario" 
-                        icon="heroicon-s-archive-box" 
-                        :activeRoutes="['admin/inventory*']"
-                    >
-                        Inventario
-                        <x-slot name="submenu">
-                            <x-sidebar.subitem href="/admin/inventory/warehouses">Almacenes</x-sidebar.subitem>
-                            <x-sidebar.subitem href="/admin/inventory/stocks">Stock</x-sidebar.subitem>
-                            <x-sidebar.subitem href="/admin/inventory/movements">Movimientos</x-sidebar.subitem>
-                        </x-slot>
-                    </x-sidebar.dropdown>
+                    @can('view inventory dashboard')
+                        {{-- Inventario --}}
+                        <x-sidebar.dropdown 
+                            id="inventario" 
+                            icon="heroicon-s-archive-box" 
+                            :activeRoutes="['admin/inventory*']"
+                        >
+                            Inventario
+                            <x-slot name="submenu">
+                                <x-sidebar.subitem href="/admin/inventory/dashboard">Dashboard</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/warehouses">Almacenes</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/stocks">Stock</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/movements">Movimientos</x-sidebar.subitem>
+                            </x-slot>
+                        </x-sidebar.dropdown>
+                    @endcan
 
                     {{-- Productos --}}
                     <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">
