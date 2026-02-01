@@ -13,8 +13,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id', 'unit_id', 'name', 'slug', 'sku', 'description', 
-        'image_path', 'price', 'cost', 'stock', 'min_stock', 
-        'is_active', 'is_stockable'
+        'image_path', 'price', 'cost', 'is_active', 'is_stockable'
     ];
 
     /* ===========================
@@ -70,20 +69,4 @@ class Product extends Model
     {
         return $query->where('is_stockable', true);
     }
-
-    public function scopeWithStock(Builder $query): Builder
-    {
-        return $query
-            ->where('is_stockable', true)
-            ->where('stock', '>', 0);
-    }
-
-    public function scopeLowStock(Builder $query): Builder
-    {
-        return $query
-            ->where('is_stockable', true)
-            ->whereColumn('stock', '<=', 'min_stock');
-    }
-
-
 }
