@@ -74,6 +74,20 @@
                             </x-slot>
                         </x-sidebar.dropdown>
                     @endcan
+                    
+                    @can('configure accounting')
+                        {{-- Inventario --}}
+                        <x-sidebar.dropdown 
+                            id="contabilidad" 
+                            icon="heroicon-s-currency-dollar" 
+                            :activeRoutes="['admin/accounting*']"
+                        >
+                            Contabilidad
+                            <x-slot name="submenu">
+                                <x-sidebar.subitem href="/admin/accounting/accounts">Cuentas Contables</x-sidebar.subitem>
+                            </x-slot>
+                        </x-sidebar.dropdown>
+                    @endcan
 
                     {{-- Productos --}}
                     <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">

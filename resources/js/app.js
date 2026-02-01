@@ -18,4 +18,5 @@ import './pages/products'
 import './pages/warehouses'
 import './pages/stock'
 import './pages/movements'
+import './pages/accounts'
 
