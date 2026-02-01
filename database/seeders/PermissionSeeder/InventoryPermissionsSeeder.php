@@ -14,6 +14,8 @@ class InventoryPermissionsSeeder extends Seeder
             'inventory stocks index', // Ver balance de productos por alamacén
             'inventory stocks update', // Editar el min_stock cuando sea necesario
             'inventory stocks export', // Exportar valores
+            'view inventory movements', // Ver el historial (Kardex)
+            'create inventory adjustments', // Realizar ajustes manuales de stock
         ];
 
         foreach ($permissions as $permission) {
