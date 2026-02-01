@@ -59,14 +59,14 @@
                 </section>
 
                 {{-- Sección 2: Precios e Inventario --}}
-                <section>
+                <section x-data="{ isStockable: {{ old('is_stockable', '1') == '1' ? 'true' : 'false' }} }">
                     <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
                         <div class="w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xs">2</div>
                         <h3 class="font-bold text-gray-800 uppercase text-xs tracking-wider">Precios y Stock</h3>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="md:col-span-2">
+                        <div>
                             <x-input-label value="Precio de Venta" />
                             <div class="relative mt-1">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">$</span>
@@ -74,17 +74,38 @@
                             </div>
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div>
                             <x-input-label value="Costo" />
                             <div class="relative mt-1">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm">$</span>
-                                <x-text-input type="number" step="0.01" name="cost" class="w-full pl-7" :value="old('cost')" placeholder="0.00" required />
+                                <x-text-input type="number" step="0.01" name="cost" class="w-full pl-7" :value="old('cost')" placeholder="0.00" />
                             </div>
+                        </div>
+
+                        <div>
+                            <x-input-label value="Stock Inicial" />
+                            <x-text-input type="number" name="stock" 
+                                class="w-full mt-1" 
+                                x-bind:readonly="!isStockable"
+                                x-bind:class="!isStockable ? 'bg-gray-100 text-gray-400' : ''"
+                                x-model="isStockable ? '{{ old('stock', 0) }}' : 0" />
+                        </div>
+
+                        <div>
+                            <x-input-label value="Stock Mínimo" />
+                            <x-text-input type="number" name="min_stock" 
+                                class="w-full mt-1" 
+                                x-bind:readonly="!isStockable"
+                                x-bind:class="!isStockable ? 'bg-gray-100 text-gray-400' : ''"
+                                x-model="isStockable ? '{{ old('min_stock', 10) }}' : 0" />
                         </div>
 
                         <div class="md:col-span-2 flex items-center gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 mt-2">
                             <x-input-label value="¿Gestionar Stock?" class="mb-0" />
-                            <input type="checkbox" name="is_stockable" value="1" checked class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-5 h-5 cursor-pointer">
+                            <input type="checkbox" name="is_stockable" 
+                                x-model="isStockable"
+                                value="1"
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 w-5 h-5 cursor-pointer">
                             <span class="text-xs text-gray-500 italic">Si se desmarca, el producto no restará inventario al venderse.</span>
                         </div>
 
