@@ -11,6 +11,9 @@ class InventoryPermissionsSeeder extends Seeder
     {
         $permissions = [
             'configure warehouses', // Gestionar almacenes
+            'inventory stocks index', // Ver balance de productos por alamacén
+            'inventory stocks update', // Editar el min_stock cuando sea necesario
+            'inventory stocks export', // Exportar valores
         ];
 
         foreach ($permissions as $permission) {
