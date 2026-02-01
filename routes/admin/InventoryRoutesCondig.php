@@ -17,6 +17,6 @@ Route::prefix('inventory')->as('inventory.')->group(function () {
     require __DIR__ . '/inventory/movements.php';
 
     Route::get('/dashboard', InventoryDashboardController::class)
-        ->middleware('permission: view inventory dashboard')
+        ->middleware('permission:view inventory dashboard')
         ->name('dashboard.index');
 });

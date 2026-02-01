@@ -79,17 +79,18 @@ class InventoryStockController extends Controller
         try {
             $this->stockService->updateMinStock($stock, $request->min_stock);
 
-            return response()->json([
-                'success' => true,
-                'message' => "Stock mínimo de {$stock->product->name} en {$stock->warehouse->name} actualizado."
-            ]);
+            // Cambiamos la respuesta JSON por un Redirect
+            return redirect()
+                ->route('inventory.stocks.index')
+                ->with('success', "Stock mínimo de {$stock->product->name} en {$stock->warehouse->name} actualizado correctamente.");
 
         } catch (\Exception $e) {
             Log::error("Error actualizando min_stock: " . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => "No se pudo actualizar el stock mínimo."
-            ], 422);
+
+            // Redirigir hacia atrás con el error para que el usuario sepa qué pasó
+            return redirect()
+                ->back()
+                ->with('error', "No se pudo actualizar el stock mínimo.");
         }
     }
 
