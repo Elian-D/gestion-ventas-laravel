@@ -57,6 +57,7 @@ class DatabaseSeeder extends Seeder
             
             //Accounting Seeders
             \Database\Seeders\AccountingSeeders\AccountingAccountSeeder::class,
+            \Database\Seeders\AccountingSeeders\DocumentTypeSeeder::class,
 
         ]);
     }
