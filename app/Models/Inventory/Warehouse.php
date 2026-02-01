@@ -50,11 +50,11 @@ class Warehouse extends Model
     /**
      * Relación: Un almacén tiene muchos balances de stock
      */
-/*     public function stocks()
+    public function stocks()
     {
         return $this->hasMany(InventoryStock::class);
     }
- */
+
     /* ===========================
      |  SCOPES
      =========================== */
