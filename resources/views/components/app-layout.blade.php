@@ -10,6 +10,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -34,76 +35,88 @@
         {{-- ELIMINADA la clase ml-XX para que el sidebar FLOTE cuando esté colapsado. --}}
         <div class="flex min-h-screen bg-gray-100"> 
             
-        {{-- SIDEBAR --}}
-        <x-sidebar.layout>
-            
-            {{-- Dashboard Independiente (Sin grupo) --}}
-            <div class="mb-6">
+            {{-- SIDEBAR --}}
+            <x-sidebar.layout>
+                
+                {{-- Dashboard independiente --}}
                 <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
                     Dashboard
                 </x-sidebar.item>
-            </div>
 
-            {{-- GRUPO 1: Operaciones de Venta --}}
-            <x-sidebar.group>
-                <x-sidebar.title>Operaciones</x-sidebar.title>
-                
-                <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
-                    Ventas (POS)
-                </x-sidebar.item>
+                {{-- Sección sin grupo: Items frecuentes --}}
+                <div class="my-4">
+                    <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
+                        Ventas (POS)
+                    </x-sidebar.item>
 
-                <x-sidebar.item href="/rutas" icon="heroicon-s-map">
-                    Rutas y Entregas
-                </x-sidebar.item>
-            </x-sidebar.group>
+                    <x-sidebar.item href="/rutas" icon="heroicon-s-map">
+                        Rutas y Entregas
+                    </x-sidebar.item>
+                </div>
 
-            {{-- GRUPO 2: Catálogos (Productos y Clientes) --}}
-            <x-sidebar.group>
-                <x-sidebar.title>Catálogos</x-sidebar.title>
+                {{-- GRUPO 1: Gestión (Inventario + Catálogos) --}}
+                <x-sidebar.group>
+                    <x-sidebar.title>Gestión</x-sidebar.title>
 
-                {{-- Dropdown de Productos (NUEVO) --}}
-                <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">
-                    Productos
-                    <x-slot name="submenu">
-                        <x-sidebar.subitem href="/admin/products">Lista de Productos</x-sidebar.subitem>
-                        <x-sidebar.subitem href="/admin/products/categories">Categorías</x-sidebar.subitem>
-                        <x-sidebar.subitem href="/admin/products/units">Unidad de Medida</x-sidebar.subitem>
-                    </x-slot>
-                </x-sidebar.dropdown>
+                    @can('view inventory dashboard')
+                        {{-- Inventario --}}
+                        <x-sidebar.dropdown 
+                            id="inventario" 
+                            icon="heroicon-s-archive-box" 
+                            :activeRoutes="['admin/inventory*']"
+                        >
+                            Inventario
+                            <x-slot name="submenu">
+                                <x-sidebar.subitem href="/admin/inventory/dashboard">Dashboard</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/warehouses">Almacenes</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/stocks">Stock</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/movements">Movimientos</x-sidebar.subitem>
+                            </x-slot>
+                        </x-sidebar.dropdown>
+                    @endcan
 
-                {{-- Dropdown de Clientes --}}
-                <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['admin/clients*']">
-                    Clientes
-                    <x-slot name="submenu">
-                        <x-sidebar.subitem href="/admin/clients">Lista de Clientes</x-sidebar.subitem>
-                        <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
-                        <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Negocio</x-sidebar.subitem>
-                        <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
-                        <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipos</x-sidebar.subitem>
-                    </x-slot>
-                </x-sidebar.dropdown>
-            </x-sidebar.group>
+                    {{-- Productos --}}
+                    <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">
+                        Productos
+                        <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/products">Productos</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/products/categories">Categorías</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/products/units">Unidades</x-sidebar.subitem>
+                        </x-slot>
+                    </x-sidebar.dropdown>
 
-            {{-- GRUPO 3: Sistema --}}
-            <x-sidebar.group>
-                <x-sidebar.title>Administración</x-sidebar.title>
+                    {{-- Clientes --}}
+                    <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['admin/clients*']">
+                        Clientes
+                        <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/clients">Clientes</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Negocio</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipos</x-sidebar.subitem>
+                        </x-slot>
+                    </x-sidebar.dropdown>
+                </x-sidebar.group>
 
-                <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
-                    Usuarios
-                </x-sidebar.item>
+                {{-- GRUPO 2: Administración --}}
+                <x-sidebar.group>
+                    <x-sidebar.title>Administración</x-sidebar.title>
 
-                <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
-                    Roles y Permisos
-                </x-sidebar.item>
+                    <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
+                        Usuarios
+                    </x-sidebar.item>
 
-                <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
-                    Configuración
-                </x-sidebar.item>
-            </x-sidebar.group>
+                    <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
+                        Roles y Permisos
+                    </x-sidebar.item>
 
-        </x-sidebar.layout>
+                    <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
+                        Configuración
+                    </x-sidebar.item>
+                </x-sidebar.group>
 
-            
+            </x-sidebar.layout>
+                        
             {{-- OVERLAY (Fondo oscuro para móviles) --}}
             {{-- Se activa si el sidebar está abierto Y es móvil (ancho < 640px) --}}
             <div x-show="isSidebarOpen && (window.innerWidth < 640)" 
