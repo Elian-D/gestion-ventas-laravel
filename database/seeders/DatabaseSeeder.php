@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PermissionSeeder\EquipmentPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\ProductsPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\InventoryPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\AccountingPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
 
@@ -53,6 +54,10 @@ class DatabaseSeeder extends Seeder
 
             // Inventory Seeders
             \Database\Seeders\InventorySeeders\WarehouseSeeder::class,
+            
+            //Accounting Seeders
+            \Database\Seeders\AccountingSeeders\AccountingAccountSeeder::class,
+
         ]);
     }
 }
