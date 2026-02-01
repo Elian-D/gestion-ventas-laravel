@@ -11,5 +11,7 @@ Route::prefix('inventory')->as('inventory.')->group(function () {
     
     
     require __DIR__ . '/inventory/inventorystock.php';
+    require __DIR__ . '/inventory/movements.php';
+
 /*     require __DIR__ . '/inventory/inventory.php'; */
 });

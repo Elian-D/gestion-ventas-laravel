@@ -10,7 +10,7 @@ export const setupEventListeners = (ctx) => {
     });
 
     // Inputs y Selects
-    ctx.form.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="date"]').forEach(el => 
+    ctx.form.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="date"], input[type="datetime-local"]').forEach(el => 
         el.addEventListener('change', () => applyFilters(ctx))
     );
 
