@@ -13,6 +13,13 @@ class AccountingPermissionsSeeder extends Seeder
             'configure accounting',
             'configure accounting account',
 
+            'view journal entries',
+            'create journal entries',
+            'edit journal entries',
+            'post journal entries', // Permiso especial para "Asentar"
+            'cancel journal entries',
+            'delete journal entries',
+
         ];
 
         foreach ($permissions as $permission) {
