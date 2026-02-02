@@ -9,5 +9,6 @@ Route::prefix('accounting')->as('accounting.')->group(function () {
     // para que no se dupliquen con los del resource
     require __DIR__ . '/accounting/accountingAccounts.php';
     require __DIR__ . '/accounting/journalEntries.php';
+    require __DIR__ . '/accounting/documentTypes.php';
 
 });
