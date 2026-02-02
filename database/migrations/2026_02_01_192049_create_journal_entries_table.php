@@ -11,9 +11,17 @@ return new class extends Migration
     {
         Schema::create('journal_entries', function (Blueprint $table) {
             $table->id();
-            $table->date('entry_date'); // Fecha contable
-            $table->string('reference')->nullable(); // NCF, # Cheque, # Factura
-            $table->string('description'); // La glosa o concepto
+            
+            // Relación con el tipo y número generado por el sistema
+            $table->foreignId('document_type_id')->nullable()->constrained('document_types');
+            $table->string('document_number')->nullable()->index(); // Indexado para búsquedas rápidas
+            
+            $table->date('entry_date'); 
+            
+            // Referencia para documentos externos (facturas de terceros, # de cheque, NCF)
+            $table->string('reference')->nullable(); 
+            
+            $table->string('description'); 
             $table->string('status');
             $table->foreignId('created_by')->constrained('users');
             $table->softDeletes();

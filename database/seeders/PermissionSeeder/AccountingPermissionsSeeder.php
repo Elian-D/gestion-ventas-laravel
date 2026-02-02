@@ -20,6 +20,11 @@ class AccountingPermissionsSeeder extends Seeder
             'cancel journal entries',
             'delete journal entries',
 
+            'view document types',
+            'create document types',
+            'edit document types',
+            'delete document types',
+
         ];
 
         foreach ($permissions as $permission) {
