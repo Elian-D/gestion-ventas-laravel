@@ -126,6 +126,27 @@
                 
                 {{-- Columna Izquierda: Clasificación --}}
                 <div class="space-y-6">
+                    {{-- Bloque de Cliente Vinculado (NUEVO) --}}
+                        @if($item->client)
+                        <section class="animate-in fade-in slide-in-from-left-4 duration-500">
+                            <h4 class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <x-heroicon-s-user-circle class="w-4 h-4"/> Enlace Externo
+                            </h4>
+                            <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 flex items-center gap-4">
+                                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-indigo-100">
+                                    <span class="text-indigo-600 font-black text-xs">{{ substr($item->client->name, 0, 2) }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-indigo-400 uppercase font-bold block leading-none mb-1">Cliente Asociado</span>
+                                    <p class="text-sm font-bold text-gray-800">{{ $item->client->name }}</p>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        <span class="text-[9px] px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded font-mono">{{ $item->client->taxIdentifierType->code ?? 'N/A' }}:  {{ $item->client->tax_id }}</span>
+                                        <a href="{{ route('clients.edit', $item->client->id) }}" class="text-[9px] text-indigo-600 hover:underline font-bold uppercase">Ver Perfil</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        @endif
                     <section>
                         <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <x-heroicon-s-tag class="w-4 h-4"/> Clasificación Contable

@@ -9,27 +9,30 @@ class ClientTable
         return [
             'id'                   => 'ID',
             'name'                 => 'Nombre Cliente',
-            'tax_identifier_types' => 'Tipo Identificador Fiscal',
-            'tax_id'               => 'Identificador Fiscal',
-            'type'                 => 'Tipo de Cliente',
+            'tax_identifier_types' => 'Tipo ID Fiscal',
+            'tax_id'               => 'ID Fiscal',
+            'type'                 => 'Tipo',
+            'balance'              => 'Saldo Pendiente', // Nueva
+            'credit_limit'         => 'Límite Crédito',  // Nueva
             'email'                => 'Email',
             'phone'                => 'Teléfono',
             'state'                => 'Estado/Provincia',
             'city'                 => 'Ciudad',
             'address'              => 'Dirección',
-            'estado_cliente'       => 'Estado del Cliente',
+            'accounting_account'   => 'Cuenta Contable', // Nueva
+            'estado_cliente'       => 'Estado Op.',
             'created_at'           => 'Fecha Creación',
-            'updated_at'           => 'Última Actualización'
         ];
     }
 
     public static function defaultDesktop(): array
     {
-        return ['id', 'name', 'tax_identifier_types','tax_id', 'estado_cliente'];
+        // Añadimos balance para control financiero inmediato
+        return ['id', 'name', 'tax_id', 'balance', 'credit_limit', 'estado_cliente'];
     }
 
     public static function defaultMobile(): array
     {
-        return ['id', 'name'];
+        return ['name', 'balance']; // En móvil, el saldo es vital
     }
 }
