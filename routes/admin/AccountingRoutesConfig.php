@@ -10,5 +10,6 @@ Route::prefix('accounting')->as('accounting.')->group(function () {
     require __DIR__ . '/accounting/accountingAccounts.php';
     require __DIR__ . '/accounting/journalEntries.php';
     require __DIR__ . '/accounting/documentTypes.php';
+    require __DIR__ . '/accounting/receivables.php';
 
 });
