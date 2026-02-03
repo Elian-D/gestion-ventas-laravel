@@ -36,7 +36,7 @@ class JournalEntryController extends Controller
         // Aplicación del Pipeline de Filtros (Fecha, Referencia, Estado)
         $entries = (new JournalEntryFilters($request))
             ->apply(JournalEntry::query()->with(['creator', 'items.account']))
-            ->latest('entry_date')
+            ->latest()
             ->paginate($perPage)
             ->withQueryString();
 
@@ -47,6 +47,8 @@ class JournalEntryController extends Controller
                 'items'          => $entries,
                 'visibleColumns' => $visibleColumns,
                 'allColumns'     => JournalEntryTable::allColumns(),
+                'defaultDesktop' => JournalEntryTable::defaultDesktop(),
+                'defaultMobile'  => JournalEntryTable::defaultMobile(),
             ])->render();
         }
 
