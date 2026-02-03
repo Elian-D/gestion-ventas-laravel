@@ -69,6 +69,11 @@ class AccountingAccount extends Model
         return $this->hasMany(AccountingAccount::class, 'parent_id')->orderBy('code'); 
     }
 
+    public function client(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        // Una cuenta "tiene un" cliente vinculado a través de accounting_account_id
+        return $this->hasOne(\App\Models\Clients\Client::class, 'accounting_account_id');
+    }
     // Scopes
     public function scopeRoots($query) 
     { 

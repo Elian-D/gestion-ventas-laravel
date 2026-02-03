@@ -25,6 +25,12 @@ class AccountingPermissionsSeeder extends Seeder
             'edit document types',
             'delete document types',
 
+            'view receivables',
+            'create receivables', // Para deudas manuales/ajustes
+            'edit receivables',
+            'cancel receivables',
+            'report receivables', // Para ver reportes de antigüedad de saldos
+
         ];
 
         foreach ($permissions as $permission) {

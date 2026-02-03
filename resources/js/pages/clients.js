@@ -16,6 +16,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: 'Estado del Cliente',
                 source: 'estadosClientes'
             },
+            has_debt: {
+                label: 'Saldo',
+                values: {
+                    'yes': 'Con Saldo Pendiente',
+                    'no': 'Sin Deuda'
+                }
+            },
+            over_limit: {
+                label: 'Crédito',
+                values: {
+                    '1': 'Límite Excedido'
+                }
+            },
             state: {
                 label: 'Estado',
                 source: 'state'

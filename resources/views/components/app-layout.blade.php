@@ -85,6 +85,7 @@
                             Contabilidad
                             <x-slot name="submenu">
                                 <x-sidebar.subitem href="/admin/accounting/accounts">Cuentas Contables</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/accounting/receivables">Cuentas por Cobrar</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/journal_entries">Asientos Contables</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/document_types">Tipo de Documento</x-sidebar.subitem>
                             </x-slot>

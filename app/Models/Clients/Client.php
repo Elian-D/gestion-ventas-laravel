@@ -4,6 +4,8 @@ namespace App\Models\Clients;
 
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
+use App\Models\Accounting\AccountingAccount; // Nueva importación
+use App\Models\Accounting\Receivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -28,8 +30,18 @@ class Client extends Model
         'address',
         'tax_identifier_type_id',
         'tax_id',
+        // Nuevos campos financieros
+        'credit_limit',
+        'balance',
+        'payment_terms',
+        'accounting_account_id',
     ];
 
+    protected $casts = [
+        'credit_limit' => 'decimal:2',
+        'balance' => 'decimal:2',
+        'payment_terms' => 'integer',
+    ];
 
     /* ===========================
      |      RELACIONES
@@ -40,64 +52,73 @@ class Client extends Model
         return $this->hasMany(PointOfSale::class, 'client_id');
     }
 
-    /**
-     * Obtiene el estado operativo del cliente (Moroso, Activo, etc.)
-     */
     public function estadoCliente(): BelongsTo
     {
         return $this->belongsTo(EstadosCliente::class, 'estado_cliente_id');
     }
 
-    /**
-     * Obtiene la provincia/estado geográfico
-     */
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class, 'state_id');
     }
-
-    /**
-     * Obtiene el tipo de identificador fiscal (RNC, Cédula, RFC, etc.)
-     */
 
     public function taxIdentifierType(): BelongsTo
     {
         return $this->belongsTo(TaxIdentifierType::class, 'tax_identifier_type_id');
     }
 
+    /**
+     * Relación con la cuenta contable específica (si aplica)
+     */
+    public function accountingAccount(): BelongsTo
+    {
+        return $this->belongsTo(AccountingAccount::class, 'accounting_account_id');
+    }
+
+    
+    /* ===========================
+     |    Mutadores
+     =========================== */
+        /**
+     * Recalcula el saldo actual del cliente basado en sus facturas pendientes.
+     */
+    public function refreshBalance(): bool
+    {
+        $this->balance = $this->receivables()
+            ->whereIn('status', [Receivable::STATUS_UNPAID, Receivable::STATUS_PARTIAL])
+            ->sum('current_balance');
+            
+        return $this->save();
+    }
+
+    /**
+     * Relación con las cuentas por cobrar.
+     */
+    public function receivables(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Receivable::class);
+    }
+
     /* ===========================
      |    ACCESSORS (AYUDANTES DE VISTA)
      =========================== */
 
-    /**
-     * Devuelve el nombre comercial si existe, de lo contrario el legal.
-     * Útil para listados rápidos.
-     */
     public function getDisplayNameAttribute(): string
     {
         return $this->commercial_name ?: $this->name;
     }
 
-    /**
-     * Retorna la sigla o nombre del identificador fiscal real del cliente.
-     * Ejemplo: "RNC", "Cédula", "DNI", etc.
-     */
     public function getTaxLabelAttribute(): string
     {
-        // 1. Intentamos obtener el código desde la relación cargada
-        // Esto es mucho más preciso que adivinar por el tipo de cliente.
         if ($this->taxIdentifierType) {
             return $this->taxIdentifierType->code ?? $this->taxIdentifierType->name;
         }
 
-        // 2. Fallback: Si por alguna razón no tiene tipo asignado, 
-        // usamos la lógica de configuración general como último recurso.
         $config = general_config();
         if (!$config) return 'ID Fiscal';
 
         $entityType = $this->type === 'individual' ? 'person' : 'company';
         
-        // Podríamos cachear esto, pero lo ideal es que el cliente siempre tenga su tipo_id
         $default = TaxIdentifierType::where('country_id', $config->country_id)
                     ->whereIn('entity_type', [$entityType, 'both'])
                     ->first();
@@ -105,16 +126,26 @@ class Client extends Model
         return $default?->code ?? 'ID Fiscal';
     }
 
+    /**
+     * Determina si el cliente tiene una cuenta contable propia 
+     * o si debe usar la cuenta general de CxC.
+     */
+    public function hasCustomAccount(): bool
+    {
+        return !is_null($this->accounting_account_id);
+    }
+
     /* ===========================
     |      SCOPES
     =========================== */
 
     public function scopeWithIndexRelations($query)
-{
-    return $query->with([
-        'estadoCliente:id,nombre,clase_fondo,clase_texto',
-        'state:id,name',
-        'taxIdentifierType:id,name,code',
-    ]);
-}
+    {
+        return $query->with([
+            'estadoCliente:id,nombre,clase_fondo,clase_texto',
+            'state:id,name',
+            'taxIdentifierType:id,name,code',
+            'accountingAccount:id,code,name', // Añadido a la carga por defecto
+        ]);
+    }
 }

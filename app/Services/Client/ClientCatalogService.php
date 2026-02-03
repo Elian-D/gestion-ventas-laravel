@@ -5,6 +5,7 @@ namespace App\Services\Client;
 use App\Models\Geo\State;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Configuration\TaxIdentifierType;
+use App\Models\Accounting\AccountingAccount; // Importante
 
 class ClientCatalogService
 {
@@ -22,7 +23,12 @@ class ClientCatalogService
                 : collect(),
                 
             'estadosClientes' => EstadosCliente::select('id', 'nombre')->get(),
-            
+
+            // Opciones estáticas para los nuevos filtros de deuda
+            'debtOptions' => [
+                'yes' => 'Con Saldo Pendiente',
+                'no'  => 'Sin Deuda'
+            ]
         ];
     }
 
@@ -37,14 +43,19 @@ class ClientCatalogService
                 'individual' => 'Persona Física', 
                 'company'    => 'Empresa / Jurídica'
             ],
-            // Filtramos estados solo del país configurado
             'states' => $countryId 
                 ? State::byCountry($countryId)->select('id', 'name')->orderBy('name')->get()
                 : collect(),
-            // Tipos de ID Fiscal (RNC, Cédula, etc.) del país
             'taxIdentifierTypes' => $countryId 
                 ? TaxIdentifierType::byCountry($countryId)->select('id', 'code', 'name')->orderBy('name')->get()
                 : collect(),
+            
+            // Filtramos por el nodo de Activos Corrientes -> Cuentas por Cobrar
+            'accountingAccounts' => AccountingAccount::where('is_selectable', true)
+                ->where('code', 'like', '1.1.02%') // Ajusta según tu plan de cuentas
+                ->select('id', 'code', 'name')
+                ->orderBy('code')
+                ->get(),
         ];
     }
 }
