@@ -5,6 +5,7 @@ namespace App\Models\Clients;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Models\Accounting\AccountingAccount; // Nueva importación
+use App\Models\Accounting\Receivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -72,6 +73,30 @@ class Client extends Model
     public function accountingAccount(): BelongsTo
     {
         return $this->belongsTo(AccountingAccount::class, 'accounting_account_id');
+    }
+
+    
+    /* ===========================
+     |    Mutadores
+     =========================== */
+        /**
+     * Recalcula el saldo actual del cliente basado en sus facturas pendientes.
+     */
+    public function refreshBalance(): bool
+    {
+        $this->balance = $this->receivables()
+            ->whereIn('status', [Receivable::STATUS_UNPAID, Receivable::STATUS_PARTIAL])
+            ->sum('current_balance');
+            
+        return $this->save();
+    }
+
+    /**
+     * Relación con las cuentas por cobrar.
+     */
+    public function receivables(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Receivable::class);
     }
 
     /* ===========================
