@@ -5,6 +5,7 @@ namespace App\Models\Clients;
 use App\Models\Configuration\EstadosCliente;
 use App\Models\Geo\State;
 use App\Models\Accounting\AccountingAccount; // Nueva importación
+use App\Models\Accounting\Payment;
 use App\Models\Accounting\Receivable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -73,6 +74,11 @@ class Client extends Model
     public function accountingAccount(): BelongsTo
     {
         return $this->belongsTo(AccountingAccount::class, 'accounting_account_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
     

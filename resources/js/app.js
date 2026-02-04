@@ -22,4 +22,5 @@ import './pages/accounts'
 import './pages/journals'
 import './pages/documentTypes'
 import './pages/receivable'
+import './pages/payment'
 

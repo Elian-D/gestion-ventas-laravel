@@ -7,36 +7,15 @@ use Illuminate\Database\Seeder;
 
 class TipoPagoSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $tiposPago = [
-            [
-                'nombre' => 'Efectivo',
-                'estado' => true,
-            ],
-            [
-                'nombre' => 'Cheque',
-                'estado' => true,
-            ],
-            [
-                'nombre' => 'Transferencia',
-                'estado' => true,
-            ],
-            [
-                'nombre' => 'Tarjeta',
-                'estado' => true,
-            ],
-            [
-                'nombre' => 'Apple Pay',
-                'estado' => true,
-            ],
-            [
-                'nombre' => 'Google Pay',
-                'estado' => true,
-            ],
+            ['nombre' => 'Efectivo'],
+            ['nombre' => 'Transferencia Bancaria'],
+            ['nombre' => 'Cheque'],
+            ['nombre' => 'Tarjeta de Crédito/Débito'],
+            ['nombre' => 'Depósito Bancario'],
+            ['nombre' => 'Nota de Crédito Aplicada'], // Útil para cruces contables
         ];
 
         foreach ($tiposPago as $tipoPago) {
