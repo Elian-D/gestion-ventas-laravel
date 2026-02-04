@@ -34,6 +34,12 @@ class DocumentTypeSeeder extends Seeder
                 'prefix' => 'AS',
                 'current_number' => 0,
             ],
+            [
+                'name' => 'Comprobante de Pago',
+                'code' => 'PAG',
+                'prefix' => 'PAG',
+                'current_number' => 0,
+            ],
         ];
 
         foreach ($docs as $doc) {

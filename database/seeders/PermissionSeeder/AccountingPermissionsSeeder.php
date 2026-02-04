@@ -31,6 +31,14 @@ class AccountingPermissionsSeeder extends Seeder
             'cancel receivables',
             'report receivables', // Para ver reportes de antigüedad de saldos
 
+            'view payments',
+            'create payments',
+            'edit payments',
+            'cancel payments', // Importante para reversiones contables
+            'delete payments', // SoftDelete
+            'export payments',
+            'print payment receipts', // Específico para el PDF
+
         ];
 
         foreach ($permissions as $permission) {

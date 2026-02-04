@@ -81,22 +81,45 @@ class ReceivableService
         });
     }
 
-    // app/Services/Accounting/Receivable/ReceivableService.php
-
     public function updateReceivable(Receivable $receivable, array $data): Receivable
     {
         return DB::transaction(function () use ($receivable, $data) {
-            // 1. Calculamos cuánto se ha pagado hasta ahora (Monto Original - Saldo Actual)
+            $oldAmount = $receivable->total_amount;
+            $newAmount = $data['total_amount'];
+
+            // 1. Si el monto cambió, ajustamos la contabilidad
+            if ($oldAmount != $newAmount) {
+                $difference = $newAmount - $oldAmount;
+
+                $this->journalService->create([
+                    'entry_date'  => now(),
+                    'reference'   => "ADJ-{$receivable->document_number}",
+                    'description' => "Ajuste de monto en CxC: {$receivable->document_number}. De {$oldAmount} a {$newAmount}",
+                    'status'      => JournalEntry::STATUS_POSTED,
+                    'items'       => [
+                        [
+                            // Si difference es +, es un Débito (aumenta deuda). Si es -, es Crédito (baja deuda).
+                            'accounting_account_id' => $receivable->accounting_account_id,
+                            'debit'  => $difference > 0 ? abs($difference) : 0,
+                            'credit' => $difference < 0 ? abs($difference) : 0,
+                            'note'   => "Ajuste de saldo por edición"
+                        ],
+                        [
+                            // Contrapartida en Ventas/Ingresos
+                            'accounting_account_id' => $this->getAccountIdByCode('4.1'),
+                            'debit'  => $difference < 0 ? abs($difference) : 0,
+                            'credit' => $difference > 0 ? abs($difference) : 0,
+                            'note'   => "Ajuste de ingreso por edición"
+                        ]
+                    ]
+                ]);
+            }
+
+            // 2. Lógica de saldos que ya tenías
             $amountPaid = $receivable->total_amount - $receivable->current_balance;
+            $data['current_balance'] = $newAmount - $amountPaid;
 
-            // 2. El nuevo saldo será el nuevo monto total menos lo que ya se pagó
-            // Si el cliente no tiene abonos, $amountPaid es 0, por lo que current_balance = total_amount
-            $data['current_balance'] = $data['total_amount'] - $amountPaid;
-
-            // 3. Actualizamos el registro
             $receivable->update($data);
-
-            // 4. Ajustamos el estado automáticamente basado en el nuevo saldo
             $this->updateStatusBasedOnBalance($receivable);
 
             return $receivable;
