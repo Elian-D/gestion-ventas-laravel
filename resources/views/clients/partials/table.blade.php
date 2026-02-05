@@ -35,7 +35,38 @@
                 </td>
             @endif
 
+            {{-- Columnas Financieras --}}
+            @if(in_array('balance', $visibleColumns))
+                <td class="px-6 py-4 text-sm">
+                    <span class="font-semibold {{ $client->balance > 0 ? 'text-red-600' : 'text-green-600' }}">${{ number_format($client->balance, 2) }}</span>
+                </td>
+            @endif
 
+            @if(in_array('credit_limit', $visibleColumns))
+                <td class="px-6 py-4 text-sm">
+                    @if($client->credit_limit > 0)
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-700 font-medium">${{ number_format($client->credit_limit, 2) }}</span>
+                            
+                            @if($client->balance > $client->credit_limit)
+                                <span class="whitespace-nowrap inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 animate-pulse ring-1 ring-red-400">
+                                    EXCEDIDO
+                                </span>
+                            @endif
+                        </div>
+                    @else
+                        <span class="whitespace-nowrap text-[10px] font-bold text-gray-400 uppercase tracking-tighter bg-gray-100 px-2 py-1 rounded">
+                            Solo Contado
+                        </span>
+                    @endif
+                </td>
+            @endif
+
+            @if(in_array('accounting_account', $visibleColumns))
+                <td class="px-6 py-4 text-xs text-gray-500">
+                    {{ $client->accountingAccount->code ?? 'General' }}
+                </td>
+            @endif
 
             @if(in_array('type', $visibleColumns))
                 <td class="px-6 py-4 text-xs text-gray-700">

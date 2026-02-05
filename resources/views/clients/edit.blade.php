@@ -9,7 +9,7 @@
             @if(isset($client)) 
                 @method('PUT') 
             @endif
-
+            <x-ui.toasts />
             <x-form-header
                 :title="isset($client) ? 'Editar Cliente: ' . $client->name : 'Nuevo Cliente'"
                 subtitle="Complete todos los campos requeridos para la gestión comercial."
@@ -104,6 +104,72 @@
                         <div class="md:col-span-2">
                             <x-input-label value="Dirección Exacta" />
                             <textarea name="address" rows="2" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm p-2.5" placeholder="Calle, número, edificio...">{{ old('address', $client->address ?? '') }}</textarea>
+                        </div>
+                    </div>
+                </section>
+                {{-- Bloque 3: Información Financiera y Crédito --}}
+                <section>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                        <h3 class="font-bold text-gray-700 uppercase text-xs tracking-wider">Configuración Contable y Crédito</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-6 gap-6 items-start">
+                        {{-- Límite de Crédito --}}
+                        <div class="md:col-span-2">
+                            <x-input-label value="Límite de Crédito ($)" />
+                            <x-text-input name="credit_limit" type="number" step="0.01" class="w-full mt-1 font-mono" 
+                                :value="old('credit_limit', $client->credit_limit)" />
+                            <p class="text-[10px] mt-1 {{ $client->balance > 0 ? 'text-red-500' : 'text-gray-400' }}">
+                                Saldo actual: ${{ number_format($client->balance, 2) }}
+                            </p>
+                        </div>
+
+                        {{-- Días de Crédito --}}
+                        <div class="md:col-span-2">
+                            <x-input-label value="Días de Crédito (Vencimiento)" />
+                            <x-text-input name="payment_terms" type="number" class="w-full mt-1" 
+                                :value="old('payment_terms', $client->payment_terms)" />
+                        </div>
+
+                        {{-- Cuenta Contable --}}
+                        <div class="md:col-span-2" x-data="{ 
+                            createAccount: false, 
+                            hasCustomAccount: {{ ($client->accounting_account_id && $client->accountingAccount && $client->accountingAccount->code !== '1.1.02') ? 'true' : 'false' }} 
+                        }">
+                            <x-input-label value="Cuenta Contable (CxC)" />
+                            
+                            <div class="mt-1 space-y-2">
+                                {{-- Selector: Solo muestra la general y LA PROPIA si existe --}}
+                                <select name="accounting_account_id" 
+                                        x-show="!createAccount"
+                                        class="w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm">
+                                    <option value="">Usar Cuenta General (1.1.02)</option>
+                                    @if($client->accounting_account_id && $client->accountingAccount && $client->accountingAccount->code !== '1.1.02')
+                                        <option value="{{ $client->accounting_account_id }}" selected>
+                                            {{ $client->accountingAccount->code }} – {{ $client->accountingAccount->name }}
+                                        </option>
+                                    @endif
+                                </select>
+
+                                {{-- Mostrar opción de crear cuenta solo si NO tiene una actualmente --}}
+                                <template x-if="!hasCustomAccount">
+                                    <label class="flex items-center cursor-pointer gap-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100">
+                                        <input type="checkbox" name="create_accounting_account" value="1" 
+                                            x-model="createAccount"
+                                            class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                                        <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-tight">¿Asignar cuenta individual?</span>
+                                    </label>
+                                </template>
+
+                                <p x-show="createAccount" class="text-[10px] text-indigo-500 italic leading-tight">
+                                    * Al guardar, se generará una sub-cuenta única.
+                                </p>
+
+                                <p x-show="hasCustomAccount && !createAccount" class="text-[10px] text-amber-600 italic leading-tight">
+                                    * Si cambia a "General", su cuenta actual será archivada.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>

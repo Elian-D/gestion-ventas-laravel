@@ -9,7 +9,7 @@
 
             {{-- Código --}}
             @if(in_array('code', $visibleColumns))
-                <td class="whitespace-nowra px-6 py-4 text-sm font-mono font-medium text-gray-600">
+                <td class="whitespace-nowrap px-6 py-4 text-sm font-mono font-medium text-gray-600">
                     {{ $item->code ?? 'PENDIENTE' }}
                 </td>
             @endif
@@ -21,7 +21,7 @@
                 </td>
             @endif
 
-            {{-- Tipo (Usando el Accessor type_label) --}}
+            {{-- Tipo --}}
             @if(in_array('types', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-gray-600">
                     <span class="flex items-center gap-1">
@@ -34,6 +34,27 @@
                         @endif
                         {{ $item->type_label }}
                     </span>
+                </td>
+            @endif
+
+            {{-- Cuenta Contable (Nueva Columna) --}}
+            @if(in_array('accounting_account_id', $visibleColumns))
+                <td class="px-6 py-4">
+                    @if($item->accountingAccount)
+                        <div class="flex flex-col">
+                            <span class="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded w-fit">
+                                {{ $item->accountingAccount->code }}
+                            </span>
+                            <span class="text-[10px] text-gray-400 truncate max-w-[150px]" title="{{ $item->accountingAccount->name }}">
+                                {{ $item->accountingAccount->name }}
+                            </span>
+                        </div>
+                    @else
+                        <span class="text-xs text-amber-500 italic flex items-center gap-1">
+                            <x-heroicon-s-exclamation-triangle class="w-3 h-3" />
+                            Sin vincular
+                        </span>
+                    @endif
                 </td>
             @endif
 
@@ -75,7 +96,7 @@
             @endif
 
             {{-- Acciones --}}
-            <td class="px-6 py-4">
+            <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-3">
                     @php 
                         $isLastActives = $item->is_active && $warehouses->where('is_active', true)->count() <= 1; 
@@ -90,6 +111,13 @@
                             {{ $isLastActives ? 'Mínimo Activos' : ($item->is_active ? 'Desactivar' : 'Activar') }}
                         </button>
                     </form>
+
+                    {{-- Ver Detalles --}}
+                    <button @click="$dispatch('open-modal', 'view-warehouse-{{ $item->id }}')" 
+                            class="text-gray-400 hover:text-indigo-600 p-1 rounded hover:bg-gray-100 transition-colors"
+                            title="Ver detalles completos">
+                        <x-heroicon-s-eye class="w-5 h-5" />
+                    </button>
 
                     <button @click="$dispatch('open-modal', 'edit-warehouse-{{ $item->id }}')" 
                             class="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors">
@@ -107,7 +135,7 @@
         </tr>
     @empty
         <tr>
-            <td colspan="10" class="text-center py-12">
+            <td colspan="11" class="text-center py-12">
                 <div class="flex flex-col items-center">
                     <x-heroicon-s-building-office class="w-12 h-12 text-gray-200 mb-2" />
                     <p class="text-gray-500 font-medium">No hay almacenes registrados con estos filtros</p>
