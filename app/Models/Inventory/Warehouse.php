@@ -2,9 +2,12 @@
 
 namespace App\Models\Inventory;
 
+use App\Models\Accounting\AccountingAccount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Warehouse extends Model
@@ -20,6 +23,7 @@ class Warehouse extends Model
         'address',
         'description',
         'is_active',
+        'accounting_account_id', // Nuevo campos
     ];
 
     protected $casts = [
@@ -43,9 +47,72 @@ class Warehouse extends Model
         ];
     }
 
+    /**
+     * Eventos del Modelo
+     */
+    protected static function booted()
+    {
+        static::created(function (Warehouse $warehouse) {
+            // Ejecutamos la lógica contable
+            $warehouse->createAccountingAccount();
+            
+            // Ejecutamos la lógica del código
+            $prefix = strtoupper(substr(Str::slug($warehouse->name), 0, 3));
+            $warehouse->updateQuietly([
+                'code' => $prefix . '-' . $warehouse->id
+            ]);
+        });
+    }
+
+    /**
+     * Crea la subcuenta contable automáticamente bajo la cuenta de Inventarios (1.1.03)
+     */
+    public function createAccountingAccount(): void
+    {
+        if ($this->accounting_account_id) return;
+
+        DB::transaction(function () {
+            $parent = AccountingAccount::where('code', '1.1.03')->first();
+            
+            if (!$parent) return;
+
+            // Buscar el último correlativo de este padre
+            $lastChild = AccountingAccount::where('parent_id', $parent->id)
+                ->orderBy('code', 'desc')
+                ->first();
+
+            if (!$lastChild) {
+                $newCode = $parent->code . '.01';
+            } else {
+                $parts = explode('.', $lastChild->code);
+                $lastPart = (int) end($parts);
+                $newCode = $parent->code . '.' . str_pad($lastPart + 1, 2, '0', STR_PAD_LEFT);
+            }
+
+            $account = AccountingAccount::create([
+                'parent_id'     => $parent->id,
+                'code'          => $newCode,
+                'name'          => 'Inventario: ' . $this->name,
+                'type'          => AccountingAccount::TYPE_ASSET,
+                'level'         => $parent->level + 1,
+                'is_selectable' => true,
+            ]);
+
+            $this->updateQuietly(['accounting_account_id' => $account->id]);
+        });
+    }
+
     /* ===========================
      |  RELACIONES
      =========================== */
+
+    /**
+     * Relación con la cuenta contable de activo que representa este almacén
+     */
+    public function accountingAccount(): BelongsTo
+    {
+        return $this->belongsTo(AccountingAccount::class, 'accounting_account_id');
+    }
 
     /**
      * Relación: Un almacén tiene muchos balances de stock
@@ -95,11 +162,14 @@ class Warehouse extends Model
 
     /**
      * Alternar el estado activo/inactivo
+     * * @return bool
      */
-    public function toggleActivo(): void
+    public function toggleActivo(): bool
     {
         $this->is_active = !$this->is_active;
         $this->save();
+        
+        return $this->is_active; // Ahora devuelve el nuevo estado (true/false)
     }
     
     /**
