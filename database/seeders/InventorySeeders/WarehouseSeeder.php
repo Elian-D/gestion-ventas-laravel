@@ -38,8 +38,8 @@ class WarehouseSeeder extends Seeder
 
         foreach ($warehouses as $data) {
             $warehouse = Warehouse::create($data);
-            
-            // Disparamos la generación del código (BOD-1, CAM-3, etc.)
+            // Como el evento está desactivado, llamamos a los métodos a mano
+            $warehouse->createAccountingAccount();
             $warehouse->generateCode();
         }
     }

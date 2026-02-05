@@ -14,7 +14,7 @@ export const setupEventListeners = (ctx) => {
         el.addEventListener('change', () => applyFilters(ctx))
     );
 
-    ctx.form.querySelectorAll('input[type="text"]').forEach(el => {
+    ctx.form.querySelectorAll('input[type="text"], input[type="number"]').forEach(el => {
         el.addEventListener('input', () => {
             clearTimeout(ctx.state.timer);
             ctx.state.timer = setTimeout(() => applyFilters(ctx), ctx.config.debounce || 1000);

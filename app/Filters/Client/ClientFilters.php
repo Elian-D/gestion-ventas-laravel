@@ -16,6 +16,8 @@ class ClientFilters extends QueryFilter
             'tax_type'       => ClientTaxIdentifierFilter::class,
             'from_date' => ClientDateFilter::class,
             'to_date'   => ClientDateFilter::class,
+            'has_debt'       => ClientHasDebtFilter::class,
+            'over_limit'     => ClientOverLimitFilter::class,
         ];
     }
 }
