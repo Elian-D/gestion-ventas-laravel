@@ -77,8 +77,18 @@ class ClientFactory extends Factory
 
     protected function createRealPayment($client, $receivable, $amount)
     {
+        // Buscamos el tipo de documento cada vez para asegurar frescura
         $docType = DocumentType::where('code', 'PAG')->first();
-        $receiptNumber = $docType ? $docType->getNextNumberFormatted() : 'REC-' . fake()->numberBetween(100, 999);
+        
+        if ($docType) {
+            // Usamos el método formateado
+            $receiptNumber = $docType->getNextNumberFormatted();
+            // Incrementamos directamente en la DB para que el siguiente factory vea el nuevo número
+            $docType->increment('current_number');
+        } else {
+            // Fallback mucho más robusto si no existe el tipo de documento
+            $receiptNumber = 'REC-' . str_pad(fake()->unique()->numberBetween(1, 999999), 6, '0', STR_PAD_LEFT);
+        }
 
         Payment::create([
             'client_id' => $client->id,
@@ -92,6 +102,5 @@ class ClientFactory extends Factory
         ]);
 
         $receivable->decrement('current_balance', $amount);
-        if ($docType) $docType->increment('current_number');
     }
 }

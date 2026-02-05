@@ -10,6 +10,8 @@ class AccountingPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            'view accounting dashboard',
+
             'configure accounting',
             'configure accounting account',
 

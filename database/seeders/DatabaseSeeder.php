@@ -51,14 +51,13 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\ProductsSeeders\CategorySeeder::class,
             \Database\Seeders\ProductsSeeders\UnitSeeder::class,
             \Database\Seeders\ProductsSeeders\ProductSeeder::class,
-
-            // Inventory Seeders
-            \Database\Seeders\InventorySeeders\WarehouseSeeder::class,
             
             //Accounting Seeders
             \Database\Seeders\AccountingSeeders\AccountingAccountSeeder::class,
             \Database\Seeders\AccountingSeeders\DocumentTypeSeeder::class,
 
+            // Inventory Seeders
+            \Database\Seeders\InventorySeeders\WarehouseSeeder::class,
         ]);
     }
 }
