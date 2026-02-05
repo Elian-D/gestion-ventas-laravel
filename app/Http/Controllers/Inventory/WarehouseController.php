@@ -2,145 +2,98 @@
 
 namespace App\Http\Controllers\Inventory;
 
-use App\Filters\Warehouses\WarehousesFilters;
-use App\Models\Inventory\Warehouse;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Inventory\Warehouse;
+use App\Services\Inventory\WarehouseService\WarehouseService;
+use App\Services\Inventory\WarehouseService\WarehouseCatalogService;
+use App\Http\Requests\Inventory\StoreWarehouseRequest;
+use App\Http\Requests\Inventory\UpdateWarehouseRequest;
 use App\Tables\WarehouseTable;
+use App\Filters\Warehouses\WarehousesFilters;
 use App\Traits\SoftDeletesTrait;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
+use Exception;
 
 class WarehouseController extends Controller
 {
     use SoftDeletesTrait;
+
+    public function __construct(
+        protected WarehouseService $service,
+        protected WarehouseCatalogService $catalogService
+    ) {}
 
     public function index(Request $request)
     {
         $visibleColumns = $request->input('columns', WarehouseTable::defaultDesktop());
         $perPage = $request->input('per_page', 10);
 
-        // Aplicamos los filtros (Search, Active y Type)
+        // Cargamos la relación contable para la tabla
         $warehouses = (new WarehousesFilters($request))
-            ->apply(Warehouse::query())
+            ->apply(Warehouse::query()->with('accountingAccount'))
             ->paginate($perPage)
             ->withQueryString();
 
-    
-        $types = Warehouse::getTypes();
-            
-        if ($request->ajax()) {
-            return view('inventory.warehouses.partials.table', [
-                'warehouses'     => $warehouses,
-                'visibleColumns' => $visibleColumns,
-                'allColumns'     => WarehouseTable::allColumns(),
-                'defaultDesktop' => WarehouseTable::defaultDesktop(),
-                'defaultMobile'  => WarehouseTable::defaultMobile(),
-                'types'          => $types,
-            ])->render();
-        }
-
-        return view('inventory.warehouses.index', [
+        $viewData = array_merge([
             'warehouses'     => $warehouses,
             'visibleColumns' => $visibleColumns,
             'allColumns'     => WarehouseTable::allColumns(),
             'defaultDesktop' => WarehouseTable::defaultDesktop(),
             'defaultMobile'  => WarehouseTable::defaultMobile(),
-            'types'          => $types,
-        ]);
-    }
+        ], $this->catalogService->getForIndex());
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name'        => ['required', 'string', 'max:100'],
-            'type'        => ['required', 'string', Rule::in(array_keys(Warehouse::getTypes()))],
-            'address'     => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'is_active'   => ['required', 'boolean'],
-        ]);
-
-        $warehouse = Warehouse::create([
-            'name'        => $request->name,
-            'type'        => $request->type,
-            'address'     => $request->address,
-            'description' => $request->description,
-            'is_active'   => $request->is_active,
-            // El 'code' se genera abajo porque necesitamos el ID
-        ]);
-
-        // Generamos el código basado en el ID recién creado (Ej: BODEGA -> BOD-1)
-        $warehouse->generateCode();
-
-        return redirect()
-            ->route('inventory.warehouses.index')
-            ->with('success', "Almacén \"{$warehouse->name}\" creado con éxito (Código: {$warehouse->code}).");
-    }
-
-    public function update(Request $request, Warehouse $warehouse)
-    {
-        $request->validate([
-            'name'        => ['required', 'string', 'max:100'],
-            'type'        => ['required', 'string', Rule::in(array_keys(Warehouse::getTypes()))],
-            'address'     => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string', 'max:500'],
-            'is_active'   => ['sometimes', 'boolean'],
-        ]);
-
-        $nuevoEstado = $request->boolean('is_active');
-
-        // Protección: No desactivar si es el único almacén activo
-        if ($warehouse->is_active && !$nuevoEstado) {
-            if (Warehouse::where('is_active', true)->count() <= 1) {
-                return redirect()
-                    ->route('inventory.warehouses.index')
-                    ->with('error', 'No se puede desactivar el único almacén activo del sistema.');
-            }
+        if ($request->ajax()) {
+            return view('inventory.warehouses.partials.table', $viewData)->render();
         }
 
-        // Guardamos el nombre viejo para comparar
-        $nombreAnterior = $warehouse->name;
+        return view('inventory.warehouses.index', $viewData);
+    }
 
-        $warehouse->update([
-            'name'        => $request->name,
-            'type'        => $request->type,
-            'address'     => $request->address,
-            'description' => $request->description,
-            'is_active'   => $nuevoEstado,
-        ]);
-
-        // SI EL NOMBRE CAMBIÓ: Regeneramos el código (Ej: de ALM-1 a CEN-1 si cambió a "Central")
-        if ($nombreAnterior !== $request->name) {
-            $warehouse->generateCode();
+    public function store(StoreWarehouseRequest $request)
+    {
+        try {
+            $warehouse = $this->service->store($request->validated());
+            
+            return redirect()->route('inventory.warehouses.index')
+                ->with('success', "Almacén \"{$warehouse->name}\" creado con éxito y vinculado a la cuenta: {$warehouse->accountingAccount->code}");
+        } catch (Exception $e) {
+            return back()->with('error', 'Error al crear el almacén: ' . $e->getMessage())->withInput();
         }
+    }
 
-        return redirect()
-            ->route('inventory.warehouses.index')
-            ->with('success', "Almacén \"{$warehouse->name}\" actualizado correctamente.");
+    public function update(UpdateWarehouseRequest $request, Warehouse $warehouse)
+    {
+        try {
+            $this->service->update($warehouse, $request->validated());
+            
+            return redirect()->route('inventory.warehouses.index')
+                ->with('success', "Almacén \"{$warehouse->name}\" actualizado correctamente.");
+        } catch (Exception $e) {
+            return back()->with('error', $e->getMessage())->withInput();
+        }
     }
 
     public function toggleEstado(Warehouse $warehouse)
     {
-        if ($warehouse->is_active && Warehouse::where('is_active', true)->count() <= 1) {
-            return redirect()
-                ->back()
-                ->with('error', 'Debe haber al menos un almacén activo.');
+        try {
+            $this->service->toggle($warehouse);
+            return back()->with('success', 'Estado del almacén actualizado con éxito.');
+        } catch (Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        $warehouse->toggleActivo();
-
-        return redirect()
-            ->route('inventory.warehouses.index')
-            ->with('success', 'Estado de "' . $warehouse->name . '" actualizado.');
     }
 
     public function destroy($id)
     {
         $warehouse = Warehouse::findOrFail($id);
-        // Aquí podrías añadir una validación extra: 
-        // No borrar si tiene stock > 0 (esto lo haremos cuando tengamos la tabla de balances)
+        
+        // Validación preventiva: No borrar si tiene cuentas con saldo (opcional aquí, ideal en el service)
+        if ($warehouse->stocks()->where('quantity', '>', 0)->exists()) {
+            return back()->with('error', 'No se puede eliminar un almacén que aún tiene existencia de productos.');
+        }
+
         return $this->destroyTrait($warehouse);
     }
-
     protected function getModelClass(): string { return Warehouse::class; }
     protected function getViewFolder(): string { return 'inventory.warehouses'; }
     protected function getRouteIndex(): string { return 'inventory.warehouses.index'; }
