@@ -21,17 +21,23 @@
         x-data="{
             isSidebarOpen: false,
             isHovered: false,
-
             updateSidebarState() {
                 this.isSidebarOpen = window.innerWidth >= 640;
+                // Avisar a los gráficos que el tamaño cambió
+                window.dispatchEvent(new Event('resize-charts'));
             }
         }"
+        {{-- Agregamos un watch para disparar el evento cada vez que isSidebarOpen cambie manualmente --}}
         x-init="
             updateSidebarState();
             window.addEventListener('resize', () => updateSidebarState());
+            $watch('isSidebarOpen', () => {
+                // Esperamos un poco a que termine la animación del CSS
+                setTimeout(() => window.dispatchEvent(new Event('resize-charts')), 310);
+            });
         "
     >
-        
+            
         {{-- ELIMINADA la clase ml-XX para que el sidebar FLOTE cuando esté colapsado. --}}
         <div class="flex min-h-screen bg-gray-100"> 
             
@@ -75,7 +81,7 @@
                         </x-sidebar.dropdown>
                     @endcan
                     
-                    @can('configure accounting')
+                    @can('view accounting dashboard')
                         {{-- Inventario --}}
                         <x-sidebar.dropdown 
                             id="contabilidad" 
@@ -84,6 +90,7 @@
                         >
                             Contabilidad
                             <x-slot name="submenu">
+                                <x-sidebar.subitem href="/admin/accounting/dashboard">Dashboard</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/accounts">Cuentas Contables</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/receivables">Cuentas por Cobrar</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/payments">Pagos</x-sidebar.subitem>
@@ -166,5 +173,6 @@
 
             </div>
         </div>
+        @stack('scripts')
     </body>
 </html>

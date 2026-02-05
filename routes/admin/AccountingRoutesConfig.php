@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounting\AccountingDashboardController;
 use Illuminate\Support\Facades\Route;
 
 // routes/admin/InventoryRoutesCondig.php
@@ -13,4 +14,7 @@ Route::prefix('accounting')->as('accounting.')->group(function () {
     require __DIR__ . '/accounting/receivables.php';
     require __DIR__ . '/accounting/payments.php';
 
+    Route::get('/dashboard', AccountingDashboardController::class)
+        ->middleware('can:view accounting dashboard')
+        ->name('dashboard.index');
 });
