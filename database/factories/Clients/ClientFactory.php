@@ -48,14 +48,19 @@ class ClientFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Client $client) {
-            // 1. Asegurar cuenta contable
+            // Si es el Consumidor Final, no generamos deudas de prueba
+            if ($client->name === 'Consumidor Final') {
+                return;
+            }
+
+            // 1. Asegurar cuenta contable (CxC)
             if (!$client->accounting_account_id) {
                 $client->update([
                     'accounting_account_id' => AccountingAccount::where('code', '1.1.02')->first()?->id
                 ]);
             }
 
-            // 2. Generar facturas (Receivables) reales
+            // 2. Generar facturas (Receivables) reales solo para clientes con crédito
             Receivable::factory()
                 ->count(fake()->numberBetween(1, 3))
                 ->create([
