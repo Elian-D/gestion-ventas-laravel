@@ -1,0 +1,128 @@
+<?php
+
+namespace App\Http\Controllers\Sales;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Sales\StoreSaleRequest;
+use App\Http\Requests\Sales\UpdateSaleRequest;
+use App\Models\Sales\Sale;
+use App\Services\Sales\SalesServices\SaleService;
+use App\Services\Sales\SalesServices\SaleCatalogService;
+use App\Filters\Sales\SalesFilters\SaleFilters;
+use App\Tables\SalesTables\SaleTable;
+use App\Traits\SoftDeletesTrait;
+use App\Exports\Sales\SalesExport;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use Exception;
+
+class SaleController extends Controller
+{
+    use SoftDeletesTrait;
+
+    public function __construct(
+        protected SaleService $service,
+        protected SaleCatalogService $catalogService
+    ) {}
+
+    /**
+     * Vista principal: Tabla AJAX con filtros dinámicos.
+     */
+    public function index(Request $request)
+    {
+        $visibleColumns = $request->input('columns', SaleTable::defaultDesktop());
+        $perPage = $request->input('per_page', 10);
+
+        // Aplicación del Pipeline de Filtros
+        $sales = (new SaleFilters($request))
+            ->apply(Sale::query()->withIndexRelations())
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $catalogs = $this->catalogService->getForFilters();
+
+        if ($request->ajax()) {
+            return view('sales.partials.table', [
+                'items'          => $sales,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => SaleTable::allColumns(),
+                'defaultDesktop' => SaleTable::defaultDesktop(),
+                'defaultMobile'  => SaleTable::defaultMobile(),
+            ])->render();
+        }
+
+        return view('sales.index', array_merge(
+            [
+                'items'          => $sales,
+                'visibleColumns' => $visibleColumns,
+                'allColumns'     => SaleTable::allColumns(),
+                'defaultDesktop' => SaleTable::defaultDesktop(),
+                'defaultMobile'  => SaleTable::defaultMobile(),
+            ],
+            $catalogs
+        ));
+    }
+
+    /**
+     * Mostrar formulario de creación (Ventanilla de Venta).
+     */
+    public function create()
+    {
+        return view('sales.create', $this->catalogService->getForForm());
+    }
+
+    /**
+     * Registrar la venta, afectar inventario y generar asientos.
+     */
+    public function store(StoreSaleRequest $request)
+    {
+        try {
+            $sale = $this->service->create($request->validated());
+
+            return redirect()
+                ->route('sales.index')
+                ->with('success', "Venta #{$sale->number} registrada con éxito.");
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', "Error al procesar la venta: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Proceso de Anulación: Reversión total (Stock + Contabilidad).
+     */
+    public function cancel(Sale $sale)
+    {
+        if ($sale->status === Sale::STATUS_CANCELED) {
+            return back()->with('error', "Esta venta ya ha sido anulada previamente.");
+        }
+        try {
+            $this->service->cancel($sale);
+            return back()->with('success', "La venta {$sale->number} ha sido anulada y el inventario revertido.");
+        } catch (Exception $e) {
+            return back()->with('error', "No se pudo anular la venta: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Exportación filtrada a Excel.
+     */
+    public function export(Request $request)
+    {
+        $query = (new SaleFilters($request))
+            ->apply(Sale::query());
+
+        $fileName = 'reporte-ventas-' . now()->format('d-m-Y-H-i') . '.xlsx';
+
+        return Excel::download(new SalesExport($query), $fileName);
+    }
+
+    /**
+     * Requerimientos para SoftDeletesTrait.
+     */
+    protected function getModelClass(): string { return Sale::class; }
+    protected function getViewFolder(): string { return 'sales.sales'; }
+    protected function getRouteIndex(): string { return 'sales.index'; }
+    protected function getRouteEliminadas(): string { return 'sales.eliminados'; }
+    protected function getEntityName(): string { return 'Venta'; }
+}
