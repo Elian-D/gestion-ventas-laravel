@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\PermissionSeeder\ProductsPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\InventoryPermissionsSeeder::class,
             \Database\Seeders\PermissionSeeder\AccountingPermissionsSeeder::class,
+            \Database\Seeders\PermissionSeeder\SalesPermissionsSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
 
