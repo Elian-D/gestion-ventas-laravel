@@ -37,10 +37,27 @@ class SaleCatalogService
     {
         return [
             // 1. Clientes: Priorizando Consumidor Final
-            'clients' => Client::select('id', 'name', 'credit_limit', 'balance', 'accounting_account_id')
+            'clients' => Client::with('estadoCliente.categoria')
+                ->whereHas('estadoCliente.categoria', function ($query) {
+                    // Solo enviamos Clientes Operativos o con Restricción Financiera (Morosos)
+                    $query->whereIn('code', ['OPERATIVO', 'FINANCIERO_RESTRICTO']);
+                })
+                ->select('id', 'name', 'credit_limit', 'balance', 'estado_cliente_id')
                 ->orderByRaw("CASE WHEN name = 'Consumidor Final' THEN 0 ELSE 1 END")
                 ->orderBy('name')
-                ->get(),
+                ->get()
+                ->map(function ($client) {
+                    return [
+                        'id'           => $client->id,
+                        'name'         => $client->name,
+                        'credit_limit' => $client->credit_limit,
+                        'balance'      => $client->balance,
+                        'available'    => $client->credit_limit - $client->balance,
+                        // Moroso = FINANCIERO_RESTRICTO
+                        'is_moroso'    => ($client->estadoCliente->categoria->code ?? '') === 'FINANCIERO_RESTRICTO',
+                        'status_name'  => $client->estadoCliente->nombre ?? 'N/A',
+                    ];
+                }),
 
             // 2. Almacenes: Para saber de dónde sale el hielo
             'warehouses' => Warehouse::select('id', 'name', 'type')

@@ -2,12 +2,11 @@
 
 namespace App\Services\Accounting\Receivable;
 
-use App\Models\Accounting\AccountingAccount;
-use App\Models\Accounting\Receivable;
-use App\Models\Accounting\JournalEntry;
+use App\Models\Accounting\{AccountingAccount, Receivable, JournalEntry};
 use App\Models\Clients\Client;
 use App\Services\Accounting\JournalEntries\JournalEntryService;
 use Illuminate\Support\Facades\DB;
+use Exception;
 
 class ReceivableService
 {
@@ -15,17 +14,18 @@ class ReceivableService
         protected JournalEntryService $journalService
     ) {}
 
+    /**
+     * Invocado únicamente desde SaleService u otros procesos de origen
+     */
     public function createReceivable(array $data): Receivable
     {
         return DB::transaction(function () use ($data) {
             $client = Client::findOrFail($data['client_id']);
             
-            // 1. Determinar Cuenta de CxC (Cliente o General 1.1.02)
             $receivableAccountId = $client->accounting_account_id 
                 ?? $data['accounting_account_id'] 
                 ?? $this->getAccountIdByCode('1.1.02');
 
-            // 2. Crear Asiento Contable de Origen
             $entry = $this->journalService->create([
                 'entry_date'  => $data['emission_date'],
                 'reference'   => $data['document_number'],
@@ -33,14 +33,12 @@ class ReceivableService
                 'status'      => JournalEntry::STATUS_POSTED,
                 'items'       => [
                     [
-                        // DEBITO: Aumenta el Activo (CxC)
                         'accounting_account_id' => $receivableAccountId,
                         'debit'  => $data['total_amount'],
                         'credit' => 0,
                         'note'   => "Cargo de deuda"
                     ],
                     [
-                        // CREDITO: Ingreso por Ventas (4.1)
                         'accounting_account_id' => $this->getAccountIdByCode('4.1'),
                         'debit'  => 0,
                         'credit' => $data['total_amount'],
@@ -49,137 +47,48 @@ class ReceivableService
                 ]
             ]);
 
-            // 3. Crear la CxC vinculada al asiento
-            $data['current_balance'] = $data['total_amount'];
-            $data['status'] = $data['status'] ?? Receivable::STATUS_UNPAID;
-            $data['journal_entry_id'] = $entry->id;
-            $data['accounting_account_id'] = $receivableAccountId;
-
-            return Receivable::create($data);
+            return Receivable::create([
+                'client_id'             => $data['client_id'],
+                'journal_entry_id'      => $entry->id,
+                'accounting_account_id' => $receivableAccountId,
+                'document_number'       => $data['document_number'],
+                'description'           => $data['description'] ?? "Registro CxC: {$data['document_number']} - Cliente: {$client->name}",
+                'total_amount'          => $data['total_amount'],
+                'current_balance'       => $data['total_amount'],
+                'emission_date'         => $data['emission_date'],
+                'due_date'              => $data['due_date'],
+                'reference_type'        => $data['reference_type'],
+                'reference_id'          => $data['reference_id'],
+                'status'                => Receivable::STATUS_UNPAID,
+            ]);
         });
     }
 
-    protected function getDefaultReceivableAccountId(): int
-    {
-        // Buscamos la cuenta 1.1.02 configurada en el catálogo
-        return AccountingAccount::where('code', '1.1.02')->first()->id;
-    }
-
     /**
-     * Anula una cuenta por cobrar
-     * Solo si no tiene abonos procesados (current_balance == total_amount)
+     * Anula una cuenta por cobrar (Solo si no tiene abonos)
      */
     public function cancelReceivable(Receivable $receivable): bool
     {
         return DB::transaction(function () use ($receivable) {
+            if ($receivable->status === Receivable::STATUS_CANCELLED) return true;
+
             if ($receivable->current_balance < $receivable->total_amount) {
-                throw new \Exception("No se puede anular una factura que ya tiene abonos registrados.");
+                throw new Exception("No se puede anular una factura con abonos.");
             }
-
-            $receivable->update(['status' => Receivable::STATUS_CANCELLED]);
-            return $receivable->delete(); // SoftDelete
-        });
-    }
-
-    public function updateReceivable(Receivable $receivable, array $data): Receivable
-    {
-        return DB::transaction(function () use ($receivable, $data) {
-            $oldAmount = $receivable->total_amount;
-            $newAmount = $data['total_amount'];
-
-            // 1. Si el monto cambió, ajustamos la contabilidad
-            if ($oldAmount != $newAmount) {
-                $difference = $newAmount - $oldAmount;
-
-                $this->journalService->create([
-                    'entry_date'  => now(),
-                    'reference'   => "ADJ-{$receivable->document_number}",
-                    'description' => "Ajuste de monto en CxC: {$receivable->document_number}. De {$oldAmount} a {$newAmount}",
-                    'status'      => JournalEntry::STATUS_POSTED,
-                    'items'       => [
-                        [
-                            // Si difference es +, es un Débito (aumenta deuda). Si es -, es Crédito (baja deuda).
-                            'accounting_account_id' => $receivable->accounting_account_id,
-                            'debit'  => $difference > 0 ? abs($difference) : 0,
-                            'credit' => $difference < 0 ? abs($difference) : 0,
-                            'note'   => "Ajuste de saldo por edición"
-                        ],
-                        [
-                            // Contrapartida en Ventas/Ingresos
-                            'accounting_account_id' => $this->getAccountIdByCode('4.1'),
-                            'debit'  => $difference < 0 ? abs($difference) : 0,
-                            'credit' => $difference > 0 ? abs($difference) : 0,
-                            'note'   => "Ajuste de ingreso por edición"
-                        ]
-                    ]
-                ]);
-            }
-
-            // 2. Lógica de saldos que ya tenías
-            $amountPaid = $receivable->total_amount - $receivable->current_balance;
-            $data['current_balance'] = $newAmount - $amountPaid;
-
-            $receivable->update($data);
-            $this->updateStatusBasedOnBalance($receivable);
-
-            return $receivable;
-        });
-    }
-
-public function registerPayment(Receivable $receivable, array $data): Receivable
-    {
-        return DB::transaction(function () use ($receivable, $data) {
-            $amount = $data['payment_amount'];
-
-            if ($amount > $receivable->current_balance) {
-                throw new \Exception("El abono no puede ser mayor al saldo pendiente.");
-            }
-
-            // 1. Crear Asiento Contable del Abono
-            $this->journalService->create([
-                'entry_date'  => $data['payment_date'] ?? now(),
-                'reference'   => "ABONO-" . $receivable->document_number,
-                'description' => "Abono recibido de {$receivable->client->name}. Ref: {$receivable->document_number}",
-                'status'      => JournalEntry::STATUS_POSTED,
-                'items'       => [
-                    [
-                        // DEBITO: Entra dinero a Caja (1.1.01)
-                        'accounting_account_id' => $this->getAccountIdByCode('1.1.01'),
-                        'debit'  => $amount,
-                        'credit' => 0,
-                        'note'   => "Ingreso de efectivo/banco"
-                    ],
-                    [
-                        // CREDITO: Disminuye el Activo (CxC)
-                        'accounting_account_id' => $receivable->accounting_account_id,
-                        'debit'  => 0,
-                        'credit' => $amount,
-                        'note'   => "Reducción de saldo pendiente"
-                    ]
-                ]
+            
+            return $receivable->update([
+                'status' => Receivable::STATUS_CANCELLED,
+                'current_balance' => 0
             ]);
-
-            // 2. Actualizar saldos del modelo
-            $receivable->current_balance -= $amount;
-            $this->updateStatusBasedOnBalance($receivable);
-            $receivable->client->refreshBalance();
-
-            return $receivable;
         });
-    }
-
-    protected function getAccountIdByCode(string $code): int
-    {
-        return AccountingAccount::where('code', $code)->firstOrFail()->id;
     }
 
     /**
-     * Lógica para actualizar el estado basado en el saldo
+     * ACTUALIZA EL ESTADO BASADO EN EL SALDO
+     * Este método es REQUERIDO por PaymentService al registrar abonos.
      */
     public function updateStatusBasedOnBalance(Receivable $receivable): void
     {
-        // Usamos quietly() para evitar bucles infinitos si el observer escucha 'updated'
-        // aunque en este caso el observer escucha 'saved', lo cual es seguro.
         if ($receivable->current_balance <= 0) {
             $receivable->status = Receivable::STATUS_PAID;
         } elseif ($receivable->current_balance < $receivable->total_amount) {
@@ -189,5 +98,10 @@ public function registerPayment(Receivable $receivable, array $data): Receivable
         }
         
         $receivable->save();
+    }
+
+    protected function getAccountIdByCode(string $code): int
+    {
+        return AccountingAccount::where('code', $code)->firstOrFail()->id;
     }
 }

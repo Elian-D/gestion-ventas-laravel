@@ -1,13 +1,10 @@
 <?php
-
 namespace App\Models\Accounting;
 
 use App\Models\Clients\Client;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Carbon\Carbon;
+use Illuminate\Database\Eloquent\{Model, SoftDeletes, Relations\BelongsTo, Relations\MorphTo};
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 
 class Receivable extends Model
 {
@@ -17,6 +14,8 @@ class Receivable extends Model
         'client_id',
         'journal_entry_id',
         'accounting_account_id',
+        'reference_type', // Agregado
+        'reference_id',   // Agregado
         'document_number',
         'description',
         'total_amount',
@@ -58,6 +57,12 @@ class Receivable extends Model
             self::STATUS_CANCELLED => 'bg-gray-100 text-gray-700 border-gray-200 ring-gray-500/10',
         ];
     }
+    
+    // Relación Polimórfica: Permite obtener el objeto origen (Sale, etc.)
+    public function reference(): MorphTo
+    {
+        return $this->morphTo();
+    }
 
     /**
      * Forzamos la comparación usando parse para asegurar objetos Carbon
@@ -83,19 +88,8 @@ class Receivable extends Model
         return self::getStatuses()[$this->status] ?? $this->status;
     }
 
-    // Relaciones
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
-
-    public function journalEntry(): BelongsTo
-    {
-        return $this->belongsTo(JournalEntry::class);
-    }
-
-    public function accountingAccount(): BelongsTo
-    {
-        return $this->belongsTo(AccountingAccount::class);
-    }
+    // Relaciones estándar
+    public function client(): BelongsTo { return $this->belongsTo(Client::class); }
+    public function journalEntry(): BelongsTo { return $this->belongsTo(JournalEntry::class); }
+    public function accountingAccount(): BelongsTo { return $this->belongsTo(AccountingAccount::class); }
 }
