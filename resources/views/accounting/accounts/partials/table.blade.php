@@ -88,7 +88,7 @@
 
             @if(in_array('updated_at', $visibleColumns))
                 <td class="px-6 py-4 text-xs text-gray-400">
-                    {{ $item->updated_at->diffForHumans() }}
+                    {{ $item->updated_at?->diffForHumans() ?? 'Sin cambios' }}
                 </td>
             @endif
             

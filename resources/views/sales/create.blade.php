@@ -1,125 +1,189 @@
 <x-app-layout>
-    <div class="max-w-6xl mx-auto py-8 px-4" 
-         x-data="saleForm()" 
-         x-init="init()">
+    <div class="max-w-6xl mx-auto py-8 px-4" x-data="saleForm()" x-init="init()">
         
         <form action="{{ route('sales.store') }}" method="POST"
-            class="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100">
+            class="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-100 transition-all">
             @csrf
 
             <x-ui.toasts />
             
-            <x-form-header
-                title="Nueva Venta de Mercancía"
-                subtitle="Registro de salida de inventario y facturación."
-                :back-route="route('sales.index')" />
+            {{-- HEADER --}}
+            <div class="bg-white border-b border-gray-100 p-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 tracking-tight">Nueva Venta de Mercancía</h2>
+                    <p class="text-sm text-gray-500">Gestión de facturación y salida de inventario.</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Fecha de Emisión</span>
+                    <input type="date" name="sale_date" x-model="formData.sale_date"
+                        class="border-none p-0 text-gray-600 font-mono text-sm bg-transparent focus:ring-0 text-right cursor-default" 
+                        readonly>
+                </div>
+            </div>
 
             <div class="p-6 md:p-8 space-y-8">
                 
-                {{-- SECCIÓN 1: CABECERA Y CLIENTE --}}
-                <section class="grid grid-cols-1 md:grid-cols-4 gap-6 bg-gray-50/50 p-6 rounded-xl border border-gray-100">
-                    <div class="md:col-span-2">
-                        <x-input-label value="Cliente" />
-                        <select name="client_id" x-model="formData.client_id" 
-                                class="w-full mt-1 border-gray-300 rounded-lg text-sm focus:ring-indigo-500" required>
-                            @foreach($clients as $client)
-                                <option value="{{ $client->id }}">
-                                    {{ $client->name }} (Crédito Disp: ${{ number_format($client->credit_limit - $client->balance, 2) }})
-                                </option>
-                            @endforeach
-                        </select>
+                {{-- SECCIÓN 1: CONFIGURACIÓN --}}
+                <section class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div>
+                            <x-input-label value="Tipo de Venta" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
+                            <select name="payment_type" x-model="formData.payment_type" @change="handlePaymentTypeChange()"
+                                    class="w-full border-gray-300 rounded-lg text-sm font-bold focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all">
+                                @foreach($payment_types as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <x-input-label value="Almacén de Salida" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
+                            <select name="warehouse_id" x-model="formData.warehouse_id" @change="clearItems()"
+                                    class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
+                                <option value="">Seleccione...</option>
+                                @foreach($warehouses as $wh)
+                                    <option value="{{ $wh->id }}">{{ $wh->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <x-input-label value="Cliente" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
+                            <select name="client_id" x-model="formData.client_id" 
+                                    class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
+                                <template x-for="client in filteredClients" :key="client.id">
+                                    <option :value="client.id" x-text="client.name"></option>
+                                </template>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="md:col-span-1">
-                        <x-input-label value="Almacén de Salida" />
-                        <select name="warehouse_id" x-model="formData.warehouse_id" @change="clearItems()"
-                                class="w-full mt-1 border-gray-300 rounded-lg text-sm focus:ring-indigo-500" required>
-                            <option value="">Seleccione...</option>
-                            @foreach($warehouses as $wh)
-                                <option value="{{ $wh->id }}">{{ $wh->name }}</option>
-                            @endforeach
-                        </select>
+                    {{-- INFO BOX DEL CLIENTE (Con animaciones de entrada) --}}
+                    <div class="min-h-[70px]"> {{-- Espacio reservado para evitar saltos bruscos --}}
+                        <template x-if="selectedClient">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                 x-transition:enter-end="opacity-100 transform translate-y-0">
+                                
+                                <div :class="selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'" 
+                                     class="border rounded-xl p-4 flex items-center gap-4 transition-all duration-500">
+                                    <div :class="selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-500' : 'bg-emerald-500'" 
+                                         class="w-1.5 h-10 rounded-full shadow-sm"></div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Estatus del Cliente</p>
+                                        <p :class="selectedClient.is_moroso || selectedClient.is_blocked ? 'text-red-700' : 'text-emerald-700'" 
+                                           class="font-bold text-sm">
+                                            <span x-text="selectedClient.status_name"></span>
+                                            <template x-if="selectedClient.is_moroso"><span> (SÓLO CONTADO)</span></template>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between group hover:bg-indigo-100 transition-colors cursor-default">
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Línea de Crédito Disponible</p>
+                                        <p class="text-indigo-900 font-black text-lg font-mono" x-text="formatMoney(selectedClient.available)"></p>
+                                    </div>
+                                    <x-heroicon-o-credit-card class="w-8 h-8 text-indigo-300 group-hover:scale-110 transition-transform"/>
+                                </div>
+                            </div>
+                        </template>
                     </div>
 
-                    <div class="md:col-span-1">
-                        <x-input-label value="Fecha de Registro" />
-                        <x-text-input 
-                            type="date" 
-                            name="sale_date"
-                            x-model="formData.sale_date"
-                            class="w-full mt-1 bg-gray-100 cursor-not-allowed opacity-75" 
-                            readonly
-                            required 
-                        />
-                        <p class="text-[10px] text-gray-400 mt-1 italic">* Fecha automática no editable</p>
-                    </div>
+                    {{-- ALERTA DE RESTRICCIÓN --}}
+                    <template x-if="selectedClient && selectedClient.is_moroso && formData.payment_type === 'credit'">
+                        <div x-transition class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-4 text-amber-800 shadow-sm animate-pulse">
+                            <div class="bg-amber-100 p-2 rounded-lg">
+                                <x-heroicon-s-exclamation-circle class="w-6 h-6 text-amber-600"/>
+                            </div>
+                            <div class="text-sm">
+                                <strong class="block font-bold">Restricción de Crédito</strong>
+                                <p class="opacity-80">El cliente tiene facturas vencidas. Cambie a <strong>Contado</strong>.</p>
+                            </div>
+                        </div>
+                    </template>
                 </section>
 
                 {{-- SECCIÓN 2: DETALLE DE PRODUCTOS --}}
-                <section>
+                <section x-show="formData.warehouse_id" 
+                         x-transition:enter="transition ease-out duration-500"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100">
+                    
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-gray-800 uppercase text-xs tracking-wider flex items-center gap-2">
-                            <span class="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-[10px]">2</span>
-                            Productos / Servicios
+                        <h3 class="font-bold text-gray-400 uppercase text-[10px] tracking-widest flex items-center gap-2">
+                            <span class="w-5 h-5 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+                            Detalle de Productos
                         </h3>
-                        <button type="button" @click="addItem()" :disabled="!formData.warehouse_id"
-                            class="text-xs bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg hover:bg-indigo-600 hover:text-white transition-all font-bold disabled:opacity-50">
+                        <button type="button" @click="addItem()"
+                            class="text-xs bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all font-bold active:scale-95">
                             + Añadir Producto
                         </button>
                     </div>
 
-                    <div class="border rounded-xl overflow-hidden">
+                    <div class="border border-gray-100 rounded-xl overflow-hidden shadow-sm bg-white">
                         <table class="w-full text-sm">
-                            <thead class="bg-gray-100 text-gray-600 text-xs uppercase text-left">
+                            <thead class="bg-gray-50/80 text-gray-500 text-[10px] uppercase text-left border-b border-gray-100">
                                 <tr>
-                                    <th class="px-4 py-3 w-1/3">Producto</th>
-                                    <th class="px-4 py-3 text-center">Cant. Disp.</th>
-                                    <th class="px-4 py-3 w-24">Cantidad</th>
-                                    <th class="px-4 py-3">Precio</th>
-                                    <th class="px-4 py-3 text-right">Subtotal</th>
-                                    <th class="px-4 py-3 w-10"></th>
+                                    <th class="px-6 py-4 w-1/3 text-center">Producto</th>
+                                    <th class="px-6 py-4 text-center">Stock</th>
+                                    <th class="px-6 py-4 w-28 text-center">Cant.</th>
+                                    <th class="px-6 py-4 text-center">Precio</th>
+                                    <th class="px-6 py-4 text-right">Subtotal</th>
+                                    <th class="px-6 py-4 w-10"></th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody class="divide-y divide-gray-50">
                                 <template x-for="(item, index) in items" :key="index">
-                                    <tr class="hover:bg-gray-50/50 transition">
-                                        <td class="p-2">
+                                    <tr class="hover:bg-gray-50/50 transition-colors group"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 -translate-x-2"
+                                        x-transition:enter-end="opacity-100 translate-x-0">
+                                        
+                                        <td class="px-4 py-3">
                                             <select :name="`items[${index}][product_id]`" 
                                                     x-model="item.product_id"
                                                     @change="updateProductData(index)"
-                                                    class="w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500" required>
-                                                <option value="">Seleccione producto...</option>
+                                                    class="w-full border-gray-200 rounded-lg text-sm focus:ring-indigo-500 transition-all">
+                                                <option value="">Seleccione...</option>
                                                 <template x-for="p in filteredProducts" :key="p.id">
                                                     <option :value="p.id" x-text="p.name"></option>
                                                 </template>
                                             </select>
                                         </td>
-                                        <td class="p-2 text-center text-gray-500 font-mono" x-text="item.stock || 0"></td>
-                                        <td class="p-2">
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="px-2 py-1 bg-gray-100 rounded text-gray-500 font-mono text-[11px]" x-text="item.stock || 0"></span>
+                                        </td>
+                                        <td class="px-4 py-3">
                                             <input type="number" :name="`items[${index}][quantity]`" 
                                                 x-model.number="item.quantity"
                                                 @input="calculateTotals()"
-                                                :max="item.stock"
-                                                min="1"
-                                                class="w-full border-gray-200 rounded-lg text-sm text-center focus:ring-indigo-500" required>
+                                                :max="item.stock" min="1"
+                                                class="w-full border-gray-200 rounded-lg text-sm text-center focus:ring-indigo-500">
                                         </td>
-                                        <td class="p-2">
+                                        <td class="px-4 py-3">
                                             <input type="number" :name="`items[${index}][price]`" 
                                                 x-model.number="item.price"
-                                                @input="calculateTotals()"
-                                                step="0.01"
-                                                readonly
-                                                class="w-full border-transparent bg-gray-50 rounded-lg text-sm text-right font-mono cursor-not-allowed focus:ring-0" 
-                                                required>
+                                                class="w-full border-transparent bg-gray-50/50 rounded-lg text-sm text-right font-mono cursor-not-allowed" 
+                                                readonly>
                                         </td>
-                                        <td class="p-2 text-right font-mono font-bold text-gray-700" 
+                                        <td class="px-4 py-3 text-right font-mono font-bold text-gray-700" 
                                             x-text="formatMoney(item.quantity * item.price)">
                                         </td>
-                                        <td class="p-2 text-center">
-                                            <button type="button" @click="removeItem(index)"
-                                                class="text-red-400 hover:text-red-600 transition">
-                                                <x-heroicon-s-trash class="w-5 h-5"/>
+                                        <td class="px-4 py-3 text-center">
+                                            <button type="button" @click="removeItem(index)" 
+                                                    class="p-1.5 text-red-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                                                <x-heroicon-s-trash class="w-4 h-4"/>
                                             </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                {{-- EMPTY STATE --}}
+                                <template x-if="items.length === 0">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-10 text-center text-gray-400 italic text-sm">
+                                            No hay productos agregados. Haga clic en "Añadir Producto" para comenzar.
                                         </td>
                                     </tr>
                                 </template>
@@ -128,86 +192,96 @@
                     </div>
                 </section>
 
-                {{-- SECCIÓN 3: PAGO Y TOTALES --}}
-                <section class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-                    <div class="md:col-span-2 space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label value="Tipo de Pago" />
-                                <select name="payment_type" class="w-full mt-1 border-gray-300 rounded-lg text-sm">
-                                    @foreach($payment_types as $key => $label)
-                                        <option value="{{ $key }}">{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <x-input-label value="Notas de la Venta" />
-                                <textarea name="notes" rows="2" class="w-full mt-1 border-gray-300 rounded-lg text-sm" placeholder="Opcional..."></textarea>
-                            </div>
-                        </div>
+                {{-- SECCIÓN 3: TOTALES --}}
+                <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <x-input-label value="Notas de la Venta" class="text-xs text-gray-500 uppercase tracking-wider" />
+                        <textarea name="notes" rows="3" 
+                                  class="w-full mt-2 border-gray-300 rounded-xl text-sm focus:ring-indigo-500 transition-all" 
+                                  placeholder="Detalles adicionales de la factura..."></textarea>
                     </div>
 
-                    <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-xl space-y-4">
-                        <div class="flex justify-between text-sm opacity-70">
-                            <span>Subtotal</span>
+                    <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-2xl space-y-4 relative overflow-hidden transition-all duration-500">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full -mr-12 -mt-12"></div>
+                        
+                        <div class="flex justify-between text-[10px] opacity-50 uppercase tracking-[0.2em]">
+                            <span>Subtotal Bruto</span>
                             <span x-text="formatMoney(totals.subtotal)"></span>
                         </div>
 
-                        {{-- Toggle de Impuestos --}}
-                        <div class="flex justify-between items-center py-2 border-y border-white/5">
-                            <div class="flex items-center gap-2">
+                        <div class="flex justify-between items-center py-3 border-y border-white/5">
+                            <div class="flex items-center gap-3">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" x-model="config.apply_tax" @change="calculateTotals()" class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500"></div>
+                                    <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
                                 </label>
-                                <span class="text-xs uppercase font-medium">Aplicar ITBIS ({{ general_config()->impuesto->valor }}%)</span>
+                                <span class="text-[10px] font-bold text-gray-400">APLICAR IMPUESTOS</span>
                             </div>
-                            <span class="font-mono text-sm" x-text="formatMoney(totals.tax)"></span>
-                            {{-- Campo oculto para enviar si se aplicó impuesto o no al backend --}}
-                            <input type="hidden" name="apply_tax" :value="config.apply_tax ? 1 : 0">
+                            <span class="font-mono text-sm text-indigo-300" x-text="formatMoney(totals.tax)"></span>
                         </div>
 
-                        <div class="pt-2 flex justify-between items-center">
-                            <span class="text-xs uppercase font-bold tracking-widest text-indigo-400">Total a Pagar</span>
-                            <span class="text-3xl font-black font-mono" x-text="formatMoney(totals.total)"></span>
+                        <div class="pt-2">
+                            <div class="flex justify-between items-end">
+                                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Total Factura</span>
+                                <span class="text-3xl font-black font-mono tracking-tight" x-text="formatMoney(totals.total)"></span>
+                            </div>
                             <input type="hidden" name="total_amount" :value="totals.total">
                         </div>
+
+                        <template x-if="formData.payment_type === 'credit' && selectedClient && totals.total > selectedClient.available">
+                            <div x-transition class="bg-red-500/20 text-red-300 text-[10px] p-2 rounded-lg border border-red-500/40 text-center font-bold">
+                                ERROR: Excede límite de crédito.
+                            </div>
+                        </template>
                     </div>
                 </section>
             </div>
 
-            <div class="p-6 bg-gray-50 flex justify-end items-center border-t gap-4">
-                <a href="{{ route('sales.index') }}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Cancelar</a>
-                <x-primary-button class="bg-indigo-600 px-10 py-3" ::disabled="items.length === 0 || totals.total <= 0">
-                    Finalizar Venta
-                </x-primary-button>
+            {{-- FOOTER --}}
+            <div class="p-6 bg-gray-50/50 flex justify-end items-center border-t border-gray-100 gap-6">
+                <a href="{{ route('sales.index') }}" class="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">Cancelar</a>
+                
+                <button type="submit"
+                    class="bg-indigo-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
+                    :class="isSubmitDisabled ? '' : 'hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-95'"
+                    :disabled="isSubmitDisabled">
+                    <x-heroicon-s-check-circle class="w-5 h-5"/>
+                    Confirmar y Facturar
+                </button>
             </div>
         </form>
     </div>
-
     <script>
         function saleForm() {
             return {
                 products: @json($products),
+                clients: @json($clients),
                 items: [],
-                // Cargamos la configuración desde el helper de Laravel hacia Alpine
                 config: {
                     tax_rate: {{ general_config()->impuesto->valor ?? 0 }},
-                    apply_tax: false, // Por defecto apagado para ventas pequeñas
+                    apply_tax: false,
                 },
                 formData: {
-                    client_id: '{{ $clients->first()->id ?? "" }}',
+                    payment_type: 'cash',
+                    client_id: '',
                     warehouse_id: '',
                     sale_date: '{{ date("Y-m-d") }}',
                 },  
-                totals: {
-                    subtotal: 0,
-                    tax: 0,
-                    total: 0
-                },
+                totals: { subtotal: 0, tax: 0, total: 0 },
 
                 init() {
-                    if(this.formData.warehouse_id) this.addItem();
+                    this.handlePaymentTypeChange();
+                },
+
+                get filteredClients() {
+                    if (this.formData.payment_type === 'credit') {
+                        return this.clients.filter(c => c.id != 1);
+                    }
+                    return this.clients;
+                },
+
+                get selectedClient() {
+                    return this.clients.find(c => c.id == this.formData.client_id) || null;
                 },
 
                 get filteredProducts() {
@@ -215,13 +289,29 @@
                     return this.products.filter(p => p.warehouse_id == this.formData.warehouse_id);
                 },
 
+                get isSubmitDisabled() {
+                    const basic = this.items.length === 0 || this.totals.total <= 0;
+                    
+                    if (this.formData.payment_type === 'credit') {
+                        return basic || 
+                            !this.selectedClient || 
+                            this.selectedClient.is_blocked || 
+                            this.selectedClient.is_moroso || 
+                            (this.totals.total > this.selectedClient.available);
+                    }
+                    return basic;
+                },
+
+                handlePaymentTypeChange() {
+                    if (this.formData.payment_type === 'credit' && this.formData.client_id == 1) {
+                        this.formData.client_id = '';
+                    } else if (this.formData.payment_type === 'cash' && !this.formData.client_id) {
+                        this.formData.client_id = 1; 
+                    }
+                },
+
                 addItem() {
-                    this.items.push({
-                        product_id: '',
-                        quantity: 1,
-                        price: 0,
-                        stock: 0
-                    });
+                    this.items.push({ product_id: '', quantity: 1, price: 0, stock: 0 });
                 },
 
                 removeItem(index) {
@@ -237,7 +327,6 @@
                 updateProductData(index) {
                     const item = this.items[index];
                     const product = this.products.find(p => p.id == item.product_id && p.warehouse_id == this.formData.warehouse_id);
-                    
                     if (product) {
                         item.price = product.price;
                         item.stock = product.stock;
@@ -246,25 +335,13 @@
                 },
 
                 calculateTotals() {
-                    // 1. Calcular Subtotal
-                    this.totals.subtotal = this.items.reduce((sum, item) => {
-                        return sum + (parseFloat(item.quantity || 0) * parseFloat(item.price || 0));
-                    }, 0);
-                    
-                    // 2. Calcular Impuesto basado en el Switch
-                    this.totals.tax = this.config.apply_tax 
-                        ? (this.totals.subtotal * (this.config.tax_rate / 100)) 
-                        : 0;
-
-                    // 3. Total Final
+                    this.totals.subtotal = this.items.reduce((sum, item) => sum + (parseFloat(item.quantity || 0) * parseFloat(item.price || 0)), 0);
+                    this.totals.tax = this.config.apply_tax ? (this.totals.subtotal * (this.config.tax_rate / 100)) : 0;
                     this.totals.total = this.totals.subtotal + this.totals.tax;
                 },
 
                 formatMoney(amount) {
-                    return '$' + new Intl.NumberFormat('en-US', { 
-                        minimumFractionDigits: 2, 
-                        maximumFractionDigits: 2 
-                    }).format(amount);
+                    return '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(amount);
                 }
             }
         }
