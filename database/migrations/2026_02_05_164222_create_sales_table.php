@@ -25,6 +25,8 @@ return new class extends Migration
             $table->decimal('total_amount', 15, 2);
             
             $table->string('payment_type'); // cash, credit
+            $table->decimal('cash_received', 12, 2)->default(0);
+            $table->decimal('cash_change', 12, 2)->default(0);
             $table->string('status');       // completed, canceled
             
             $table->text('notes')->nullable();

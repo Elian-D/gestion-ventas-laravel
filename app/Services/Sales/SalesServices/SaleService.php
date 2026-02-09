@@ -9,6 +9,7 @@ use App\Services\Inventory\InventoryMovementService;
 use App\Services\Accounting\JournalEntries\JournalEntryService;
 use App\Services\Accounting\Receivable\ReceivableService;
 use Illuminate\Support\Facades\{DB, Auth};
+use App\Services\Sales\InvoicesServices\InvoiceService; 
 use Exception;
 
 class SaleService
@@ -16,7 +17,8 @@ class SaleService
     public function __construct(
         protected InventoryMovementService $inventoryService,
         protected JournalEntryService $journalService,
-        protected ReceivableService $receivableService
+        protected ReceivableService $receivableService,
+        protected InvoiceService $invoiceService
     ) {}
 
     public function create(array $data): Sale
@@ -35,6 +37,10 @@ class SaleService
                 'sale_date'        => $data['sale_date'] ?? now(),
                 'total_amount'     => $data['total_amount'],
                 'payment_type'     => $data['payment_type'],
+                // --- NUEVOS CAMPOS AQUÍ ---
+                'cash_received'    => $data['payment_type'] === Sale::PAYMENT_CASH ? ($data['cash_received'] ?? 0) : 0,
+                'cash_change'      => $data['payment_type'] === Sale::PAYMENT_CASH ? ($data['cash_change'] ?? 0) : 0,
+                // --------------------------
                 'status'           => Sale::STATUS_COMPLETED,
                 'notes'            => $data['notes'] ?? null,
             ]);
@@ -73,6 +79,7 @@ class SaleService
                 ]);
             }
 
+            $this->invoiceService->createFromSale($sale);
             return $sale;
         });
     }
@@ -114,6 +121,8 @@ class SaleService
                 ]);
             }
 
+            $this->invoiceService->cancelInvoice($sale);
+            
             return $sale->update(['status' => Sale::STATUS_CANCELED]);
         });
     }

@@ -65,6 +65,22 @@ class SaleController extends Controller
     }
 
     /**
+     * Redirigir a la impresión de la factura asociada a la venta.
+     */
+    public function printInvoice(Sale $sale)
+    {
+        // Buscamos la factura asociada
+        $invoice = $sale->invoice; 
+
+        if (!$invoice) {
+            return back()->with('error', 'Esta venta aún no tiene una factura generada.');
+        }
+
+        // Reutilizamos el método print del InvoiceController
+        return app(\App\Http\Controllers\Sales\InvoiceController::class)->print($invoice);
+    }
+
+    /**
      * Mostrar formulario de creación (Ventanilla de Venta).
      */
     public function create()

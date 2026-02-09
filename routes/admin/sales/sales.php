@@ -4,7 +4,6 @@ use App\Http\Controllers\Sales\SaleController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
-
     // Listado y Dashboard de Ventas
     Route::get('/', [SaleController::class, 'index'])
         ->middleware('permission:view sales')
@@ -28,4 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/export', [SaleController::class, 'export'])
         ->middleware('permission:view sales')
         ->name('export');
+
+    Route::get('sales/{sale}/print-invoice', [SaleController::class, 'printInvoice'])
+        ->name('print-invoice')
+        ->middleware('permission:print invoices');
 });

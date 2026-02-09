@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 use App\Models\Clients\Client;
 use App\Models\Inventory\Warehouse;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Sale extends Model
 {
@@ -23,6 +24,8 @@ class Sale extends Model
         'sale_date',
         'total_amount',
         'payment_type',
+        'cash_received', // Nuevo
+        'cash_change',   // Nuevo
         'status',
         'notes',
     ];
@@ -101,4 +104,5 @@ class Sale extends Model
     public function client(): BelongsTo { return $this->belongsTo(Client::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function warehouse(): BelongsTo{return $this->belongsTo(Warehouse::class);}
+    public function invoice(): HasOne{return $this->hasOne(Invoice::class);}
 }
