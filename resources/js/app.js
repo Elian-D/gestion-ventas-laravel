@@ -24,4 +24,5 @@ import './pages/documentTypes'
 import './pages/receivable'
 import './pages/payment'
 import './pages/sales'
+import './pages/invoices'
 

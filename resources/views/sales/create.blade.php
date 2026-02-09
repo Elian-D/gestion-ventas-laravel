@@ -197,42 +197,65 @@
                     <div class="md:col-span-2">
                         <x-input-label value="Notas de la Venta" class="text-xs text-gray-500 uppercase tracking-wider" />
                         <textarea name="notes" rows="3" 
-                                  class="w-full mt-2 border-gray-300 rounded-xl text-sm focus:ring-indigo-500 transition-all" 
-                                  placeholder="Detalles adicionales de la factura..."></textarea>
+                                class="w-full mt-2 border-gray-300 rounded-xl text-sm focus:ring-indigo-500 transition-all" 
+                                placeholder="Detalles adicionales de la factura..."></textarea>
                     </div>
 
                     <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-2xl space-y-4 relative overflow-hidden transition-all duration-500">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full -mr-12 -mt-12"></div>
                         
+                        {{-- Subtotal (Venta Real) --}}
                         <div class="flex justify-between text-[10px] opacity-50 uppercase tracking-[0.2em]">
-                            <span>Subtotal Bruto</span>
+                            <span>Venta Neta (Subtotal)</span>
                             <span x-text="formatMoney(totals.subtotal)"></span>
                         </div>
 
-                        <div class="flex justify-between items-center py-3 border-y border-white/5">
-                            <div class="flex items-center gap-3">
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" x-model="config.apply_tax" @change="calculateTotals()" class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
-                                </label>
-                                <span class="text-[10px] font-bold text-gray-400">APLICAR IMPUESTOS</span>
+                        {{-- Toggle de Impuesto: Solo aparece si el tax_rate es > 0 --}}
+                        {{-- COMENTADA HASTA SABER EL FUNCIONAMIENTO CORRECTO DE LAS EMPRESAS --}}
+                        {{-- <template x-if="config.tax_rate > 0">
+                            <div class="flex justify-between items-center py-3 border-y border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" x-model="config.apply_tax" @change="calculateTotals()" class="sr-only peer">
+                                        <div class="w-9 h-5 bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-4"></div>
+                                    </label>
+                                    <span class="text-[10px] font-bold text-gray-400">DESGLOSAR ITBIS</span>
+                                </div>
+                                <span class="font-mono text-sm text-indigo-300" x-text="formatMoney(totals.tax)"></span>
                             </div>
-                            <span class="font-mono text-sm text-indigo-300" x-text="formatMoney(totals.tax)"></span>
-                        </div>
+                        </template> --}}
+
+                        {{-- NUEVO: Bloque de Pago (Solo si es Contado) --}}
+                        <template x-if="formData.payment_type === 'cash'">
+                            <div class="space-y-3 pt-4 mt-2 border-t border-white/10" x-transition>
+                                <div>
+                                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Efectivo Recibido</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-mono">$</span>
+                                        <input type="number" name="cash_received" x-model.number="formData.cash_received" 
+                                            @input="calculateChange()" step="0.01"
+                                            class="w-full bg-white/5 border-white/10 rounded-lg pl-7 py-2 text-lg font-mono focus:ring-indigo-500 focus:bg-white/10 transition-all">
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-center bg-indigo-500/20 p-3 rounded-xl border border-indigo-500/30">
+                                    <span class="text-[10px] font-bold text-indigo-300 uppercase">Cambio a Devolver</span>
+                                    <span class="text-xl font-black font-mono text-indigo-400" x-text="formatMoney(formData.cash_change)"></span>
+                                    <input type="hidden" name="cash_change" :value="formData.cash_change">
+                                </div>
+                            </div>
+                        </template>
 
                         <div class="pt-2">
                             <div class="flex justify-between items-end">
-                                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Total Factura</span>
+                                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Total a Pagar</span>
                                 <span class="text-3xl font-black font-mono tracking-tight" x-text="formatMoney(totals.total)"></span>
                             </div>
+                            {{-- Enviamos los valores reales al servidor --}}
+                            <input type="hidden" name="subtotal" :value="totals.subtotal">
+                            <input type="hidden" name="tax_amount" :value="totals.tax">
                             <input type="hidden" name="total_amount" :value="totals.total">
                         </div>
-
-                        <template x-if="formData.payment_type === 'credit' && selectedClient && totals.total > selectedClient.available">
-                            <div x-transition class="bg-red-500/20 text-red-300 text-[10px] p-2 rounded-lg border border-red-500/40 text-center font-bold">
-                                ERROR: Excede límite de crédito.
-                            </div>
-                        </template>
                     </div>
                 </section>
             </div>
@@ -266,6 +289,8 @@
                     client_id: '',
                     warehouse_id: '',
                     sale_date: '{{ date("Y-m-d") }}',
+                    cash_received: 0, // Nuevo
+                    cash_change: 0,   // Nuevo
                 },  
                 totals: { subtotal: 0, tax: 0, total: 0 },
 
@@ -293,12 +318,15 @@
                     const basic = this.items.length === 0 || this.totals.total <= 0;
                     
                     if (this.formData.payment_type === 'credit') {
-                        return basic || 
-                            !this.selectedClient || 
-                            this.selectedClient.is_blocked || 
-                            this.selectedClient.is_moroso || 
-                            (this.totals.total > this.selectedClient.available);
+                        return basic || !this.selectedClient || this.selectedClient.is_blocked || 
+                            this.selectedClient.is_moroso || (this.totals.total > this.selectedClient.available);
                     }
+
+                    // Validación para Contado: Debe haber recibido suficiente dinero
+                    if (this.formData.payment_type === 'cash') {
+                        return basic || (this.formData.cash_received < this.totals.total);
+                    }
+
                     return basic;
                 },
 
@@ -335,9 +363,34 @@
                 },
 
                 calculateTotals() {
-                    this.totals.subtotal = this.items.reduce((sum, item) => sum + (parseFloat(item.quantity || 0) * parseFloat(item.price || 0)), 0);
-                    this.totals.tax = this.config.apply_tax ? (this.totals.subtotal * (this.config.tax_rate / 100)) : 0;
-                    this.totals.total = this.totals.subtotal + this.totals.tax;
+                    // 1. El Total Bruto es la suma simple de lo que el cliente realmente va a pagar
+                    const bruto = this.items.reduce((sum, item) => sum + (parseFloat(item.quantity || 0) * parseFloat(item.price || 0)), 0);
+                    
+                    if (this.config.apply_tax && this.config.tax_rate > 0) {
+                        // Lógica ITBIS Incluido:
+                        // Total es 100. Base = 100 / 1.18. Impuesto = Total - Base.
+                        const divisor = 1 + (this.config.tax_rate / 100);
+                        this.totals.total = bruto; 
+                        this.totals.subtotal = bruto / divisor;
+                        this.totals.tax = bruto - this.totals.subtotal;
+                    } else {
+                        // Sin impuestos o impuesto 0: Todo es subtotal
+                        this.totals.total = bruto;
+                        this.totals.subtotal = bruto;
+                        this.totals.tax = 0;
+                        this.calculateChange();
+                    }
+                },
+
+                calculateChange() {
+                    const received = parseFloat(this.formData.cash_received || 0);
+                    const total = parseFloat(this.totals.total || 0);
+                    
+                    if (received >= total) {
+                        this.formData.cash_change = (received - total).toFixed(2);
+                    } else {
+                        this.formData.cash_change = 0;
+                    }
                 },
 
                 formatMoney(amount) {
