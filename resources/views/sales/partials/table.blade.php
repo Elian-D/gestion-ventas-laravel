@@ -113,9 +113,9 @@
                     </button>
 
                     {{-- Imprimir Factura/Ticket --}}
-                    <a href="#" target="_blank" 
-                       class="bg-white border border-gray-200 text-gray-500 hover:bg-gray-800 hover:text-white p-2 rounded-lg transition-all shadow-sm" 
-                       title="Imprimir Comprobante">
+                    <a href="{{ route('sales.print-invoice', $sale) }}" target="_blank" 
+                    class="bg-white border border-gray-200 text-gray-500 hover:bg-gray-800 hover:text-white p-2 rounded-lg transition-all shadow-sm" 
+                    title="Imprimir Comprobante">
                         <x-heroicon-s-printer class="w-4 h-4" />
                     </a>
 

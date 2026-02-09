@@ -49,15 +49,28 @@
                     Dashboard
                 </x-sidebar.item>
 
-                {{-- GRUPO 1: Operaciones Diarias --}}
+                {{-- GRUPO 1: Operaciones --}}
                 <x-sidebar.group>
                     <x-sidebar.title>Operaciones</x-sidebar.title>
 
-                    @can('view sales')
-                        <x-sidebar.item href="/admin/sales" icon="heroicon-s-currency-dollar">
-                            Ventas (POS)
-                        </x-sidebar.item>
-                    @endcan
+                    {{-- Ventas como Dropdown --}}
+                    @canany(['view sales', 'view invoices'])
+                        <x-sidebar.dropdown 
+                            id="ventas" 
+                            icon="heroicon-s-banknotes" 
+                            :activeRoutes="['admin/sales*']"
+                        >
+                            Ventas
+                            <x-slot name="submenu">
+                                @can('view sales')
+                                    <x-sidebar.subitem href="/admin/sales">Punto de Venta (POS)</x-sidebar.subitem>
+                                @endcan
+                                @can('view invoices')
+                                    <x-sidebar.subitem href="/admin/sales/invoice">Facturas</x-sidebar.subitem>
+                                @endcan
+                            </x-slot>
+                        </x-sidebar.dropdown>
+                    @endcanany
 
                     <x-sidebar.item href="/rutas" icon="heroicon-s-map">
                         Rutas y Entregas
@@ -66,7 +79,7 @@
                     @can('view inventory dashboard')
                         <x-sidebar.dropdown 
                             id="inventario" 
-                            icon="heroicon-s-archive-box" 
+                            icon="heroicon-s-cube" 
                             :activeRoutes="['admin/inventory*']"
                         >
                             Inventario
@@ -104,11 +117,10 @@
                     </x-sidebar.group>
                 @endcan
 
-                {{-- GRUPO 3: Catálogos Maestros --}}
+                {{-- GRUPO 3: Catálogos --}}
                 <x-sidebar.group>
                     <x-sidebar.title>Catálogos</x-sidebar.title>
 
-                    {{-- Productos --}}
                     <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">
                         Productos
                         <x-slot name="submenu">
@@ -118,7 +130,6 @@
                         </x-slot>
                     </x-sidebar.dropdown>
 
-                    {{-- Clientes --}}
                     <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['admin/clients*']">
                         Clientes
                         <x-slot name="submenu">
@@ -141,7 +152,7 @@
                     </x-sidebar.item>
 
                     <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
-                        Roles y Permisos
+                        Roles
                     </x-sidebar.item>
 
                     <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">

@@ -22,6 +22,8 @@ class StoreSaleRequest extends FormRequest
             'warehouse_id' => ['required', 'exists:warehouses,id'],
             'sale_date'    => ['required', 'date', 'after_or_equal:today', 'before_or_equal:today'],
             'payment_type' => ['required', Rule::in([Sale::PAYMENT_CASH, Sale::PAYMENT_CREDIT])],
+            'cash_received' => ['nullable', 'numeric', 'min:0'],
+            'cash_change'   => ['nullable', 'numeric', 'min:0'],
             'total_amount' => ['required', 'numeric', 'min:0'],
             'apply_tax'    => ['nullable', 'boolean'], // Recibimos el estado del switch
             'notes'        => ['nullable', 'string', 'max:255'],
@@ -65,6 +67,23 @@ class StoreSaleRequest extends FormRequest
             if (abs($totalFinal - $this->total_amount) > 0.01) {
                 $validator->errors()->add('total_amount', 'El total no coincide con la suma de los productos + impuestos.');
             }
+            
+            // --- VALIDACIÓN DE EFECTIVO (VENTA AL CONTADO) ---
+            if ($this->payment_type === Sale::PAYMENT_CASH) {
+                $recibido = (float) $this->cash_received;
+                $total = (float) $this->total_amount;
+
+                if ($recibido < $total) {
+                    $validator->errors()->add('cash_received', 'El efectivo recibido es menor al total a pagar.');
+                }
+                
+                // Validación matemática del cambio (opcional, por seguridad)
+                $cambioCalculado = $recibido - $total;
+                if (abs($cambioCalculado - (float)$this->cash_change) > 0.01) {
+                    $validator->errors()->add('cash_change', 'El cálculo del cambio no es correcto.');
+                }
+            }
+
 
             // --- LÓGICA DE CRÉDITO Y ESTADOS ---
             if ($this->payment_type === Sale::PAYMENT_CREDIT) {

@@ -100,15 +100,38 @@
                                 </tr>
                             @endforeach
                         </tbody>
-                        <tfoot class="bg-gray-50/50">
+                        <tfoot class="bg-gray-50/80">
                             <tr>
-                                <td colspan="3" class="px-4 py-3 text-right font-bold text-gray-400 uppercase text-[10px]">Total de la Operación</td>
+                                <td colspan="3" class="px-4 py-2 text-right font-bold text-gray-400 uppercase text-[10px]">Subtotal</td>
+                                <td class="px-4 py-2 text-right font-mono text-gray-600">${{ number_format($sale->subtotal, 2) }}</td>
+                            </tr>
+                            @if($sale->tax_amount > 0)
+                            <tr>
+                                <td colspan="3" class="px-4 py-2 text-right font-bold text-gray-400 uppercase text-[10px]">ITBIS (Impuestos)</td>
+                                <td class="px-4 py-2 text-right font-mono text-gray-600">${{ number_format($sale->tax_amount, 2) }}</td>
+                            </tr>
+                            @endif
+                            <tr class="border-t">
+                                <td colspan="3" class="px-4 py-3 text-right font-black text-gray-900 uppercase text-[10px]">Total de la Operación</td>
                                 <td class="px-4 py-3 text-right">
-                                    <span class="text-lg font-black text-indigo-700">${{ number_format($sale->total_amount, 2) }}</span>
+                                    <span class="text-lg font-black text-indigo-700 font-mono">${{ number_format($sale->total_amount, 2) }}</span>
                                 </td>
                             </tr>
                         </tfoot>
                     </table>
+                    {{-- NUEVO: DESGLOSE DE PAGO (SOLO CONTADO) --}}
+                    @if($sale->payment_type === 'cash')
+                        <div class="bg-gray-50/50 border-t px-4 py-4 grid grid-cols-2 gap-4">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Efectivo Recibido</span>
+                                <span class="text-sm font-mono text-gray-600">${{ number_format($sale->cash_received ?? 0, 2) }}</span>
+                            </div>
+                            <div class="flex flex-col text-right">
+                                <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Cambio Entregado</span>
+                                <span class="text-sm font-mono font-bold text-emerald-600">${{ number_format($sale->cash_change ?? 0, 2) }}</span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Notas --}}
@@ -127,7 +150,8 @@
 
             <div class="px-8 py-5 bg-gray-50 border-t flex justify-end gap-3">
                 <x-secondary-button x-on:click="$dispatch('close')">Cerrar</x-secondary-button>
-                <a href="#" target="_blank" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 transition shadow-sm">
+                <a href="{{ route('sales.print-invoice', $sale) }}" target="_blank" 
+                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 transition shadow-sm">
                     <x-heroicon-s-printer class="w-3 h-3 mr-2"/> Re-imprimir Ticket
                 </a>
             </div>

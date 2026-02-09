@@ -18,6 +18,10 @@ class SalesPermissionsSeeder extends Seeder
             'delete sales', // SoftDelete por seguridad técnica
             'export sales',
             'print sales receipts', // Para el PDF del recibo o factura
+
+            'view invoices',
+            'export invoices',
+            'print invoices',
         ];
 
         foreach ($permissions as $permission) {
