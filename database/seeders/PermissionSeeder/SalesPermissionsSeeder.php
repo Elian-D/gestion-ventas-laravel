@@ -22,6 +22,13 @@ class SalesPermissionsSeeder extends Seeder
             'view invoices',
             'export invoices',
             'print invoices',
+
+            // Gestión de Comprobantes Fiscales (NCF)
+            'view ncf sequences',    // Ver los lotes cargados
+            'manage ncf sequences',  // Crear/Editar lotes (Configuración)
+            'void ncf',              // Anular un número específicamente
+            'view ncf reports',      // Para reportes tipo 606/607/608
+            'manage ncf types',
         ];
 
         foreach ($permissions as $permission) {
