@@ -25,4 +25,7 @@ import './pages/receivable'
 import './pages/payment'
 import './pages/sales'
 import './pages/invoices'
+import './pages/sequences'
+import './pages/ncf-logs'
+import './pages/nfc-types'
 
