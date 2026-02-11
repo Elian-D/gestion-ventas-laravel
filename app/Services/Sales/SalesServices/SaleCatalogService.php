@@ -39,10 +39,10 @@ class SaleCatalogService
             // 1. Clientes: Priorizando Consumidor Final
             'clients' => Client::with('estadoCliente.categoria')
                 ->whereHas('estadoCliente.categoria', function ($query) {
-                    // Solo enviamos Clientes Operativos o con Restricción Financiera (Morosos)
                     $query->whereIn('code', ['OPERATIVO', 'FINANCIERO_RESTRICTO']);
                 })
-                ->select('id', 'name', 'credit_limit', 'balance', 'estado_cliente_id')
+                // AGREGAMOS 'tax_id' AQUÍ ABAJO:
+                ->select('id', 'name', 'tax_id', 'credit_limit', 'balance', 'estado_cliente_id') 
                 ->orderByRaw("CASE WHEN name = 'Consumidor Final' THEN 0 ELSE 1 END")
                 ->orderBy('name')
                 ->get()
@@ -50,10 +50,10 @@ class SaleCatalogService
                     return [
                         'id'           => $client->id,
                         'name'         => $client->name,
+                        'tax_id'       => $client->tax_id, // Ahora esto ya no será null
                         'credit_limit' => $client->credit_limit,
                         'balance'      => $client->balance,
                         'available'    => $client->credit_limit - $client->balance,
-                        // Moroso = FINANCIERO_RESTRICTO
                         'is_moroso'    => ($client->estadoCliente->categoria->code ?? '') === 'FINANCIERO_RESTRICTO',
                         'status_name'  => $client->estadoCliente->nombre ?? 'N/A',
                     ];
@@ -92,6 +92,21 @@ class SaleCatalogService
             'default_cash_account' => AccountingAccount::where('code', '1.1.01')
                 ->select('id', 'name', 'code')
                 ->first(),
+
+            'ncf_types' => \App\Models\Sales\Ncf\NcfType::whereHas('sequences', function($q) {
+                    $q->where('status', \App\Models\Sales\Ncf\NcfSequence::STATUS_ACTIVE)
+                    ->where('expiry_date', '>=', now())
+                    ->whereColumn('current', '<', 'to');
+                })
+                ->get()
+                ->map(function($type) {
+                    return [
+                        'id' => $type->id,
+                        'name' => $type->name,
+                        'code' => $type->code,
+                        'is_electronic' => $type->is_electronic
+                    ];
+                }),
         ];
     }
 }

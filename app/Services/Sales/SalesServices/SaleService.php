@@ -10,6 +10,8 @@ use App\Services\Accounting\JournalEntries\JournalEntryService;
 use App\Services\Accounting\Receivable\ReceivableService;
 use Illuminate\Support\Facades\{DB, Auth};
 use App\Services\Sales\InvoicesServices\InvoiceService; 
+use App\Contracts\Sales\NcfGeneratorInterface;
+use App\Models\Sales\Ncf\NcfLog;
 use Exception;
 
 class SaleService
@@ -18,7 +20,8 @@ class SaleService
         protected InventoryMovementService $inventoryService,
         protected JournalEntryService $journalService,
         protected ReceivableService $receivableService,
-        protected InvoiceService $invoiceService
+        protected InvoiceService $invoiceService,
+        protected NcfGeneratorInterface $ncfGenerator // <--- INYECTAR INTERFAZ
     ) {}
 
     public function create(array $data): Sale
@@ -44,6 +47,11 @@ class SaleService
                 'status'           => Sale::STATUS_COMPLETED,
                 'notes'            => $data['notes'] ?? null,
             ]);
+
+            if (isset($data['ncf_type_id'])) {
+                $fullNcf = $this->ncfGenerator->generate($sale, $data['ncf_type_id']);
+                $sale->update(['ncf' => $fullNcf]); // Asegúrate que la tabla 'sales' tenga la columna 'ncf'
+            }
 
             foreach ($data['items'] as $item) {
                 $sale->items()->create([
@@ -84,9 +92,9 @@ class SaleService
         });
     }
 
-    public function cancel(Sale $sale): bool
+    public function cancel(Sale $sale, ?string $reason = null): bool
     {
-        return DB::transaction(function () use ($sale) {
+        return DB::transaction(function () use ($sale, $reason) {
             if ($sale->status === Sale::STATUS_CANCELED) {
                 throw new Exception("La venta ya se encuentra anulada.");
             }
@@ -104,6 +112,12 @@ class SaleService
                     $this->receivableService->cancelReceivable($receivable);
                 }
             }
+        // Actualizar el log del NCF con el motivo real
+        NcfLog::where('sale_id', $sale->id)
+            ->update([
+                'status' => NcfLog::STATUS_VOIDED,
+                'cancellation_reason' => $reason ?? 'Anulación de venta manual'
+            ]);
 
             // 2. Reversión de Ingresos (4.1 vs Caja/CxC)
             $this->generateCancellationAccountingEntry($sale);
