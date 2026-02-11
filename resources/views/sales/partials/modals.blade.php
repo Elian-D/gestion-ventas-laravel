@@ -157,10 +157,10 @@
             </div>
         </div>
     </x-modal>
-
-    {{-- 2. MODAL: CONFIRMACIÓN DE ANULACIÓN --}}
+    
+    {{-- 2. MODAL: CONFIRMACIÓN DE ANULACIÓN ACTUALIZADO --}}
     <x-modal name="confirm-cancel-sale-{{ $sale->id }}" maxWidth="sm">
-        <form action="{{ route('sales.cancel', $sale) }}" method="POST" class="p-6 text-center">
+        <form action="{{ route('sales.cancel', $sale) }}" method="POST" class="p-6">
             @csrf
             @method('PATCH')
             
@@ -168,17 +168,31 @@
                 <x-heroicon-s-exclamation-triangle class="w-10 h-10"/>
             </div>
             
-            <h3 class="text-lg font-bold text-gray-900">¿Anular Venta?</h3>
-            <p class="text-sm text-gray-500 mt-2">
-                Esta acción anulará la venta <strong>{{ $sale->number }}</strong>, reintegrará el stock a los almacenes y cancelará cualquier saldo pendiente.
-            </p>
+            <div class="text-center mb-4">
+                <h3 class="text-lg font-bold text-gray-900">¿Anular Venta?</h3>
+                <p class="text-xs text-gray-500 mt-1">
+                    Venta: <strong>{{ $sale->number }}</strong>
+                </p>
+            </div>
+
+            {{-- Nuevo: Campo de Motivo --}}
+            <div class="mt-4 text-left">
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Motivo de Anulación (DGII)</label>
+                <select name="cancellation_reason" required class="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="01 - ERRORES DE DIGITACION">01 - Errores de digitación</option>
+                    <option value="02 - ERRORES DE IMPRESION">02 - Errores de impresión</option>
+                    <option value="03 - PRODUCTO DEFECTUOSO">03 - Producto defectuoso</option>
+                    <option value="04 - DEVOLUCION">04 - Devolución</option>
+                    <option value="05 - OTROS">05 - Otros</option>
+                </select>
+            </div>
 
             <div class="mt-8 flex justify-center gap-3">
-                <x-secondary-button x-on:click="$dispatch('close')">No, volver</x-secondary-button>
+                <x-secondary-button x-on:click="$dispatch('close')">Volver</x-secondary-button>
                 <button type="submit" class="px-6 py-2 bg-red-600 text-white text-xs font-bold uppercase rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-200">
-                    Confirmar Anulación
+                    Confirmar
                 </button>
             </div>
         </form>
-    </x-modal>
+</x-modal>
 @endforeach

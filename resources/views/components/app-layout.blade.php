@@ -44,7 +44,6 @@
             {{-- SIDEBAR --}}
             <x-sidebar.layout>
                 
-                {{-- Dashboard principal --}}
                 <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
                     Dashboard
                 </x-sidebar.item>
@@ -53,7 +52,7 @@
                 <x-sidebar.group>
                     <x-sidebar.title>Operaciones</x-sidebar.title>
 
-                    {{-- Ventas como Dropdown --}}
+                    {{-- Ventas (solo operaciones diarias) --}}
                     @canany(['view sales', 'view invoices'])
                         <x-sidebar.dropdown 
                             id="ventas" 
@@ -155,9 +154,25 @@
                         Roles
                     </x-sidebar.item>
 
-                    <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
+                    {{-- Configuración ahora incluye NCF --}}
+                    <x-sidebar.dropdown 
+                        id="configuracion" 
+                        icon="heroicon-s-cog-6-tooth" 
+                        :activeRoutes="['admin/config*', 'admin/sales/ncf*']"
+                    >
                         Configuración
-                    </x-sidebar.item>
+                        <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/config">General</x-sidebar.subitem>
+                            
+                            @can('view ncf sequences')
+                                <div class="h-px bg-gray-700/30 my-1.5"></div>
+                                <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">NCF (Fiscal)</div>
+                                <x-sidebar.subitem href="/admin/sales/ncf/sequences">Secuencias NCF</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/sales/ncf/logs">Historial NCF</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/sales/ncf/types">Tipos NCF</x-sidebar.subitem>
+                            @endcan
+                        </x-slot>
+                    </x-sidebar.dropdown>
                 </x-sidebar.group>
 
             </x-sidebar.layout>

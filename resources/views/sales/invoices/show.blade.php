@@ -41,6 +41,35 @@
                 
                 {{-- Lateral: Información y Auditoría (1 Columna) --}}
                 <div class="xl:col-span-1 space-y-6">
+
+                    {{-- NUEVO: BLOQUE FISCAL RESALTADO --}}
+                    @if($invoice->sale->ncf)
+                    <div class="bg-white rounded-2xl shadow-sm border-2 border-indigo-100 overflow-hidden">
+                        <div class="bg-indigo-50 px-5 py-3 border-b border-indigo-100 flex justify-between items-center">
+                            <h3 class="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Datos Fiscales (DGII)</h3>
+                            <x-heroicon-s-check-badge class="w-4 h-4 text-indigo-500"/>
+                        </div>
+                        <div class="p-5">
+                            <div class="mb-4">
+                                <label class="block text-[10px] font-black text-gray-400 uppercase mb-1">Número de Comprobante</label>
+                                <p class="text-xl font-mono font-black text-gray-900 tracking-tighter">{{ $invoice->sale->ncf }}</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-[11px] text-gray-500 italic">Tipo:</span>
+                                    <span class="text-[11px] font-bold text-gray-700">{{ $invoice->sale->ncfLog->type->name ?? 'N/A' }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-[11px] text-gray-500 italic">Vencimiento:</span>
+                                    <span class="text-[11px] font-bold text-gray-700">
+                                        {{ $invoice->sale->ncfLog?->sequence?->expiry_date?->format('d/m/Y') ?? 'N/A' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                         <div class="bg-gray-50 px-5 py-4 border-b border-gray-100">
                             <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">Información General</h3>
@@ -80,6 +109,19 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- Alerta de Anulación (Si aplica) --}}
+                    @if($invoice->status !== 'active')
+                    <div class="bg-red-50 rounded-2xl p-5 border border-red-100">
+                        <div class="flex items-center gap-2 mb-2 text-red-700">
+                            <x-heroicon-s-x-circle class="w-5 h-5"/>
+                            <span class="text-xs font-black uppercase">Documento Anulado</span>
+                        </div>
+                        <p class="text-[11px] text-red-600 italic">
+                            Motivo: {{ $invoice->sale->ncfLog->cancellation_reason ?? 'Sin motivo registrado' }}
+                        </p>
+                    </div>
+                    @endif
                 </div>
 
                 {{-- Central: Preview con iframe --}}

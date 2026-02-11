@@ -47,46 +47,70 @@
                             </select>
                         </div>
 
-                        <div class="md:col-span-2">
+                        {{-- Cliente --}}
+                        <div class="md:col-span-1">
                             <x-input-label value="Cliente" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
-                            <select name="client_id" x-model="formData.client_id" 
+                            <select name="client_id" x-model="formData.client_id" @change="validateNcfSupport()"
                                     class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
                                 <template x-for="client in filteredClients" :key="client.id">
                                     <option :value="client.id" x-text="client.name"></option>
                                 </template>
                             </select>
                         </div>
+
+                        {{-- Tipo de Comprobante (NCF) --}}
+                        <div class="md:col-span-1">
+                            <x-input-label value="Comprobante Fiscal" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
+                            <select name="ncf_type_id" x-model="formData.ncf_type_id"
+                                class="w-full border-gray-300 rounded-lg text-sm font-bold focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
+                                <template x-for="type in filteredNcfTypes" :key="type.id">
+                                    <option :value="type.id" x-text="type.name"></option>
+                                </template>
+                            </select>
+                        </div>
                     </div>
 
-                    {{-- INFO BOX DEL CLIENTE (Con animaciones de entrada) --}}
-                    <div class="min-h-[70px]"> {{-- Espacio reservado para evitar saltos bruscos --}}
+                    {{-- INFO BOX DEL CLIENTE --}}
+                    <div class="min-h-[70px]">
                         <template x-if="selectedClient">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" 
-                                 x-transition:enter="transition ease-out duration-300"
-                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
-                                 x-transition:enter-end="opacity-100 transform translate-y-0">
+                            <div class="grid grid-cols-1 gap-4 transition-all duration-300"
+                                :class="selectedClient.id == 1 ? 'md:grid-cols-1' : 'md:grid-cols-2'"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0">
                                 
-                                <div :class="selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'" 
-                                     class="border rounded-xl p-4 flex items-center gap-4 transition-all duration-500">
-                                    <div :class="selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-500' : 'bg-emerald-500'" 
-                                         class="w-1.5 h-10 rounded-full shadow-sm"></div>
+                                {{-- Columna 1: Estatus --}}
+                                <div :class="selectedClient.id == 1 ? 'bg-blue-50 border-blue-200' : (selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200')" 
+                                    class="border rounded-xl p-4 flex items-center gap-4 transition-all duration-500">
+                                    
+                                    <div :class="selectedClient.id == 1 ? 'bg-blue-500' : (selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-500' : 'bg-emerald-500')" 
+                                        class="w-1.5 h-10 rounded-full shadow-sm"></div>
+                                    
                                     <div>
                                         <p class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Estatus del Cliente</p>
-                                        <p :class="selectedClient.is_moroso || selectedClient.is_blocked ? 'text-red-700' : 'text-emerald-700'" 
-                                           class="font-bold text-sm">
-                                            <span x-text="selectedClient.status_name"></span>
+                                        <p :class="selectedClient.id == 1 ? 'text-blue-700' : (selectedClient.is_moroso || selectedClient.is_blocked ? 'text-red-700' : 'text-emerald-700')" 
+                                        class="font-bold text-sm uppercase">
+                                            <template x-if="selectedClient.id == 1">
+                                                <span>Comprobante de Consumo (Público General)</span>
+                                            </template>
+                                            <template x-if="selectedClient.id != 1">
+                                                <span x-text="selectedClient.status_name"></span>
+                                            </template>
                                             <template x-if="selectedClient.is_moroso"><span> (SÓLO CONTADO)</span></template>
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between group hover:bg-indigo-100 transition-colors cursor-default">
-                                    <div>
-                                        <p class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Línea de Crédito Disponible</p>
-                                        <p class="text-indigo-900 font-black text-lg font-mono" x-text="formatMoney(selectedClient.available)"></p>
+                                {{-- Columna 2: Línea de Crédito (Solo si NO es consumidor final) --}}
+                                <template x-if="selectedClient.id != 1">
+                                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between group hover:bg-indigo-100 transition-colors cursor-default">
+                                        <div>
+                                            <p class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Línea de Crédito Disponible</p>
+                                            <p class="text-indigo-900 font-black text-lg font-mono" x-text="formatMoney(selectedClient.available)"></p>
+                                        </div>
+                                        <x-heroicon-o-credit-card class="w-8 h-8 text-indigo-300 group-hover:scale-110 transition-transform"/>
                                     </div>
-                                    <x-heroicon-o-credit-card class="w-8 h-8 text-indigo-300 group-hover:scale-110 transition-transform"/>
-                                </div>
+                                </template>
                             </div>
                         </template>
                     </div>
@@ -100,6 +124,19 @@
                             <div class="text-sm">
                                 <strong class="block font-bold">Restricción de Crédito</strong>
                                 <p class="opacity-80">El cliente tiene facturas vencidas. Cambie a <strong>Contado</strong>.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- ALERTA DE RNC FALTANTE PARA CRÉDITO FISCAL --}}
+                    <template x-if="ncfRequiresRnc && !selectedClient?.tax_id">
+                        <div x-transition class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 text-red-800 shadow-sm mb-4">
+                            <div class="bg-red-100 p-2 rounded-lg">
+                                <x-heroicon-s-exclamation-triangle class="w-6 h-6 text-red-600"/>
+                            </div>
+                            <div class="text-sm">
+                                <strong class="block font-bold">RNC Requerido</strong>
+                                <p class="opacity-80">Este cliente no tiene RNC configurado. El tipo de comprobante seleccionado lo requiere.</p>
                             </div>
                         </div>
                     </template>
@@ -279,6 +316,7 @@
             return {
                 products: @json($products),
                 clients: @json($clients),
+                ncf_types: @json($ncf_types),
                 items: [],
                 config: {
                     tax_rate: {{ general_config()->impuesto->valor ?? 0 }},
@@ -286,23 +324,43 @@
                 },
                 formData: {
                     payment_type: 'cash',
-                    client_id: '',
+                    client_id: '1', // Por defecto Consumidor Final
                     warehouse_id: '',
+                    ncf_type_id: '2', // Por defecto Consumidor Final (B02)
                     sale_date: '{{ date("Y-m-d") }}',
-                    cash_received: 0, // Nuevo
-                    cash_change: 0,   // Nuevo
+                    cash_received: 0,
+                    cash_change: 0,
                 },  
-                totals: { subtotal: 0, tax: 0, total: 0 },
+                totals: { subtotal: 0, tax: 0, total: 0 },  
 
                 init() {
-                    this.handlePaymentTypeChange();
+                    this.$watch('formData.ncf_type_id', () => this.validateNcfAndClient());
                 },
 
                 get filteredClients() {
+                    let list = this.clients;
+                    
+                    // Si es Crédito, quitar Consumidor Final (ID 1)
                     if (this.formData.payment_type === 'credit') {
-                        return this.clients.filter(c => c.id != 1);
+                        list = list.filter(c => c.id != 1);
                     }
-                    return this.clients;
+
+                    // Si el NCF actual requiere RNC, quitar Consumidor Final o genéricos
+                    const selectedNcf = this.ncf_types.find(n => n.id == this.formData.ncf_type_id);
+                    if (selectedNcf && ['01', '31'].includes(selectedNcf.code)) {
+                        list = list.filter(c => c.id != 1 && c.tax_id !== '00000000000');
+                    }
+
+                    return list;
+                },
+
+                // Tipos de NCF filtrados según el cliente seleccionado
+                get filteredNcfTypes() {
+                    // Si el cliente es Consumidor Final, no mostrar Crédito Fiscal (01, 31)
+                    if (this.formData.client_id == 1 || this.selectedClient?.tax_id === '00000000000') {
+                        return this.ncf_types.filter(n => !['01', '31'].includes(n.code));
+                    }
+                    return this.ncf_types;
                 },
 
                 get selectedClient() {
@@ -314,28 +372,39 @@
                     return this.products.filter(p => p.warehouse_id == this.formData.warehouse_id);
                 },
 
-                get isSubmitDisabled() {
-                    const basic = this.items.length === 0 || this.totals.total <= 0;
+                // Nueva lógica de validación cruzada
+                validateNcfAndClient() {
+                    const selectedNcf = this.ncf_types.find(n => n.id == this.formData.ncf_type_id);
                     
-                    if (this.formData.payment_type === 'credit') {
-                        return basic || !this.selectedClient || this.selectedClient.is_blocked || 
-                            this.selectedClient.is_moroso || (this.totals.total > this.selectedClient.available);
+                    // Si el NCF pide RNC y el cliente actual no tiene o es Consumidor Final, limpiar cliente
+                    if (selectedNcf && ['01', '31'].includes(selectedNcf.code)) {
+                        if (this.formData.client_id == 1 || (this.selectedClient && !this.selectedClient.tax_id)) {
+                            this.formData.client_id = '';
+                        }
                     }
-
-                    // Validación para Contado: Debe haber recibido suficiente dinero
-                    if (this.formData.payment_type === 'cash') {
-                        return basic || (this.formData.cash_received < this.totals.total);
-                    }
-
-                    return basic;
                 },
 
-                handlePaymentTypeChange() {
-                    if (this.formData.payment_type === 'credit' && this.formData.client_id == 1) {
-                        this.formData.client_id = '';
-                    } else if (this.formData.payment_type === 'cash' && !this.formData.client_id) {
-                        this.formData.client_id = 1; 
+                get ncfRequiresRnc() {
+                    const selectedNcf = this.ncf_types.find(n => n.id == this.formData.ncf_type_id);
+                    if (!selectedNcf) return false;
+                    return ['01', '31'].includes(selectedNcf.code) && (!this.selectedClient?.tax_id || this.selectedClient.tax_id === '00000000000');
+                },
+
+                get isSubmitDisabled() {
+                    const hasItems = this.items.length > 0;
+                    const hasTotal = this.totals.total > 0;
+                    
+                    // Bloqueo si el NCF requiere un RNC válido y el cliente no lo tiene o es el genérico
+                    if (this.ncfRequiresRnc) {
+                        return true; 
                     }
+
+                    // Bloqueo por morosidad en ventas a crédito
+                    if (this.formData.payment_type === 'credit') {
+                        return !hasItems || !this.selectedClient || this.selectedClient.is_moroso;
+                    }
+
+                    return !hasItems || !hasTotal;
                 },
 
                 addItem() {

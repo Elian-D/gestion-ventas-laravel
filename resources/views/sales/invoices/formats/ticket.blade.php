@@ -9,25 +9,20 @@
     $taxIdentifier = \DB::table('tax_identifier_types')
                         ->where('id', $config->tax_identifier_type_id)
                         ->first();
-    $taxLabel = $taxIdentifier->code ?? 'ID FISCAL';
+    $taxLabel = $taxIdentifier->code ?? 'RNC';
 
-    // Identificador fiscal del CLIENTE (RNC/Cédula)
-    $clientTaxIdentifier = \DB::table('tax_identifier_types')
-                        ->where('id', $client->tax_identifier_type_id)
-                        ->first();
-    $clientTaxLabel = $clientTaxIdentifier->code ?? 'RNC/CED';
-
-    $taxName = $impuestoConfig->nombre ?? 'Impuesto';
+    $taxName = $impuestoConfig->nombre ?? 'ITBIS';
     
-    // Vencimiento de factura (Crédito)
-    $vencimiento = $sale->payment_type === 'credit' 
+    // Vencimiento de factura (Crédito comercial)
+    $vencimientoPago = $sale->payment_type === 'credit' 
         ? $sale->created_at->addDays($client->credit_limit_days ?? 30)->format('d/m/Y') 
         : null;
 
-    /* COLA PARA FUTUROS NCF:
-       $ncf = $sale->ncf ?? 'B0100000001'; 
-       $vencimientoNcf = '31/12/' . date('Y');
-    */
+    // Lógica de NCF y su Vencimiento Fiscal
+    $ncfLog = $sale->ncfLog;
+    $vencimientoNcf = $ncfLog?->sequence?->expiry_date 
+        ? $ncfLog->sequence->expiry_date->format('d/m/Y') 
+        : null;
 @endphp
 
 <!DOCTYPE html>
@@ -44,7 +39,8 @@
         .header-info { font-size: 11px; }
         .signature-box { margin-top: 20px; text-align: center; font-size: 10px; }
         .line { border-top: 1px solid #000; width: 80%; margin: 40px auto 5px auto; }
-        .ncf-section { font-size: 12px; font-weight: bold; margin: 5px 0; }
+        /* Estilo para que el eNCF/NCF no rompa el diseño pero resalte */
+        .ncf-label { font-size: 13px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -56,43 +52,56 @@
                 {{ $config->direccion }}<br>
                 Tel: {{ $config->telefono }}<br>
                 {{ $taxLabel }}: {{ $config->tax_id }}<br>
-                {{-- Comentado para el futuro: --}}
-                {{-- <b>COMPROBANTE AUTORIZADO POR LA DGII</b> --}}
+                <b style="font-size: 9px;">COMPROBANTE AUTORIZADO POR LA DGII</b>
             </span>
         </div>
 
-        {{-- 2. DATOS DE FACTURA Y NCF --}}
+        {{-- 2. DATOS FISCALES (NCF) --}}
         <div class="border-top">
             <table class="header-info">
                 <tr>
                     <td>Factura: <b>{{ $invoice->invoice_number }}</b></td>
-                    <td class="right"><b>{{ $sale->payment_type === 'credit' ? 'CREDITO' : 'CONTADO' }}</b></td>
+                    <td class="right"><b>{{ $sale->payment_type === 'cash' ? 'CONTADO' : 'CRÉDITO' }}</b></td>
                 </tr>
-                {{-- COLA NCF --}}
-                {{-- 
-                <tr class="ncf-section">
-                    <td>NCF: <b>B0100000001</b></td>
-                    <td class="right">Vence: 31/12/2026</td>
+                
+                @if($sale->ncf)
+                <tr>
+                    <td colspan="2">
+                        {{-- Identificación si es e-NCF o NCF --}}
+                        <span>{{ $ncfLog?->type?->is_electronic ? 'e-NCF:' : 'NCF:' }}</span> 
+                        <span class="ncf-label">{{ $sale->ncf }}</span>
+                    </td>
                 </tr>
-                --}}
+                @if($vencimientoNcf)
+                <tr>
+                    <td colspan="2">
+                        Vencimiento NCF: <span>{{ $vencimientoNcf }}</span>
+                    </td>
+                </tr>
+                @endif
+                @endif
             </table>
         </div>
 
+        {{-- 3. DATOS DEL CLIENTE --}}
         <div class="border-top header-info">
             Cliente: {{ $client->name }}<br>
-            {{ $clientTaxLabel }}: {{ $client->tax_id ?? 'N/A' }}<br>
+            @if($client->tax_id)
+                RNC/Céd: {{ $client->tax_id }}<br>
+            @endif
             Vendedor: {{ $sale->user->name ?? 'Sistema' }}<br>
             Fecha: {{ $sale->created_at->format('d/m/Y g:i A') }}<br>
-            @if($vencimiento)
-                <span class="bold">VENCE (PAGO): {{ $vencimiento }}</span><br>
+            
+            @if($vencimientoPago)
+                <span class="bold">VENCE PAGO: {{ $vencimientoPago }}</span><br>
             @endif
         </div>
 
-        {{-- 3. DETALLE DE PRODUCTOS --}}
-        <div>
+        {{-- 4. DETALLE DE PRODUCTOS --}}
+        <div class="border-top">
             <table>
                 <thead>
-                    <tr class="border-top">
+                    <tr>
                         <th align="left">CANT</th>
                         <th align="left">DESC.</th>
                         <th class="right">SUBT.</th>
@@ -113,53 +122,51 @@
             </table>
         </div>
 
-        {{-- 4. TOTALES --}}
+        {{-- 5. TOTALES --}}
         <div class="border-top">
             @php
-                // Calculamos el subtotal real sumando los subtotales de cada item
                 $subtotalCalculado = $sale->items->sum('subtotal'); 
-                // El ITBIS lo tomamos de la venta (si ya se calculó) o de la diferencia
                 $taxCalculado = $sale->tax > 0 ? $sale->tax : ($sale->total_amount - $subtotalCalculado);
             @endphp
             <table>
-                <tr style="font-size: 14px;">
-                    <td class="bold">TOTAL</td>
-                    <td class="right bold">{{ $currency }}{{ number_format($sale->total_amount, 2) }}</td>
-                </tr>
                 <tr>
                     <td class="header-info">Subtotal Neto:</td>
-                    {{-- Usamos la suma de los items para asegurar que no salga en 0 --}}
                     <td class="right">{{ $currency }}{{ number_format($subtotalCalculado, 2) }}</td>
                 </tr>
                 <tr>
                     <td class="header-info">{{ $taxName }}:</td>
                     <td class="right">{{ $currency }}{{ number_format($taxCalculado, 2) }}</td>
                 </tr>
+                <tr style="font-size: 14px;">
+                    <td class="bold">TOTAL</td>
+                    <td class="right bold">{{ $currency }}{{ number_format($sale->total_amount, 2) }}</td>
+                </tr>
             </table>
         </div>
-        {{-- 5. SECCIÓN DINÁMICA: PAGO O FIRMA --}}
+
+        {{-- 6. PAGO O FIRMA --}}
         @if($sale->payment_type === 'cash')
-            <div class="border-top">
+            <div class="border-top header-info">
                 <table>
                     <tr>
-                        <td>Recibido:</td>
+                        <td>Efectivo Recibido:</td>
                         <td class="right">{{ $currency }}{{ number_format($sale->cash_received ?? 0, 2) }}</td>
                     </tr>
                     <tr>
-                        <td class="bold">Cambio:</td>
+                        <td class="bold">Cambio a Devolver:</td>
                         <td class="right bold">{{ $currency }}{{ number_format($sale->cash_change ?? 0, 2) }}</td>
                     </tr>
                 </table>
             </div>
         @else
             <div class="signature-box border-top">
-                <p>Recibí conforme los artículos detallados en esta factura y acepto los términos de pago.</p>
+                <p>Acepto los términos de pago y recibo de mercancía.</p>
                 <div class="line"></div>
                 <span class="bold">FIRMA DEL CLIENTE</span>
             </div>
         @endif
 
-        <div class="center border-top" style="margin-top: 10px;">
+        <div class="center border-top" style="margin-top: 10px; font-size: 10px;">
             *** GRACIAS POR SU COMPRA ***<br>
             {{ $config->nombre_empresa }}
         </div>
