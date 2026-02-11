@@ -15,6 +15,7 @@ use App\Exports\Sales\SalesExport;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
@@ -104,21 +105,37 @@ class SaleController extends Controller
         }
     }
 
-    /**
-     * Proceso de Anulación: Reversión total (Stock + Contabilidad).
-     */
-    public function cancel(Sale $sale)
+    public function cancel(Request $request, Sale $sale)
     {
+        // 1. Verificación de estado rápida
         if ($sale->status === Sale::STATUS_CANCELED) {
             return back()->with('error', "Esta venta ya ha sido anulada previamente.");
         }
-        try {
-            $this->service->cancel($sale);
-            return back()->with('success', "La venta {$sale->number} ha sido anulada y el inventario revertido.");
-        } catch (Exception $e) {
-            return back()->with('error', "No se pudo anular la venta: " . $e->getMessage());
+
+        // 2. Validación (Considera extraer esto a un FormRequest si crece mucho)
+        $rules = [];
+        if (!empty($sale->ncf)) {
+            $rules['cancellation_reason'] = 'required|string|min:5|max:255';
         }
-    }
+
+        $validated = $request->validate($rules, [
+            'cancellation_reason.required' => 'El motivo de anulación es requerido para reportar a la DGII (608).'
+        ]);
+
+        try {
+            // 3. Ejecución vía Servicio
+            // Usamos null coalescing por si la venta no tiene NCF y no entró en la validación
+            $reason = $validated['cancellation_reason'] ?? 'Anulación administrativa';
+            
+            $this->service->cancel($sale, $reason);
+            
+            return back()->with('success', "Venta {$sale->number} anulada y stock retornado.");
+        } catch (Exception $e) {
+            // Loguear el error para el admin es buena idea
+            Log::error("Error anulando venta {$sale->id}: " . $e->getMessage());
+            return back()->with('error', "Error: " . $e->getMessage());
+        }
+}
 
     /**
      * Exportación filtrada a Excel.

@@ -62,15 +62,34 @@ class InvoiceController extends Controller
         ));
     }
 
+    public function show(Invoice $invoice)
+    {
+        // CARGA PROFUNDA: Entramos hasta la secuencia para obtener la fecha de vencimiento
+        $invoice->load([
+            'sale.items.product', 
+            'sale.client', 
+            'sale.ncfLog.type', 
+            'sale.ncfLog.sequence', // <--- FUNDAMENTAL
+        ]);
+        
+        $formats = Invoice::getFormats();
+        return view('sales.invoices.show', compact('invoice', 'formats'));
+    }
+
     public function preview(Invoice $invoice)
     {
-        $invoice->load(['sale.items.product', 'sale.client']);
+        // El preview también necesita la data del NCF para mostrarla en el iframe
+        $invoice->load([
+            'sale.items.product', 
+            'sale.client',
+            'sale.ncfLog.type',
+            'sale.ncfLog.sequence' // <--- FUNDAMENTAL
+        ]);
         
-        // Mapeamos el tipo de formato al archivo Blade real
         $viewMap = [
-            Invoice::FORMAT_TICKET => 'ticket', // busca formats.ticket
-            Invoice::FORMAT_ROUTE  => 'ticket', // usa el mismo que ticket
-            Invoice::FORMAT_LETTER => 'full',   // <--- AQUÍ: Si tu archivo se llama 'full.blade.php', mapealo así
+            Invoice::FORMAT_TICKET => 'ticket',
+            Invoice::FORMAT_ROUTE  => 'ticket',
+            Invoice::FORMAT_LETTER => 'full',
         ];
 
         $viewName = $viewMap[$invoice->format_type] ?? 'ticket';
@@ -79,38 +98,30 @@ class InvoiceController extends Controller
             'invoice' => $invoice
         ]);
     }
-    
-    public function show(Invoice $invoice)
-    {
-        $invoice->load(['sale.items.product', 'sale.client']);
-        
-        // Obtenemos los catálogos por si el usuario quiere cambiar el formato antes de imprimir
-        $formats = Invoice::getFormats();
-
-        return view('sales.invoices.show', compact('invoice', 'formats'));
-    }
 
 
 
-    /**
-     * Acción de impresión (PDF o Stream de Ticket).
-     */
     public function print(Invoice $invoice)
     {
-        // Cargamos las relaciones necesarias para evitar N+1 en la vista
-        $invoice->load(['sale.items.product', 'sale.client']);
+        // CARGA DE RELACIONES CRUCIAL PARA NCF
+        $invoice->load([
+            'sale.items.product', 
+            'sale.client', 
+            'sale.user',
+            'sale.ncfLog.type', // Carga el tipo de NCF (Crédito Fiscal, Consumo, etc.)
+        ]);
 
-        // 1. Si es formato TICKET o RUTA, usamos impresión directa del navegador (más veloz)
+        // 1. Si es formato TICKET o RUTA
         if ($invoice->format_type !== Invoice::FORMAT_LETTER) {
             return view('sales.invoices.print', [
                 'invoice' => $invoice,
-                'format'  => $invoice->format_type // ticket o route
+                'format'  => $invoice->format_type 
             ]);
         }
 
-        // 2. Si es formato CARTA, generamos un PDF profesional con DomPDF
+        // 2. Si es formato CARTA
         $pdf = Pdf::loadView('sales.invoices.formats.full', compact('invoice'))
-                ->setPaper('letter', 'portrait');
+                    ->setPaper('letter', 'portrait');
 
         return $pdf->stream("Factura-{$invoice->invoice_number}.pdf");
     }
