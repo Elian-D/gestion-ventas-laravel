@@ -2,38 +2,67 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Imprimir Factura - {{ $invoice->invoice_number }}</title>
+    <title>FAC - {{ $invoice->invoice_number }}</title>
     <style>
-        /* Estilos para ocultar todo excepto el contenido al imprimir */
+        /* RESET TOTAL PARA IMPRESIÓN */
         @media print {
-            .no-print { display: none; }
-            body { margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            body, html { 
+                background-color: white !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                width: 100%;
+            }
+            .print-container { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                padding: 0 !important;
+                width: 100% !important;
+            }
         }
-        body { background-color: #f3f4f6; display: flex; justify-content: center; padding: 20px; }
-        .print-container { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* VISTA EN PANTALLA */
+        body { 
+            background-color: #525659; /* Fondo tipo visor PDF */
+            display: flex; 
+            justify-content: center; 
+            margin: 0;
+            padding: 20px;
+            font-family: sans-serif;
+        }
+        .print-container { 
+            background: white; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+            padding: 0;
+        }
+        .no-print {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
-    <div class="no-print" style="position: fixed; top: 20px; left: 20px;">
-        <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; background: #4f46e5; color: white; border: none; border-radius: 5px;">
-            Imprimir Ahora
+    <div class="no-print">
+        <button onclick="window.print()" style="padding: 12px 24px; cursor: pointer; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            IMPRIMIR FACTURA
         </button>
-        <button onclick="window.close()" style="padding: 10px 20px; cursor: pointer; background: #ef4444; color: white; border: none; border-radius: 5px; margin-left: 10px;">
-            Cerrar
+        <button onclick="window.close()" style="padding: 12px 24px; cursor: pointer; background: #6b7280; color: white; border: none; border-radius: 6px; margin-left: 10px; font-weight: bold;">
+            CERRAR
         </button>
     </div>
 
     <div class="print-container">
-        {{-- Cargamos dinámicamente el formato ticket o ruta --}}
         @include('sales.invoices.formats.' . ($invoice->format_type === 'route' ? 'ticket' : $invoice->format_type))
     </div>
 
     <script>
-        // Disparar el diálogo de impresión automáticamente al cargar
         window.onload = function() {
-            window.print();
-            // Opcional: Cerrar la ventana después de imprimir/cancelar
-            // window.onafterprint = function() { window.close(); }
+            // Un pequeño delay ayuda a que los estilos carguen bien antes de disparar el print
+            setTimeout(() => {
+                window.print();
+            }, 500);
         }
     </script>
 </body>

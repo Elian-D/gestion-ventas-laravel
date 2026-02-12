@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 use App\Models\Clients\Client;
 use App\Models\Inventory\Warehouse;
+use App\Models\Sales\Ncf\NcfLog;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Sale extends Model
@@ -99,10 +100,22 @@ class Sale extends Model
         ]);
     }
 
+    
+    /**
+     * Accesor opcional para obtener el número de NCF directamente 
+     * sin tener que escribir $sale->ncfLog->full_ncf siempre.
+     */
+    public function getNcfAttribute()
+    {
+        return $this->ncfLog?->full_ncf;
+    }
+
     // Relaciones ...
     public function items(): HasMany { return $this->hasMany(SaleItem::class); }
     public function client(): BelongsTo { return $this->belongsTo(Client::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function warehouse(): BelongsTo{return $this->belongsTo(Warehouse::class);}
-    public function invoice(): HasOne{return $this->hasOne(Invoice::class);}
+    public function warehouse(): BelongsTo { return $this->belongsTo(Warehouse::class); }
+    public function invoice(): HasOne { return $this->hasOne(Invoice::class); }
+    public function ncfLog(): HasOne { return $this->hasOne(NcfLog::class, 'sale_id'); }
+
 }

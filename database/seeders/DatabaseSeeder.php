@@ -59,6 +59,9 @@ class DatabaseSeeder extends Seeder
 
             // Inventory Seeders
             \Database\Seeders\InventorySeeders\WarehouseSeeder::class,
+
+            //Sales Seeders
+            \Database\Seeders\SalesSeeders\NcfTypeSeeder::class,
         ]);
     }
 }
