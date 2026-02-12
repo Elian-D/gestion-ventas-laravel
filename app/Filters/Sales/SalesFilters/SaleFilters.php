@@ -13,6 +13,7 @@ class SaleFilters extends QueryFilter
             'client_id'    => SaleClientFilter::class,
             'warehouse_id' => SaleWarehouseFilter::class,
             'payment_type' => SalePaymentTypeFilter::class,
+            'tipo_pago_id' => SaleTipoPagoFilter::class,
             'status'       => SaleStatusFilter::class,
             'from_date'    => SaleDateFilter::class,
             'min_amount'   => SaleAmountRangeFilter::class,

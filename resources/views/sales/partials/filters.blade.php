@@ -34,6 +34,14 @@
                 @endforeach
             </x-data-table.filter-select>
 
+            {{-- NUEVO: Filtro de Método de Pago (Detallado) --}}
+            <x-data-table.filter-select label="Método (Efectivo/Transf.)" name="tipo_pago_id" formId="sales-filters">
+                <option value="">Todos los métodos</option>
+                @foreach($tipo_pagos as $pago)
+                    <option value="{{ $pago->id }}">{{ $pago->nombre }}</option>
+                @endforeach
+            </x-data-table.filter-select>
+
             {{-- Filtro de Estado --}}
             <x-data-table.filter-select label="Estado" name="status" formId="sales-filters">
                 <option value="">Todos los estados</option>

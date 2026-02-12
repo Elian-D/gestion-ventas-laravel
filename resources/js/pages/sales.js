@@ -25,6 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 label: 'Tipo de Pago',
                 source: 'payment_types' // Definido en SaleCatalogService
             },
+
+            // NUEVO: Chip para el método específico
+            tipo_pago_id: {
+                label: 'Método Detallado',
+                source: 'tipo_pagos' // Se alimenta de window.filterSources.tipo_pagos
+            },
+            
             // Filtro por Estado (Enum: completed, canceled)
             status: {
                 label: 'Estado',

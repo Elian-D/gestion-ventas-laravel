@@ -6,6 +6,7 @@ use App\Models\Sales\Sale;
 use App\Models\Clients\Client;
 use App\Models\Inventory\{Warehouse, InventoryStock};
 use App\Models\Accounting\{AccountingAccount, DocumentType};
+use App\Models\Configuration\TipoPago;
 use Illuminate\Support\Facades\DB;
 
 class SaleCatalogService
@@ -26,6 +27,11 @@ class SaleCatalogService
                 ->get(),
 
             'payment_types' => Sale::getPaymentTypes(),
+
+            'tipo_pagos' => TipoPago::activo()
+            ->select('id', 'nombre')
+            ->get(),
+
             'statuses'      => Sale::getStatuses(),
         ];
     }
@@ -107,6 +113,10 @@ class SaleCatalogService
                         'is_electronic' => $type->is_electronic
                     ];
                 }),
+                
+            'tipo_pagos' => TipoPago::activo()
+                            ->select('id', 'nombre', 'accounting_account_id')
+                            ->get(),
         ];
     }
 }
