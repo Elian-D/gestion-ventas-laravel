@@ -33,6 +33,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
 
             // Configuration Seeders
+
+                //Accounting Seeders
+                \Database\Seeders\AccountingSeeders\AccountingAccountSeeder::class,
+                \Database\Seeders\AccountingSeeders\DocumentTypeSeeder::class,
+                
             \Database\Seeders\ConfigurationSeeders\ClientStateCategorySeeder::class,
             \Database\Seeders\ConfigurationSeeders\EstadosClienteSeeder::class,
             \Database\Seeders\ConfigurationSeeders\DiaSemanaSeeder::class,
@@ -53,9 +58,7 @@ class DatabaseSeeder extends Seeder
             \Database\Seeders\ProductsSeeders\UnitSeeder::class,
             \Database\Seeders\ProductsSeeders\ProductSeeder::class,
             
-            //Accounting Seeders
-            \Database\Seeders\AccountingSeeders\AccountingAccountSeeder::class,
-            \Database\Seeders\AccountingSeeders\DocumentTypeSeeder::class,
+
 
             // Inventory Seeders
             \Database\Seeders\InventorySeeders\WarehouseSeeder::class,
