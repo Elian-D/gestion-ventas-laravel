@@ -86,7 +86,7 @@ class Invoice extends Model
     public function scopeWithIndexRelations($query)
     {
         return $query->with([
-            'sale:id,number,payment_type,client_id',
+            'sale:id,number,payment_type,client_id,total_amount',
             'sale.client:id,name',
         ]);
     }

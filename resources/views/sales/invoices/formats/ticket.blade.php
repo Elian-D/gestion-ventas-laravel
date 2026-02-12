@@ -5,117 +5,169 @@
     $client = $sale->client;
     $currency = $config->currency_symbol ?? '$';
 
-    // Identificador fiscal de la EMPRESA
     $taxIdentifier = \DB::table('tax_identifier_types')
                         ->where('id', $config->tax_identifier_type_id)
                         ->first();
     $taxLabel = $taxIdentifier->code ?? 'RNC';
-
     $taxName = $impuestoConfig->nombre ?? 'ITBIS';
     
-    // Vencimiento de factura (Crédito comercial)
     $vencimientoPago = $sale->payment_type === 'credit' 
         ? $sale->created_at->addDays($client->credit_limit_days ?? 30)->format('d/m/Y') 
         : null;
 
-    // Lógica de NCF y su Vencimiento Fiscal
     $ncfLog = $sale->ncfLog;
     $vencimientoNcf = $ncfLog?->sequence?->expiry_date 
         ? $ncfLog->sequence->expiry_date->format('d/m/Y') 
         : null;
+    
+    // Verificamos si la venta está cancelada (asumiendo estado 'cancelled')
+    $isCancelled = $sale->status === 'canceled';
 @endphp
 
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <style>
-        * { font-family: 'Courier New', Courier, monospace; font-size: 12px; line-height: 1.2; }
-        .ticket { width: 80mm; margin: 0 auto; padding: 5px; }
+        @page { margin: 0; size: auto; }
+        * { 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 12px; 
+            line-height: 1.2; 
+            color: #000000 !important;
+            margin: 0; padding: 0;
+            box-sizing: border-box;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        body { background: #fff; -webkit-print-color-adjust: exact; }
+        .ticket { width: 72mm; margin: 0 auto; padding: 10px 2px; }
         .center { text-align: center; }
         .right { text-align: right; }
-        .bold { font-weight: bold; }
-        .border-top { border-top: 1px dashed #000; margin-top: 5px; padding-top: 5px; }
+        
+        .spacer { margin-top: 12px; }
+        .small-spacer { margin-top: 6px; }
+        .info-section { margin-top: 8px; }
         table { width: 100%; border-collapse: collapse; }
-        .header-info { font-size: 11px; }
-        .signature-box { margin-top: 20px; text-align: center; font-size: 10px; }
-        .line { border-top: 1px solid #000; width: 80%; margin: 40px auto 5px auto; }
-        /* Estilo para que el eNCF/NCF no rompa el diseño pero resalte */
-        .ncf-label { font-size: 13px; letter-spacing: 1px; }
+        
+        .footer-message {
+            margin-top: 25px;
+            padding-bottom: 10mm;
+            font-size: 11px;
+            text-transform: none;
+        }
+
+        .ncf-row {
+            white-space: nowrap;
+            display: block;
+            width: 100%;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+
+        .table-header { border-bottom: 1.5px solid #000; }
+        .total-row { font-size: 14px; }
+
+        /* Estilo para el aviso de cancelación */
+        .cancelled-banner {
+            border: 2px solid #000;
+            padding: 5px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        .cancelled-text {
+            font-size: 18px;
+            display: block;
+        }
+        .cancellation-reason {
+            font-size: 10px;
+            margin-top: 3px;
+            text-transform: none; /* Los motivos a veces son largos, mejor lectura normal */
+        }
     </style>
 </head>
 <body>
     <div class="ticket">
         {{-- 1. ENCABEZADO EMPRESA --}}
         <div class="center">
-            <span class="bold" style="font-size: 16px;">{{ $config->nombre_empresa }}</span><br>
-            <span class="header-info">
+            <span style="font-size: 16px; display: block; margin-bottom: 2px;">{{ $config->nombre_empresa }}</span>
+            <div class="header-info" style="font-size: 11px;">
                 {{ $config->direccion }}<br>
-                Tel: {{ $config->telefono }}<br>
+                TEL: {{ $config->telefono }}<br>
                 {{ $taxLabel }}: {{ $config->tax_id }}<br>
-                <b style="font-size: 9px;">COMPROBANTE AUTORIZADO POR LA DGII</b>
-            </span>
+                <span style="font-size: 9px;">COMPROBANTE AUTORIZADO POR LA DGII</span>
+            </div>
         </div>
 
-        {{-- 2. DATOS FISCALES (NCF) --}}
-        <div class="border-top">
-            <table class="header-info">
+        {{-- Alerta de Cancelación --}}
+        @if($isCancelled)
+            <div class="cancelled-banner">
+                <span class="cancelled-text">*** CANCELADA ***</span>
+                <div class="cancellation-reason">
+                    MOTIVO: {{ $sale->ncfLog->cancellation_reason ?? 'SIN MOTIVO REGISTRADO' }}
+                </div>
+            </div>
+        @endif
+
+        {{-- 2. DATOS DE LA FACTURA Y NCF --}}
+        <div class="info-section spacer">
+            <table>
                 <tr>
-                    <td>Factura: <b>{{ $invoice->invoice_number }}</b></td>
-                    <td class="right"><b>{{ $sale->payment_type === 'cash' ? 'CONTADO' : 'CRÉDITO' }}</b></td>
+                    <td>FACTURA: {{ $invoice->invoice_number }}</td>
+                    <td class="right">{{ $sale->payment_type === 'cash' ? 'CONTADO' : 'CREDITO' }}</td>
                 </tr>
-                
-                @if($sale->ncf)
-                <tr>
-                    <td colspan="2">
-                        {{-- Identificación si es e-NCF o NCF --}}
-                        <span>{{ $ncfLog?->type?->is_electronic ? 'e-NCF:' : 'NCF:' }}</span> 
-                        <span class="ncf-label">{{ $sale->ncf }}</span>
-                    </td>
-                </tr>
-                @if($vencimientoNcf)
-                <tr>
-                    <td colspan="2">
-                        Vencimiento NCF: <span>{{ $vencimientoNcf }}</span>
-                    </td>
-                </tr>
-                @endif
-                @endif
             </table>
+
+            @if($sale->ncf)
+                <div style="margin-top: 4px;">
+                    <span style="font-size: 11px; display:block;">{{ $sale->ncfLog->type->name ?? 'COMPROBANTE' }}</span>
+                    <div class="ncf-row">
+                        {{ $ncfLog?->type?->is_electronic ? 'E-NCF:' : 'NCF:' }} {{ $sale->ncf }} 
+                        @if($vencimientoNcf)
+                            <span style="font-size: 10px;"> VENCE:{{ $vencimientoNcf }}</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- 3. DATOS DEL CLIENTE --}}
-        <div class="border-top header-info">
-            Cliente: {{ $client->name }}<br>
+        <div class="info-section small-spacer">
+            <div style="border-top: 0.5px solid #000; margin-bottom: 4px;"></div>
+            CLIENTE: {{ substr($client->name, 0, 30) }}<br>
             @if($client->tax_id)
-                RNC/Céd: {{ $client->tax_id }}<br>
+                {{ $taxLabel }}: {{ $client->tax_id }}<br>
             @endif
-            Vendedor: {{ $sale->user->name ?? 'Sistema' }}<br>
-            Fecha: {{ $sale->created_at->format('d/m/Y g:i A') }}<br>
+            @if($client->address) DIR: {{ substr($client->address, 0, 35) }}<br> @endif
             
+            VENDEDOR: {{ $sale->user->name ?? 'SISTEMA' }}<br>
+            FECHA: {{ $sale->created_at->format('d/m/Y G:i A') }}
             @if($vencimientoPago)
-                <span class="bold">VENCE PAGO: {{ $vencimientoPago }}</span><br>
+                <br>VENCE PAGO: {{ $vencimientoPago }}
             @endif
         </div>
 
         {{-- 4. DETALLE DE PRODUCTOS --}}
-        <div class="border-top">
+        <div class="spacer">
             <table>
                 <thead>
-                    <tr>
-                        <th align="left">CANT</th>
-                        <th align="left">DESC.</th>
-                        <th class="right">SUBT.</th>
+                    <tr class="table-header">
+                        <th align="left" style="width: 15%; padding-bottom: 2px;">CANT</th>
+                        <th align="left" style="width: 55%; padding-bottom: 2px;">DESC.</th>
+                        <th class="right" style="width: 30%; padding-bottom: 2px;">SUBT.</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($sale->items as $item)
                         <tr>
-                            <td valign="top">{{ (int)$item->quantity }}</td>
-                            <td valign="top">
-                                {{ substr($item->product->name, 0, 25) }}<br>
-                                <small>@ {{ $currency }}{{ number_format($item->unit_price, 2) }}</small>
+                            <td valign="top" style="padding-top: 5px;">
+                                {{ (float)$item->quantity == (int)$item->quantity ? (int)$item->quantity : number_format($item->quantity, 2) }}
                             </td>
-                            <td class="right" valign="top">{{ $currency }}{{ number_format($item->quantity * $item->unit_price, 2) }}</td>
+                            <td valign="top" style="padding-top: 5px;">
+                                {{ substr($item->product->name, 0, 22) }}<br>
+                                <span style="font-size: 10px;">@ {{ number_format($item->unit_price, 2) }}</span>
+                            </td>
+                            <td class="right" valign="top" style="padding-top: 5px;">{{ number_format($item->quantity * $item->unit_price, 2) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -123,51 +175,52 @@
         </div>
 
         {{-- 5. TOTALES --}}
-        <div class="border-top">
+        <div class="spacer">
             @php
                 $subtotalCalculado = $sale->items->sum('subtotal'); 
                 $taxCalculado = $sale->tax > 0 ? $sale->tax : ($sale->total_amount - $subtotalCalculado);
             @endphp
-            <table>
+            <table style="border-top: 1px solid #000; padding-top: 4px;">
                 <tr>
-                    <td class="header-info">Subtotal Neto:</td>
+                    <td>SUBTOTAL NETO:</td>
                     <td class="right">{{ $currency }}{{ number_format($subtotalCalculado, 2) }}</td>
                 </tr>
                 <tr>
-                    <td class="header-info">{{ $taxName }}:</td>
+                    <td>{{ $taxName }}:</td>
                     <td class="right">{{ $currency }}{{ number_format($taxCalculado, 2) }}</td>
                 </tr>
-                <tr style="font-size: 14px;">
-                    <td class="bold">TOTAL</td>
-                    <td class="right bold">{{ $currency }}{{ number_format($sale->total_amount, 2) }}</td>
+                <tr class="total-row">
+                    <td style="padding-top: 4px;">TOTAL</td>
+                    <td class="right" style="padding-top: 4px;">{{ $currency }}{{ number_format($sale->total_amount, 2) }}</td>
                 </tr>
             </table>
         </div>
 
         {{-- 6. PAGO O FIRMA --}}
-        @if($sale->payment_type === 'cash')
-            <div class="border-top header-info">
+        <div class="spacer">
+            @if($sale->payment_type === 'cash')
                 <table>
                     <tr>
-                        <td>Efectivo Recibido:</td>
+                        <td>RECIBIDO:</td>
                         <td class="right">{{ $currency }}{{ number_format($sale->cash_received ?? 0, 2) }}</td>
                     </tr>
                     <tr>
-                        <td class="bold">Cambio a Devolver:</td>
-                        <td class="right bold">{{ $currency }}{{ number_format($sale->cash_change ?? 0, 2) }}</td>
+                        <td>CAMBIO:</td>
+                        <td class="right">{{ $currency }}{{ number_format($sale->cash_change ?? 0, 2) }}</td>
                     </tr>
                 </table>
-            </div>
-        @else
-            <div class="signature-box border-top">
-                <p>Acepto los términos de pago y recibo de mercancía.</p>
-                <div class="line"></div>
-                <span class="bold">FIRMA DEL CLIENTE</span>
-            </div>
-        @endif
+            @else
+                <div class="center" style="padding-top: 15px;">
+                    <p style="font-size: 10px;">ACEPTO LOS TÉRMINOS DE PAGO.</p>
+                    <div style="border-top: 1.5px solid #000; width: 85%; margin: 35px auto 5px auto;"></div>
+                    <span style="font-size: 10px;">FIRMA DEL CLIENTE</span>
+                </div>
+            @endif
+        </div>
 
-        <div class="center border-top" style="margin-top: 10px; font-size: 10px;">
-            *** GRACIAS POR SU COMPRA ***<br>
+        {{-- 7. PIE DE PAGINA --}}
+        <div class="center footer-message">
+            *** GRACIAS POR PREFERIRNOS ***<br>
             {{ $config->nombre_empresa }}
         </div>
     </div>

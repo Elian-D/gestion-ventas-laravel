@@ -128,6 +128,24 @@
                         </div>
                     </template>
 
+                    {{-- ALERTA DE EXCESO DE LÍMITE DE CRÉDITO --}}
+                    <template x-if="exceedsCreditLimit">
+                        <div x-transition 
+                            class="bg-red-100 border-2 border-red-500 rounded-xl p-4 flex items-center gap-4 text-red-900 shadow-md animate-bounce mt-4">
+                            <div class="bg-red-500 p-2 rounded-lg">
+                                <x-heroicon-s-banknotes class="w-6 h-6 text-white"/>
+                            </div>
+                            <div class="text-sm">
+                                <strong class="block font-black uppercase">Límite de Crédito Excedido</strong>
+                                <p>
+                                    El total (<span x-text="formatMoney(totals.total)"></span>) supera los 
+                                    <strong x-text="formatMoney(selectedClient.available)"></strong> disponibles. 
+                                    Reduzca la cantidad o cambie a contado.
+                                </p>
+                            </div>
+                        </div>
+                    </template>
+
                     {{-- ALERTA DE RNC FALTANTE PARA CRÉDITO FISCAL --}}
                     <template x-if="ncfRequiresRnc && !selectedClient?.tax_id">
                         <div x-transition class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 text-red-800 shadow-sm mb-4">
@@ -390,21 +408,27 @@
                     return ['01', '31'].includes(selectedNcf.code) && (!this.selectedClient?.tax_id || this.selectedClient.tax_id === '00000000000');
                 },
 
+                // Propiedad computada para saber si excede el límite
+                get exceedsCreditLimit() {
+                    if (this.formData.payment_type !== 'credit' || !this.selectedClient || this.selectedClient.id == 1) {
+                        return false;
+                    }
+                    // Comparamos el total actual contra el disponible del cliente
+                    return this.totals.total > parseFloat(this.selectedClient.available || 0);
+                },
+
                 get isSubmitDisabled() {
-                    const hasItems = this.items.length > 0;
-                    const hasTotal = this.totals.total > 0;
-                    
-                    // Bloqueo si el NCF requiere un RNC válido y el cliente no lo tiene o es el genérico
-                    if (this.ncfRequiresRnc) {
-                        return true; 
-                    }
+                        const hasItems = this.items.length > 0;
+                        const hasTotal = this.totals.total > 0;
+                        
+                        if (this.ncfRequiresRnc) return true; 
 
-                    // Bloqueo por morosidad en ventas a crédito
-                    if (this.formData.payment_type === 'credit') {
-                        return !hasItems || !this.selectedClient || this.selectedClient.is_moroso;
-                    }
+                        if (this.formData.payment_type === 'credit') {
+                            // Ahora también bloqueamos si excede el límite
+                            return !hasItems || !this.selectedClient || this.selectedClient.is_moroso || this.exceedsCreditLimit;
+                        }
 
-                    return !hasItems || !hasTotal;
+                        return !hasItems || !hasTotal;
                 },
 
                 addItem() {
