@@ -40,10 +40,10 @@ class SaleService
                 'sale_date'        => $data['sale_date'] ?? now(),
                 'total_amount'     => $data['total_amount'],
                 'payment_type'     => $data['payment_type'],
-                // --- NUEVOS CAMPOS AQUÍ ---
+                // NUEVO: Guardamos el ID del tipo de pago
+                'tipo_pago_id'     => $data['payment_type'] === Sale::PAYMENT_CASH ? $data['tipo_pago_id'] : null,
                 'cash_received'    => $data['payment_type'] === Sale::PAYMENT_CASH ? ($data['cash_received'] ?? 0) : 0,
                 'cash_change'      => $data['payment_type'] === Sale::PAYMENT_CASH ? ($data['cash_change'] ?? 0) : 0,
-                // --------------------------
                 'status'           => Sale::STATUS_COMPLETED,
                 'notes'            => $data['notes'] ?? null,
             ]);
@@ -143,25 +143,28 @@ class SaleService
 
     protected function generateSaleAccountingEntry(Sale $sale)
     {
-        $incomeAccount = AccountingAccount::where('code', '4.1')->first(); 
-        $cashAccount = AccountingAccount::where('code', '1.1.01')->first(); 
+        $incomeAccount = AccountingAccount::where('code', '4.1')->first();
         
-        if (!$cashAccount || !$incomeAccount) {
-            throw new Exception("Configuración contable no encontrada.");
+        // Si el tipo de pago tiene cuenta asignada, úsala; si no, usa la 1.1.01 por defecto
+        $debitAccountId = $sale->tipoPago?->accounting_account_id 
+                        ?? AccountingAccount::where('code', '1.1.01')->value('id');
+
+        if (!$debitAccountId || !$incomeAccount) {
+            throw new Exception("Configuración contable incompleta.");
         }
 
         $this->journalService->create([
             'entry_date'  => $sale->sale_date,
             'reference'   => $sale->number,
-            'description' => "Venta Contado - Cliente: {$sale->client->name}",
+            'description' => "Venta Contado ({$sale->tipoPago->nombre}) - {$sale->client->name}",
             'status'      => JournalEntry::STATUS_POSTED,
             'items' => [
-                ['accounting_account_id' => $cashAccount->id, 'debit' => $sale->total_amount, 'credit' => 0],
+                ['accounting_account_id' => $debitAccountId, 'debit' => $sale->total_amount, 'credit' => 0],
                 ['accounting_account_id' => $incomeAccount->id, 'debit' => 0, 'credit' => $sale->total_amount]
             ]
         ]);
     }
-
+    
     protected function generateCancellationAccountingEntry(Sale $sale)
     {
         $incomeAccount = AccountingAccount::where('code', '4.1')->first();
