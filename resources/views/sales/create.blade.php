@@ -23,142 +23,141 @@
 
             <div class="p-6 md:p-8 space-y-8">
                 
-                {{-- SECCIÓN 1: CONFIGURACIÓN --}}
+                {{-- SECCIÓN 1: CONFIGURACIÓN REDISEÑADA --}}
                 <section class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div>
-                            <x-input-label value="Tipo de Venta" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
-                            <select name="payment_type" x-model="formData.payment_type" @change="handlePaymentTypeChange()"
-                                    class="w-full border-gray-300 rounded-lg text-sm font-bold focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all">
-                                @foreach($payment_types as $key => $label)
-                                    <option value="{{ $key }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
+                    {{-- FILA 1: TIPO DE VENTA Y CLIENTE --}}
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                        
+                        {{-- Selector de Tipo de Venta (Visual) --}}
+                        <div class="md:col-span-4">
+                            <x-input-label value="Tipo de Venta" class="mb-3 text-xs text-gray-500 uppercase tracking-wider" />
+                            <div class="grid grid-cols-2 gap-2 p-1 bg-gray-100 rounded-xl">
+                                <button type="button" 
+                                    @click="formData.payment_type = 'cash'; handlePaymentTypeChange()"
+                                    :class="formData.payment_type === 'cash' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'"
+                                    class="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all">
+                                    <x-heroicon-s-currency-dollar class="w-4 h-4"/>
+                                    Contado
+                                </button>
+                                <button type="button" 
+                                    @click="formData.payment_type = 'credit'; handlePaymentTypeChange()"
+                                    :class="formData.payment_type === 'credit' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'"
+                                    class="flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all">
+                                    <x-heroicon-s-credit-card class="w-4 h-4"/>
+                                    Crédito
+                                </button>
+                            </div>
+                            <input type="hidden" name="payment_type" x-model="formData.payment_type">
                         </div>
 
-                        <div>
-                            <x-input-label value="Almacén de Salida" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
+                        {{-- Selector de Cliente con Búsqueda (Sugerencia: usar un datalist o select2 si es posible) --}}
+                        <div class="md:col-span-5">
+                            <x-input-label value="Cliente" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
+                            <div class="relative">
+                                <select name="client_id" x-model="formData.client_id" @change="validateNcfAndClient()"
+                                    class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 shadow-sm pl-10">
+                                    <template x-for="client in filteredClients" :key="client.id">
+                                        <option :value="client.id" x-text="client.name"></option>
+                                    </template>
+                                </select>
+                                <x-heroicon-o-user class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"/>
+                            </div>
+                        </div>
+
+                        {{-- Almacén (Compacto) --}}
+                        <div class="md:col-span-3">
+                            <x-input-label value="Almacén" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
                             <select name="warehouse_id" x-model="formData.warehouse_id" @change="clearItems()"
-                                    class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
-                                <option value="">Seleccione...</option>
+                                class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 shadow-sm transition-all" required>
+                                <option value="">Seleccione origen...</option>
                                 @foreach($warehouses as $wh)
                                     <option value="{{ $wh->id }}">{{ $wh->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-
-                        {{-- Cliente --}}
-                        <div class="md:col-span-1">
-                            <x-input-label value="Cliente" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
-                            <select name="client_id" x-model="formData.client_id" @change="validateNcfSupport()"
-                                    class="w-full border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
-                                <template x-for="client in filteredClients" :key="client.id">
-                                    <option :value="client.id" x-text="client.name"></option>
-                                </template>
-                            </select>
-                        </div>
-
-                        {{-- Tipo de Comprobante (NCF) --}}
-                        <div class="md:col-span-1">
-                            <x-input-label value="Comprobante Fiscal" class="mb-1 text-xs text-gray-500 uppercase tracking-wider" />
-                            <select name="ncf_type_id" x-model="formData.ncf_type_id"
-                                class="w-full border-gray-300 rounded-lg text-sm font-bold focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all" required>
-                                <template x-for="type in filteredNcfTypes" :key="type.id">
-                                    <option :value="type.id" x-text="type.name"></option>
-                                </template>
-                            </select>
-                        </div>
                     </div>
 
-                    {{-- INFO BOX DEL CLIENTE --}}
-                    <div class="min-h-[70px]">
-                        <template x-if="selectedClient">
-                            <div class="grid grid-cols-1 gap-4 transition-all duration-300"
-                                :class="selectedClient.id == 1 ? 'md:grid-cols-1' : 'md:grid-cols-2'"
-                                x-transition:enter="transition ease-out duration-300"
-                                x-transition:enter-start="opacity-0 transform -translate-y-2"
-                                x-transition:enter-end="opacity-100 transform translate-y-0">
-                                
-                                {{-- Columna 1: Estatus --}}
-                                <div :class="selectedClient.id == 1 ? 'bg-blue-50 border-blue-200' : (selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200')" 
-                                    class="border rounded-xl p-4 flex items-center gap-4 transition-all duration-500">
-                                    
-                                    <div :class="selectedClient.id == 1 ? 'bg-blue-500' : (selectedClient.is_moroso || selectedClient.is_blocked ? 'bg-red-500' : 'bg-emerald-500')" 
-                                        class="w-1.5 h-10 rounded-full shadow-sm"></div>
-                                    
+                    {{-- FILA 2: COMPROBANTE Y MÉTODO (Dinámicos) --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {{-- NCF --}}
+                        <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/50 flex items-center gap-4">
+                            <div class="flex-1">
+                                <x-input-label value="Comprobante Fiscal" class="mb-1 text-[10px] text-indigo-400 uppercase font-bold" />
+                                <select name="ncf_type_id" x-model="formData.ncf_type_id"
+                                    class="w-full border-none bg-transparent p-0 text-sm font-black text-indigo-900 focus:ring-0">
+                                    <template x-for="type in filteredNcfTypes" :key="type.id">
+                                        <option :value="type.id" x-text="type.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div class="h-10 w-px bg-indigo-200"></div>
+                            {{-- Método de Pago (Solo si es cash) --}}
+                            <div class="flex-1" x-show="formData.payment_type === 'cash'" x-transition>
+                                <x-input-label value="Método de Pago" class="mb-1 text-[10px] text-indigo-400 uppercase font-bold" />
+                                <select name="tipo_pago_id" x-model="formData.tipo_pago_id"
+                                    class="w-full border-none bg-transparent p-0 text-sm font-black text-indigo-900 focus:ring-0">
+                                    <option value="">Seleccione...</option>
+                                    @foreach($tipo_pagos as $tp)
+                                        <option value="{{ $tp->id }}">{{ $tp->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex-1" x-show="formData.payment_type === 'credit'" x-transition>
+                                <p class="text-[10px] text-amber-500 uppercase font-bold">Condición</p>
+                                <p class="text-sm font-black text-amber-700">Cuentas por Cobrar</p>
+                            </div>
+                        </div>
+
+                        {{-- INFO BOX DEL CLIENTE (AQUÍ DENTRO) --}}
+                        <div class="flex items-center">
+                            <template x-if="selectedClient">
+                                {{-- Mantenemos tu lógica de info box pero reducida en padding --}}
+                                <div class="w-full bg-white border border-gray-200 rounded-xl p-3 flex justify-between items-center shadow-sm">
                                     <div>
-                                        <p class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Estatus del Cliente</p>
-                                        <p :class="selectedClient.id == 1 ? 'text-blue-700' : (selectedClient.is_moroso || selectedClient.is_blocked ? 'text-red-700' : 'text-emerald-700')" 
-                                        class="font-bold text-sm uppercase">
-                                            <template x-if="selectedClient.id == 1">
-                                                <span>Comprobante de Consumo (Público General)</span>
-                                            </template>
-                                            <template x-if="selectedClient.id != 1">
-                                                <span x-text="selectedClient.status_name"></span>
-                                            </template>
-                                            <template x-if="selectedClient.is_moroso"><span> (SÓLO CONTADO)</span></template>
-                                        </p>
+                                        <p class="text-[10px] uppercase font-bold text-gray-400">RNC/Cédula</p>
+                                        <p class="text-sm font-mono text-gray-700" x-text="selectedClient.tax_id || 'N/A'"></p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-[10px] uppercase font-bold text-gray-400">Crédito Disp.</p>
+                                        <p :class="exceedsCreditLimit ? 'text-red-600' : 'text-emerald-600'" 
+                                        class="text-sm font-black" x-text="formatMoney(selectedClient.available)"></p>
                                     </div>
                                 </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
 
-                                {{-- Columna 2: Línea de Crédito (Solo si NO es consumidor final) --}}
-                                <template x-if="selectedClient.id != 1">
-                                    <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between group hover:bg-indigo-100 transition-colors cursor-default">
-                                        <div>
-                                            <p class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Línea de Crédito Disponible</p>
-                                            <p class="text-indigo-900 font-black text-lg font-mono" x-text="formatMoney(selectedClient.available)"></p>
-                                        </div>
-                                        <x-heroicon-o-credit-card class="w-8 h-8 text-indigo-300 group-hover:scale-110 transition-transform"/>
+                {{-- ALERTAS DE ESTADO DE CLIENTE --}}
+                <template x-if="selectedClient && (selectedClient.is_moroso || exceedsCreditLimit)">
+                    <div class="mb-6 space-y-3">
+                        {{-- Alerta de Morosidad --}}
+                        <template x-if="selectedClient.is_moroso">
+                            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm animate-pulse">
+                                <div class="flex items-center">
+                                    <x-heroicon-s-exclamation-triangle class="w-6 h-6 text-red-600 mr-3"/>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-red-800">CLIENTE MOROSO DETECTADO</h3>
+                                        <p class="text-xs text-red-700">Este cliente tiene facturas vencidas. Las ventas a crédito están bloqueadas automáticamente.</p>
                                     </div>
-                                </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- Alerta de Límite de Crédito --}}
+                        <template x-if="exceedsCreditLimit">
+                            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm">
+                                <div class="flex items-center">
+                                    <x-heroicon-s-no-symbol class="w-6 h-6 text-amber-600 mr-3"/>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-amber-800">LÍMITE DE CRÉDITO EXCEDIDO</h3>
+                                        <p class="text-xs text-amber-700">El monto total (<span x-text="formatMoney(totals.total)"></span>) supera el balance disponible del cliente (<span x-text="formatMoney(selectedClient.available)"></span>).</p>
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </div>
-
-                    {{-- ALERTA DE RESTRICCIÓN --}}
-                    <template x-if="selectedClient && selectedClient.is_moroso && formData.payment_type === 'credit'">
-                        <div x-transition class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-4 text-amber-800 shadow-sm animate-pulse">
-                            <div class="bg-amber-100 p-2 rounded-lg">
-                                <x-heroicon-s-exclamation-circle class="w-6 h-6 text-amber-600"/>
-                            </div>
-                            <div class="text-sm">
-                                <strong class="block font-bold">Restricción de Crédito</strong>
-                                <p class="opacity-80">El cliente tiene facturas vencidas. Cambie a <strong>Contado</strong>.</p>
-                            </div>
-                        </div>
-                    </template>
-
-                    {{-- ALERTA DE EXCESO DE LÍMITE DE CRÉDITO --}}
-                    <template x-if="exceedsCreditLimit">
-                        <div x-transition 
-                            class="bg-red-100 border-2 border-red-500 rounded-xl p-4 flex items-center gap-4 text-red-900 shadow-md animate-bounce mt-4">
-                            <div class="bg-red-500 p-2 rounded-lg">
-                                <x-heroicon-s-banknotes class="w-6 h-6 text-white"/>
-                            </div>
-                            <div class="text-sm">
-                                <strong class="block font-black uppercase">Límite de Crédito Excedido</strong>
-                                <p>
-                                    El total (<span x-text="formatMoney(totals.total)"></span>) supera los 
-                                    <strong x-text="formatMoney(selectedClient.available)"></strong> disponibles. 
-                                    Reduzca la cantidad o cambie a contado.
-                                </p>
-                            </div>
-                        </div>
-                    </template>
-
-                    {{-- ALERTA DE RNC FALTANTE PARA CRÉDITO FISCAL --}}
-                    <template x-if="ncfRequiresRnc && !selectedClient?.tax_id">
-                        <div x-transition class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 text-red-800 shadow-sm mb-4">
-                            <div class="bg-red-100 p-2 rounded-lg">
-                                <x-heroicon-s-exclamation-triangle class="w-6 h-6 text-red-600"/>
-                            </div>
-                            <div class="text-sm">
-                                <strong class="block font-bold">RNC Requerido</strong>
-                                <p class="opacity-80">Este cliente no tiene RNC configurado. El tipo de comprobante seleccionado lo requiere.</p>
-                            </div>
-                        </div>
-                    </template>
-                </section>
+                </template>
 
                 {{-- SECCIÓN 2: DETALLE DE PRODUCTOS --}}
                 <section x-show="formData.warehouse_id" 
@@ -283,20 +282,34 @@
                         {{-- NUEVO: Bloque de Pago (Solo si es Contado) --}}
                         <template x-if="formData.payment_type === 'cash'">
                             <div class="space-y-3 pt-4 mt-2 border-t border-white/10" x-transition>
-                                <div>
-                                    <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Efectivo Recibido</label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-mono">$</span>
-                                        <input type="number" name="cash_received" x-model.number="formData.cash_received" 
-                                            @input="calculateChange()" step="0.01"
-                                            class="w-full bg-white/5 border-white/10 rounded-lg pl-7 py-2 text-lg font-mono focus:ring-indigo-500 focus:bg-white/10 transition-all">
+                                
+                                {{-- Solo mostrar input de recibido si es efectivo --}}
+                                <template x-if="tipo_pagos.find(t => t.id == formData.tipo_pago_id)?.nombre.toLowerCase().includes('efectivo')">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-400 uppercase block mb-1">Efectivo Recibido</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-mono">$</span>
+                                            <input type="number" 
+                                                name="cash_received" 
+                                                x-model.number="formData.cash_received" 
+                                                @input="calculateChange()" 
+                                                step="0.01"
+                                                class="w-full bg-white/5 border-white/10 rounded-lg pl-7 py-2 text-lg font-mono focus:ring-indigo-500 focus:bg-white/10 transition-all">
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
 
+                                {{-- Visualización de Cambio y Campos Ocultos para el POST --}}
                                 <div class="flex justify-between items-center bg-indigo-500/20 p-3 rounded-xl border border-indigo-500/30">
                                     <span class="text-[10px] font-bold text-indigo-300 uppercase">Cambio a Devolver</span>
                                     <span class="text-xl font-black font-mono text-indigo-400" x-text="formatMoney(formData.cash_change)"></span>
+                                    
+                                    {{-- ESTOS INPUTS SON VITALES PARA EL BACKEND --}}
                                     <input type="hidden" name="cash_change" :value="formData.cash_change">
+                                    {{-- Si el método NO es efectivo, enviamos 0 de recibido automáticamente --}}
+                                    <template x-if="!tipo_pagos.find(t => t.id == formData.tipo_pago_id)?.nombre.toLowerCase().includes('efectivo')">
+                                        <input type="hidden" name="cash_received" :value="totals.total">
+                                    </template>
                                 </div>
                             </div>
                         </template>
@@ -318,14 +331,18 @@
             {{-- FOOTER --}}
             <div class="p-6 bg-gray-50/50 flex justify-end items-center border-t border-gray-100 gap-6">
                 <a href="{{ route('sales.index') }}" class="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors">Cancelar</a>
-                
-                <button type="submit"
-                    class="bg-indigo-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
-                    :class="isSubmitDisabled ? '' : 'hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-95'"
-                    :disabled="isSubmitDisabled">
-                    <x-heroicon-s-check-circle class="w-5 h-5"/>
-                    Confirmar y Facturar
-                </button>
+                <div class="flex flex-col items-end gap-1">    
+                        <button type="submit"
+                        class="bg-indigo-600 text-white px-10 py-3 rounded-xl font-bold shadow-lg shadow-indigo-100 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
+                        :class="isSubmitDisabled ? '' : 'hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-95'"
+                        :disabled="isSubmitDisabled">
+                        <x-heroicon-s-check-circle class="w-5 h-5"/>
+                        Confirmar y Facturar
+                    </button>
+                    <template x-if="isSubmitDisabled && selectedClient">
+                        <span class="text-[10px] text-red-500 font-bold uppercase">Verifique el estado o límite del cliente</span>
+                    </template>
+                </div>
             </div>
         </form>
     </div>
@@ -335,6 +352,7 @@
                 products: @json($products),
                 clients: @json($clients),
                 ncf_types: @json($ncf_types),
+                tipo_pagos: @json($tipo_pagos),
                 items: [],
                 config: {
                     tax_rate: {{ general_config()->impuesto->valor ?? 0 }},
@@ -342,6 +360,7 @@
                 },
                 formData: {
                     payment_type: 'cash',
+                    tipo_pago_id: '1', // Por defecto Efectivo
                     client_id: '1', // Por defecto Consumidor Final
                     warehouse_id: '',
                     ncf_type_id: '2', // Por defecto Consumidor Final (B02)
@@ -455,6 +474,32 @@
                     this.calculateTotals();
                 },
 
+                        // Lógica al cambiar tipo de venta (Contado/Crédito)
+                handlePaymentTypeChange() {
+                    if (this.formData.payment_type === 'credit') {
+                        this.formData.tipo_pago_id = null;
+                        this.formData.cash_received = 0;
+                        this.formData.cash_change = 0;
+                    } else {
+                        this.formData.tipo_pago_id = '1'; // Reset a efectivo al volver a contado
+                    }
+                    this.validateNcfAndClient();
+                },
+
+                // Lógica al cambiar el método detallado (Efectivo/Transferencia/etc)
+                handleTipoPagoChange() {
+                    // Buscamos si el método seleccionado es "Efectivo"
+                    const metodo = this.tipo_pagos.find(t => t.id == this.formData.tipo_pago_id);
+                    const esEfectivo = metodo && metodo.nombre.toLowerCase().includes('efectivo');
+
+                    if (!esEfectivo) {
+                        // Si es transferencia o tarjeta, el "recibido" es igual al total (no hay cambio)
+                        this.formData.cash_received = this.totals.total;
+                        this.formData.cash_change = 0;
+                    }
+                },
+
+
                 calculateTotals() {
                     // 1. El Total Bruto es la suma simple de lo que el cliente realmente va a pagar
                     const bruto = this.items.reduce((sum, item) => sum + (parseFloat(item.quantity || 0) * parseFloat(item.price || 0)), 0);
@@ -472,19 +517,21 @@
                         this.totals.subtotal = bruto;
                         this.totals.tax = 0;
                         this.calculateChange();
+                        this.handleTipoPagoChange();
                     }
                 },
 
                 calculateChange() {
-                    const received = parseFloat(this.formData.cash_received || 0);
-                    const total = parseFloat(this.totals.total || 0);
+                    const total = parseFloat(this.totals.total) || 0;
+                    const received = parseFloat(this.formData.cash_received) || 0;
                     
-                    if (received >= total) {
+                    if (received > total) {
                         this.formData.cash_change = (received - total).toFixed(2);
                     } else {
                         this.formData.cash_change = 0;
                     }
                 },
+
 
                 formatMoney(amount) {
                     return '$' + new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(amount);

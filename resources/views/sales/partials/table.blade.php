@@ -51,6 +51,13 @@
                     </span>
                 </td>
             @endif
+            
+            {{-- Método de Pago Detallado --}}
+            @if(in_array('tipo_pago_id', $visibleColumns))
+                <td class="px-6 py-4 text-sm">
+                    <div class="font-medium text-gray-900">{{ $sale->tipoPago->nombre ?? 'N/A' }}</div>
+                </td>
+            @endif
 
             {{-- Total Venta --}}
             @if(in_array('total_amount', $visibleColumns))

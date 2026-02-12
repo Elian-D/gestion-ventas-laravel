@@ -15,6 +15,7 @@ class SaleTable
             'client_id'    => 'Cliente',
             'warehouse_id' => 'Almacén',
             'payment_type' => 'Tipo de Pago',
+            'tipo_pago_id' => 'Método de Pago',
             'total_amount' => 'Total',
             'status'       => 'Estado',
             'user_id'      => 'Vendedor',
