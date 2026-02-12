@@ -27,6 +27,15 @@
                 </span>
             </div>
 
+            @if($sale->status === 'canceled')
+                <div class="bg-red-50 px-8 py-2 border-b border-red-100 flex items-center gap-2">
+                    <x-heroicon-s-information-circle class="w-4 h-4 text-red-500"/>
+                    <span class="text-[10px] font-bold text-red-700 uppercase">
+                        Motivo de anulación: {{ $sale->ncfLog->cancellation_reason  ?? 'No especificado' }}
+                    </span>
+                </div>
+            @endif
+
             <div class="p-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {{-- Información del Cliente --}}
@@ -41,14 +50,17 @@
                         </div>
                     </div>
 
-                    {{-- Información de Pago --}}
+                    {{-- Información de Pago Mejorada --}}
                     <div class="flex gap-3">
                         <div class="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0">
                             <x-heroicon-s-credit-card class="w-5 h-5"/>
                         </div>
                         <div>
                             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Método / Fecha</span>
-                            <p class="text-sm font-semibold text-gray-700">{{ $paymentLabels[$sale->payment_type] ?? $sale->payment_type }}</p>
+                            <p class="text-sm font-semibold text-gray-700">
+                                {{-- Priorizamos el nombre del tipo de pago (Efectivo, Transferencia, etc) --}}
+                                {{ $sale->tipoPago->nombre ?? ($paymentLabels[$sale->payment_type] ?? $sale->payment_type) }}
+                            </p>
                             <p class="text-[10px] text-gray-500">{{ $sale->created_at->format('d/m/Y h:i A') }}</p>
                         </div>
                     </div>
@@ -119,16 +131,20 @@
                             </tr>
                         </tfoot>
                     </table>
-                    {{-- NUEVO: DESGLOSE DE PAGO (SOLO CONTADO) --}}
-                    @if($sale->payment_type === 'cash')
+                    {{-- NUEVO: DESGLOSE DE PAGO (SOLO SI FUE EFECTIVO O TIENE VALORES) --}}
+                    @if($sale->payment_type === 'cash' && $sale->cash_received > 0)
                         <div class="bg-gray-50/50 border-t px-4 py-4 grid grid-cols-2 gap-4">
-                            <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Efectivo Recibido</span>
-                                <span class="text-sm font-mono text-gray-600">${{ number_format($sale->cash_received ?? 0, 2) }}</span>
+                            <div class="flex flex-col border-r border-gray-100">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Monto Recibido</span>
+                                <span class="text-sm font-mono text-gray-600">${{ number_format($sale->cash_received, 2) }}</span>
                             </div>
                             <div class="flex flex-col text-right">
-                                <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Cambio Entregado</span>
-                                <span class="text-sm font-mono font-bold text-emerald-600">${{ number_format($sale->cash_change ?? 0, 2) }}</span>
+                                <span class="text-[10px] font-bold {{ $sale->cash_change > 0 ? 'text-emerald-500' : 'text-gray-400' }} uppercase tracking-widest">
+                                    Cambio Entregado
+                                </span>
+                                <span class="text-sm font-mono font-bold {{ $sale->cash_change > 0 ? 'text-emerald-600' : 'text-gray-600' }}">
+                                    ${{ number_format($sale->cash_change, 2) }}
+                                </span>
                             </div>
                         </div>
                     @endif

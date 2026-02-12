@@ -24,6 +24,12 @@ class StoreSaleRequest extends FormRequest
             'ncf_type_id'  => ['required', 'exists:ncf_types,id'], // Campo obligatorio ahora
             'sale_date'    => ['required', 'date', 'after_or_equal:today', 'before_or_equal:today'],
             'payment_type' => ['required', Rule::in([Sale::PAYMENT_CASH, Sale::PAYMENT_CREDIT])],
+            // NUEVA REGLA:
+            'tipo_pago_id' => [
+                Rule::requiredIf($this->payment_type === Sale::PAYMENT_CASH), 
+                'nullable', 
+                'exists:tipo_pagos,id'
+            ],
             'cash_received' => ['nullable', 'numeric', 'min:0'],
             'cash_change'   => ['nullable', 'numeric', 'min:0'],
             'total_amount' => ['required', 'numeric', 'min:0'],
@@ -52,6 +58,11 @@ class StoreSaleRequest extends FormRequest
                 if (in_array($ncfType->code, ['01', '31']) && empty($client->tax_id)) {
                     $validator->errors()->add('ncf_type_id', "El tipo de NCF {$ncfType->name} requiere que el cliente tenga un RNC registrado.");
                 }
+            }
+
+                // --- NUEVA VALIDACIÓN DE TIPO DE PAGO ---
+            if ($this->payment_type === Sale::PAYMENT_CASH && empty($this->tipo_pago_id)) {
+                $validator->errors()->add('tipo_pago_id', 'Debe seleccionar un método de pago para ventas al contado.');
             }
 
             // --- VALIDACIÓN DE STOCK ---

@@ -140,11 +140,15 @@
             @endif
             @if($client->address) DIR: {{ substr($client->address, 0, 35) }}<br> @endif
             
-            VENDEDOR: {{ $sale->user->name ?? 'SISTEMA' }}<br>
-            FECHA: {{ $sale->created_at->format('d/m/Y G:i A') }}
-            @if($vencimientoPago)
-                <br>VENCE PAGO: {{ $vencimientoPago }}
-            @endif
+            <div style="margin-top: 4px;">
+                VENDEDOR: {{ $sale->user->name ?? 'SISTEMA' }}<br>
+                {{-- NUEVO: Campo de Método de Pago discreto --}}
+                METODO PAGO: {{ $sale->tipoPago->nombre ?? ($sale->payment_type === 'cash' ? 'EFECTIVO' : 'CREDITO') }}<br>
+                FECHA: {{ $sale->created_at->format('d/m/Y G:i A') }}
+                @if($vencimientoPago)
+                    <br>VENCE PAGO: {{ $vencimientoPago }}
+                @endif
+            </div>
         </div>
 
         {{-- 4. DETALLE DE PRODUCTOS --}}

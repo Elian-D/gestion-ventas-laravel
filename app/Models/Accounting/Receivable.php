@@ -65,6 +65,16 @@ class Receivable extends Model
     }
 
     /**
+     * Accesor para obtener la venta si la referencia es de tipo Sale
+     */
+    public function getSaleAttribute()
+    {
+        return $this->reference_type === \App\Models\Sales\Sale::class 
+            ? $this->reference 
+            : null;
+    }
+
+    /**
      * Forzamos la comparación usando parse para asegurar objetos Carbon
      */
     public function getIsOverdueAttribute(): bool

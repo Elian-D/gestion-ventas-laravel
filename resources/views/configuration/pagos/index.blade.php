@@ -100,7 +100,7 @@
             {{-- TABLA RESPONSIVA --}}
             <x-data-table
                 :items="$tipoPago"
-                :headers="['Nombre', 'Estado', 'Creado', 'Actualizado']">
+                :headers="['Nombre', 'Cuenta Contable', 'Estado', 'Creado', 'Actualizado']">
 
                 @forelse($tipoPago as $pago)
                     {{-- Fila responsiva: Card en móvil, Fila de tabla en md+ --}}
@@ -119,6 +119,13 @@
                                     @endif
                                 </span>
                             </div>
+                        </td>
+                        
+                        {{-- COLUMNA 2: CUENTA CONTABLE (Oculto en móvil, visible en md+) --}}
+                        <td class="hidden md:table-cell px-6 py-4 text-sm text-gray-600">
+                            <span class="font-mono text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                {{ $pago->account->code ?? 'S/N' }} - {{ $pago->account->name ?? 'Sin cuenta' }}
+                            </span>
                         </td>
 
                         {{-- COLUMNA 2: ESTADO (Oculto en móvil, visible en md+) --}}
@@ -209,6 +216,18 @@
                 <x-input-error :messages="$errors->get('nombre')" class="mt-2" />
             </div>
 
+            <div class="mt-4">
+                <x-input-label for="accounting_account_id" value="Cuenta Contable Asociada" />
+                <select name="accounting_account_id" id="accounting_account_id" 
+                        class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">-- Seleccione una cuenta --</option>
+                    @foreach($cuentasContables as $cuenta)
+                        <option value="{{ $cuenta->id }}">{{ $cuenta->code }} - {{ $cuenta->name }}</option>
+                    @endforeach
+                </select>
+                <x-input-error :messages="$errors->get('accounting_account_id')" class="mt-2" />
+            </div>
+
             {{-- Botones --}}
             <div class="mt-6 flex justify-end">
                 {{-- Cancelar --}}
@@ -267,6 +286,19 @@
                 />
 
                 <x-input-error :messages="$errors->get('nombre')" class="mt-2" />
+            </div>
+
+            <div class="mt-4">
+                <x-input-label for="edit_account_{{ $pago->id }}" value="Cuenta Contable Asociada" />
+                <select name="accounting_account_id" id="edit_account_{{ $pago->id }}" 
+                        class="mt-1 block w-full rounded-md border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">-- Seleccione una cuenta --</option>
+                    @foreach($cuentasContables as $cuenta)
+                        <option value="{{ $cuenta->id }}" {{ $pago->accounting_account_id == $cuenta->id ? 'selected' : '' }}>
+                            {{ $cuenta->code }} - {{ $cuenta->name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
             {{-- BOTONES --}}

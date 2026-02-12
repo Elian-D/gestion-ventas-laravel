@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 use App\Models\Clients\Client;
+use App\Models\Configuration\TipoPago;
 use App\Models\Inventory\Warehouse;
 use App\Models\Sales\Ncf\NcfLog;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -25,6 +26,7 @@ class Sale extends Model
         'sale_date',
         'total_amount',
         'payment_type',
+        'tipo_pago_id',
         'cash_received', // Nuevo
         'cash_change',   // Nuevo
         'status',
@@ -95,6 +97,7 @@ class Sale extends Model
             'client:id,name,tax_id', 
             'user:id,name', 
             'warehouse:id,name',
+            'tipoPago:id,nombre',
             'items', // Cargamos todos los campos de los items (precio, cantidad)
             'items.product:id,name,sku' // Cargamos el producto de cada item
         ]);
@@ -110,7 +113,8 @@ class Sale extends Model
         return $this->ncfLog?->full_ncf;
     }
 
-    // Relaciones ...
+    // Relaciones
+    public function tipoPago(): BelongsTo { return $this->belongsTo(TipoPago::class, 'tipo_pago_id'); } // NUEVA
     public function items(): HasMany { return $this->hasMany(SaleItem::class); }
     public function client(): BelongsTo { return $this->belongsTo(Client::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
