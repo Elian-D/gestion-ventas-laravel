@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\{DB, Auth};
 use App\Services\Sales\InvoicesServices\InvoiceService; 
 use App\Contracts\Sales\NcfGeneratorInterface;
 use App\Models\Sales\Ncf\NcfLog;
+use Carbon\Carbon;
 use Exception;
 
 class SaleService
@@ -37,7 +38,9 @@ class SaleService
                 'client_id'        => $data['client_id'],
                 'warehouse_id'     => $data['warehouse_id'],
                 'user_id'          => Auth::id(),
-                'sale_date'        => $data['sale_date'] ?? now(),
+                'sale_date'        => isset($data['sale_date']) 
+                                        ? Carbon::parse($data['sale_date'])->setTimeFrom(now()) 
+                                        : now(),
                 'total_amount'     => $data['total_amount'],
                 'payment_type'     => $data['payment_type'],
                 // NUEVO: Guardamos el ID del tipo de pago
