@@ -141,6 +141,13 @@
                             <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipo</x-sidebar.subitem>
                         </x-slot>
                     </x-sidebar.dropdown>
+
+                    <x-sidebar.dropdown id="pos" icon="heroicon-s-building-storefront" :activeRoutes="['admin/pos*']">
+                        Puntos de Venta
+                        <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/sales/pos/terminals">Terminales</x-sidebar.subitem>
+                        </x-slot>
+                    </x-sidebar.dropdown>
                 </x-sidebar.group>
 
                 {{-- GRUPO 4: Sistema --}}
