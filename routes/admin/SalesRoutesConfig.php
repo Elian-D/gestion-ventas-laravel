@@ -10,9 +10,7 @@ Route::prefix('sales')->as('sales.')->group(function () {
     require __DIR__ . '/sales/sales.php';
     require __DIR__ . '/sales/invoices.php';
     require __DIR__ . '/sales/ncf.php';
-
-    // Aquí podrías agregar en el futuro:
-    // require __DIR__ . '/sales/pos.php';
+    require __DIR__ . '/sales/pos.php';
 
     Route::get('/dashboard', SalesDashboardController::class)->name('dashboard');
     Route::get('/ncf/dashboard', NcfDashboardController::class)->name('ncf.dashboard');
