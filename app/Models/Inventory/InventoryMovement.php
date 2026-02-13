@@ -43,6 +43,12 @@ class InventoryMovement extends Model
         ];
     }
 
+    public function getTypeLabelAttribute(): string
+    {
+        $types = self::getTypes();
+        return $types[$this->type] ?? $this->type;
+    }
+
     public function scopeWithIndexRelations($query)
     {
         return $query->with(['warehouse', 'toWarehouse', 'user', 'product', 'reference']);
