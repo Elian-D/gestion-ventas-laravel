@@ -6,7 +6,7 @@
             @if(in_array('sale_date', $visibleColumns))
                 <td class="px-6 py-4 text-xs text-gray-500">
                     <span class="block font-medium text-gray-700">{{ $sale->sale_date->format('d/m/Y') }}</span>
-                    <span class="text-[10px]">{{ $sale->created_at->format('h:i A') }}</span>
+                    <span class="text-[10px]">{{ $sale->sale_date->format('h:i A') }}</span>
                 </td>
             @endif
 
