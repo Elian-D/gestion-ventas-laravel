@@ -62,6 +62,7 @@
                             Ventas
                             <x-slot name="submenu">
                                 @can('view sales')
+                                <x-sidebar.subitem href="/admin/sales/dashboard">Dashboard Ventas</x-sidebar.subitem>
                                     <x-sidebar.subitem href="/admin/sales">Punto de Venta (POS)</x-sidebar.subitem>
                                 @endcan
                                 @can('view invoices')
@@ -167,6 +168,7 @@
                             @can('view ncf sequences')
                                 <div class="h-px bg-gray-700/30 my-1.5"></div>
                                 <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">NCF (Fiscal)</div>
+                                <x-sidebar.subitem href="/admin/sales/ncf/dashboard">Dashboard NCF</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/sales/ncf/sequences">Secuencias NCF</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/sales/ncf/logs">Historial NCF</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/sales/ncf/types">Tipos NCF</x-sidebar.subitem>
