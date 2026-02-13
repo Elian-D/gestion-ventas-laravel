@@ -116,8 +116,14 @@ private function generateAccountingEntry(InventoryMovement $movement, $product, 
 
         case InventoryMovement::TYPE_ADJUSTMENT:
             if ($movement->quantity > 0) {
-                $this->createItem($entry, $movement->warehouse->accounting_account_id, $totalValue, 0, "Ajuste de inventario (Sobrante)");
-                $this->createItem($entry, $productionAccount->id, 0, $totalValue, "Recuperación/Ajuste positivo");
+                // --- CAMBIO AQUÍ ---
+                // Si el ajuste viene de una anulación de Venta, afectamos Costo de Ventas
+                $contraAccount = ($movement->reference_type === \App\Models\Sales\Sale::class) 
+                    ? $costOfSalesAccount->id 
+                    : $productionAccount->id;
+
+                $this->createItem($entry, $movement->warehouse->accounting_account_id, $totalValue, 0, "Reingreso de inventario");
+                $this->createItem($entry, $contraAccount, 0, $totalValue, "Reversión de costo/ajuste positivo");
             } else {
                 $this->createItem($entry, $costOfSalesAccount->id, $totalValue, 0, "Gasto por merma o pérdida");
                 $this->createItem($entry, $movement->warehouse->accounting_account_id, 0, $totalValue, "Baja por merma");

@@ -44,100 +44,137 @@
             {{-- SIDEBAR --}}
             <x-sidebar.layout>
                 
-                {{-- Dashboard independiente --}}
                 <x-sidebar.item href="/dashboard" icon="heroicon-s-home">
                     Dashboard
                 </x-sidebar.item>
 
-                {{-- Sección sin grupo: Items frecuentes --}}
-                <div class="my-4">
-                    <x-sidebar.item href="/ventas" icon="heroicon-s-currency-dollar">
-                        Ventas (POS)
-                    </x-sidebar.item>
+                {{-- GRUPO 1: Operaciones --}}
+                <x-sidebar.group>
+                    <x-sidebar.title>Operaciones</x-sidebar.title>
+
+                    {{-- Ventas (solo operaciones diarias) --}}
+                    @canany(['view sales', 'view invoices'])
+                        <x-sidebar.dropdown 
+                            id="ventas" 
+                            icon="heroicon-s-banknotes" 
+                            :activeRoutes="['admin/sales*']"
+                        >
+                            Ventas
+                            <x-slot name="submenu">
+                                @can('view sales')
+                                <x-sidebar.subitem href="/admin/sales/dashboard">Dashboard Ventas</x-sidebar.subitem>
+                                    <x-sidebar.subitem href="/admin/sales">Punto de Venta (POS)</x-sidebar.subitem>
+                                @endcan
+                                @can('view invoices')
+                                    <x-sidebar.subitem href="/admin/sales/invoice">Facturas</x-sidebar.subitem>
+                                @endcan
+                            </x-slot>
+                        </x-sidebar.dropdown>
+                    @endcanany
 
                     <x-sidebar.item href="/rutas" icon="heroicon-s-map">
                         Rutas y Entregas
                     </x-sidebar.item>
-                </div>
-
-                {{-- GRUPO 1: Gestión (Inventario + Catálogos) --}}
-                <x-sidebar.group>
-                    <x-sidebar.title>Gestión</x-sidebar.title>
 
                     @can('view inventory dashboard')
-                        {{-- Inventario --}}
                         <x-sidebar.dropdown 
                             id="inventario" 
-                            icon="heroicon-s-archive-box" 
+                            icon="heroicon-s-cube" 
                             :activeRoutes="['admin/inventory*']"
                         >
                             Inventario
                             <x-slot name="submenu">
                                 <x-sidebar.subitem href="/admin/inventory/dashboard">Dashboard</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/inventory/warehouses">Almacenes</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/inventory/stocks">Stock</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/stocks">Stock Actual</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/inventory/movements">Movimientos</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/inventory/warehouses">Almacenes</x-sidebar.subitem>
                             </x-slot>
                         </x-sidebar.dropdown>
                     @endcan
-                    
-                    @can('view accounting dashboard')
-                        {{-- Inventario --}}
+                </x-sidebar.group>
+
+                {{-- GRUPO 2: Finanzas --}}
+                @can('view accounting dashboard')
+                    <x-sidebar.group>
+                        <x-sidebar.title>Finanzas</x-sidebar.title>
+
                         <x-sidebar.dropdown 
                             id="contabilidad" 
-                            icon="heroicon-s-currency-dollar" 
+                            icon="heroicon-s-calculator" 
                             :activeRoutes="['admin/accounting*']"
                         >
                             Contabilidad
                             <x-slot name="submenu">
                                 <x-sidebar.subitem href="/admin/accounting/dashboard">Dashboard</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/accounting/accounts">Cuentas Contables</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/receivables">Cuentas por Cobrar</x-sidebar.subitem>
                                 <x-sidebar.subitem href="/admin/accounting/payments">Pagos</x-sidebar.subitem>
+                                <div class="h-px bg-gray-700/30 my-1.5"></div>
                                 <x-sidebar.subitem href="/admin/accounting/journal_entries">Asientos Contables</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/accounting/document_types">Tipo de Documento</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/accounting/accounts">Plan de Cuentas</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/accounting/document_types">Tipos de Documento</x-sidebar.subitem>
                             </x-slot>
                         </x-sidebar.dropdown>
-                    @endcan
+                    </x-sidebar.group>
+                @endcan
 
-                    {{-- Productos --}}
+                {{-- GRUPO 3: Catálogos --}}
+                <x-sidebar.group>
+                    <x-sidebar.title>Catálogos</x-sidebar.title>
+
                     <x-sidebar.dropdown id="productos" icon="heroicon-s-shopping-cart" :activeRoutes="['admin/products*']">
                         Productos
                         <x-slot name="submenu">
-                            <x-sidebar.subitem href="/admin/products">Productos</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/products">Lista de Productos</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/products/categories">Categorías</x-sidebar.subitem>
-                            <x-sidebar.subitem href="/admin/products/units">Unidades</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/products/units">Unidades de Medida</x-sidebar.subitem>
                         </x-slot>
                     </x-sidebar.dropdown>
 
-                    {{-- Clientes --}}
                     <x-sidebar.dropdown id="clientes" icon="heroicon-s-user-group" :activeRoutes="['admin/clients*']">
                         Clientes
                         <x-slot name="submenu">
-                            <x-sidebar.subitem href="/admin/clients">Clientes</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/clients">Lista de Clientes</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/clients/pos">Puntos de Venta</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/clients/equipments">Equipos</x-sidebar.subitem>
+                            <div class="h-px bg-gray-700/30 my-1.5"></div>
                             <x-sidebar.subitem href="/admin/clients/businessTypes">Tipos de Negocio</x-sidebar.subitem>
-                            <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipos</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/clients/equipmentTypes">Tipos de Equipo</x-sidebar.subitem>
                         </x-slot>
                     </x-sidebar.dropdown>
                 </x-sidebar.group>
 
-                {{-- GRUPO 2: Administración --}}
+                {{-- GRUPO 4: Sistema --}}
                 <x-sidebar.group>
-                    <x-sidebar.title>Administración</x-sidebar.title>
+                    <x-sidebar.title>Sistema</x-sidebar.title>
 
                     <x-sidebar.item href="/admin/users" icon="heroicon-s-users">
                         Usuarios
                     </x-sidebar.item>
 
                     <x-sidebar.item href="/admin/roles" icon="heroicon-s-lock-closed">
-                        Roles y Permisos
+                        Roles
                     </x-sidebar.item>
 
-                    <x-sidebar.item href="/admin/config" icon="heroicon-s-cog-6-tooth">
+                    {{-- Configuración ahora incluye NCF --}}
+                    <x-sidebar.dropdown 
+                        id="configuracion" 
+                        icon="heroicon-s-cog-6-tooth" 
+                        :activeRoutes="['admin/config*', 'admin/sales/ncf*']"
+                    >
                         Configuración
-                    </x-sidebar.item>
+                        <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/config">General</x-sidebar.subitem>
+                            
+                            @can('view ncf sequences')
+                                <div class="h-px bg-gray-700/30 my-1.5"></div>
+                                <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">NCF (Fiscal)</div>
+                                <x-sidebar.subitem href="/admin/sales/ncf/dashboard">Dashboard NCF</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/sales/ncf/sequences">Secuencias NCF</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/sales/ncf/logs">Historial NCF</x-sidebar.subitem>
+                                <x-sidebar.subitem href="/admin/sales/ncf/types">Tipos NCF</x-sidebar.subitem>
+                            @endcan
+                        </x-slot>
+                    </x-sidebar.dropdown>
                 </x-sidebar.group>
 
             </x-sidebar.layout>

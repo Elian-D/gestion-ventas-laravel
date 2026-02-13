@@ -24,6 +24,7 @@ class AccountingAccountSeeder extends Seeder
             ['code' => '2.1', 'name' => 'Pasivos Corrientes', 'type' => 'liability', 'is_selectable' => false, 'level' => 2, 'parent_code' => '2'],
             ['code' => '2.1.01', 'name' => 'Cuentas por Pagar Comerciales', 'type' => 'liability', 'is_selectable' => true, 'level' => 3, 'parent_code' => '2.1'],
             ['code' => '2.1.02', 'name' => 'Servicios por Pagar (Luz, Agua)', 'type' => 'liability', 'is_selectable' => true, 'level' => 3, 'parent_code' => '2.1'],
+            // ['code' => '2.1.03', 'name' => 'Impuestos por Pagar', 'type' => 'liability', 'is_selectable' => true, 'level' => 3, 'parent_code' => '2.1'],
 
 
             // PATRIMONIO (Nivel 1 y 2)

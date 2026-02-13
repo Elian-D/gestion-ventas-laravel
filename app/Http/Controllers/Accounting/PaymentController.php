@@ -63,18 +63,20 @@ class PaymentController extends Controller
     public function print(Payment $payment)
     {
         try {
-            // Cargamos relaciones para evitar consultas N+1 en la vista
-            $payment->load(['client', 'receivable', 'tipoPago', 'creator']);
+            // Importante: Cargamos 'receivable.reference' porque es polimórfica
+            // y cargamos los items y productos de esa referencia
+            $payment->load([
+                'client', 
+                'creator',
+                'tipoPago',
+                'receivable.reference.items.product' 
+            ]);
 
-            $pdf = Pdf::loadView('accounting.payments.pdf', compact('payment'))
-                ->setPaper('letter', 'portrait');
-
-            return $pdf->stream("recibo-{$payment->receipt_number}.pdf");
+            return view('accounting.payments.print', compact('payment'));
         } catch (\Exception $e) {
-            return back()->with('error', "No se pudo generar el PDF: " . $e->getMessage());
+            return back()->with('error', "No se pudo cargar el formato: " . $e->getMessage());
         }
     }
-
     /**
      * Exportar los datos filtrados a Excel
      */

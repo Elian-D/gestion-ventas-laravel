@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Configuration\ConfiguracionGeneral;
 use App\Models\Configuration\TaxIdentifierType;
+use App\Models\Sales\Sale;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
@@ -79,6 +80,14 @@ class Client extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Relación con las ventas realizadas por el cliente.
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
     }
 
     
