@@ -98,37 +98,12 @@
             {{-- Acciones --}}
             <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                    {{-- Registrar Abono (Solo si no está pagada o anulada) --}}
-                    @if($item->status !== 'paid' && $item->status !== 'cancelled')
-                        <button @click="$dispatch('open-modal', 'add-payment-{{ $item->id }}')" 
-                                class="bg-white border border-gray-200 text-emerald-600 hover:bg-emerald-600 hover:text-white p-2 rounded-lg transition-all shadow-sm"
-                                title="Registrar Abono">
-                            <x-heroicon-s-banknotes class="w-4 h-4" />
-                        </button>
-                    @endif
-
                     {{-- Ver Detalle --}}
                     <button @click="$dispatch('open-modal', 'view-receivable-{{ $item->id }}')" 
                             class="bg-white border border-gray-200 text-gray-500 hover:bg-indigo-600 hover:text-white p-2 rounded-lg transition-all shadow-sm"
                             title="Ver Detalle">
                         <x-heroicon-s-eye class="w-4 h-4" />
                     </button>
-
-                    @can('edit receivables')
-                        <a href="{{ route('accounting.receivables.edit', $item) }}" 
-                        class="bg-white border border-gray-200 text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-all shadow-sm">
-                            <x-heroicon-s-pencil-square class="w-4 h-4" />
-                        </a>
-                    @endcan
-
-                    @can('cancel receivables')
-                        @if($item->status !== 'paid' && $item->status !== 'cancelled')
-                            <button @click="$dispatch('open-modal', 'confirm-cancel-{{ $item->id }}')" 
-                                    class="bg-white border border-gray-200 text-red-600 hover:bg-red-50 p-2 rounded-lg transition-all shadow-sm">
-                                <x-heroicon-s-x-circle class="w-4 h-4" />
-                            </button>
-                        @endif
-                    @endcan
                 </div>
             </td>
         </tr>

@@ -1,70 +1,146 @@
 <x-app-layout>
     <div class="py-6 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto">
         
-        {{-- Header con acciones rápidas --}}
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8 gap-4">
-            <div>
-                <h2 class="text-3xl font-bold text-gray-900">Centro de Inventario</h2>
-                <p class="text-sm text-gray-500 mt-1">Visión general del sistema logístico</p>
-            </div>
+        {{-- Header & Filtros --}}
+        <div class="mb-8 space-y-6">
             
-            <div class="flex gap-3">
-                <button @click="$dispatch('open-modal', 'register-production')" 
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg shadow-sm hover:bg-indigo-700 transition">
-                    <x-heroicon-s-plus-circle class="w-5 h-5"/>
-                    Registrar Producción
-                </button>
+            {{-- Fila 1: Título y Botón --}}
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex-shrink-0">
+                    <h2 class="text-3xl font-bold text-gray-900 tracking-tight">Centro de Inventario</h2>
+                    <p class="text-sm text-gray-500 mt-1">Gestión de existencias y flujo logístico</p>
+                </div>
                 
-                <button @click="$dispatch('open-modal', 'register-transfer')" 
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 text-sm font-semibold rounded-lg border border-gray-300 shadow-sm hover:bg-gray-50 transition">
-                    <x-heroicon-s-arrows-right-left class="w-5 h-5"/>
-                    Transferir
+                {{-- Botón Registrar Entrada --}}
+                <button @click="$dispatch('open-modal', 'register-input')" 
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:-translate-y-0.5 active:translate-y-0 transition-all whitespace-nowrap">
+                    <x-heroicon-s-plus-circle class="w-4 h-4"/>
+                    <span>Registrar Entrada</span>
                 </button>
+            </div>
+
+            {{-- Fila 2: Filtros --}}
+            <div class="flex flex-col lg:flex-row gap-4">
+                
+                {{-- Filtros Rápidos --}}
+                <div class="inline-flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+                    @php $ranges = ['today' => 'Hoy', '7days' => '7D', 'this_month' => 'Este Mes', '30days' => '30D']; @endphp
+                    <div class="flex gap-1 min-w-max">
+                        @foreach($ranges as $key => $label)
+                            <a href="{{ route('inventory.dashboard.index', ['range' => $key]) }}" 
+                               class="px-4 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap {{ $filters['current_range'] == $key ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50' }}">
+                                {{ $label }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Selector de Rango Manual --}}
+                <form action="{{ route('inventory.dashboard.index') }}" method="GET" 
+                      class="flex items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all min-w-max">
+                    <input type="hidden" name="range" value="custom">
+                    <div class="flex items-center px-2 gap-1">
+                        <input type="date" name="start_date" value="{{ $filters['start'] }}" 
+                               class="text-xs border-none focus:ring-0 p-1 text-gray-600 bg-transparent w-[110px]">
+                        <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest flex-shrink-0">al</span>
+                        <input type="date" name="end_date" value="{{ $filters['end'] }}" 
+                               class="text-xs border-none focus:ring-0 p-1 text-gray-600 bg-transparent w-[110px]">
+                    </div>
+                    <button type="submit" 
+                            class="p-2 bg-gray-50 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors border-l border-gray-100 flex-shrink-0">
+                        <x-heroicon-s-magnifying-glass class="w-4 h-4"/>
+                    </button>
+                </form>
             </div>
         </div>
 
         <x-ui.toasts />
 
-    @include('inventory.dashboard.kpi-cards')
+        {{-- KPIs divididos en 2 filas de 3 --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+            <x-dashboard.kpi-card 
+                title="Productos Totales" 
+                :value="$stats['total_products']" 
+                icon="cube" 
+                color="blue" 
+                secondary-text="Items en catálogo"
+            />
 
+            <x-dashboard.kpi-card 
+                title="Existencias" 
+                :value="number_format($stats['total_stock'], 0)" 
+                icon="archive-box" 
+                color="green" 
+                secondary-text="Unidades disponibles"
+                href="{{ route('inventory.stocks.index') }}"
+            />
 
-        {{-- Layout principal: Gráficos + Actividad reciente --}}
+            <x-dashboard.kpi-card 
+                title="Stock Bajo" 
+                :value="$stats['low_stock']" 
+                icon="exclamation-triangle" 
+                color="red" 
+                :trend="$stats['low_stock'] > 0 ? 'Requiere atención' : 'Todo OK'"
+                :trend-up="false"
+            />
+
+            <x-dashboard.kpi-card 
+                title="Almacenes Activos" 
+                :value="$stats['active_warehouses']" 
+                icon="building-office-2" 
+                color="indigo" 
+                secondary-text="Ubicaciones operativas"
+                href="{{ route('inventory.warehouses.index') }}"
+            />
+
+            <x-dashboard.kpi-card 
+                title="Entradas (Periodo)" 
+                :value="number_format($stats['total_inputs'], 0)" 
+                icon="arrow-up-circle" 
+                color="green" 
+                secondary-text="Nuevas unidades en el rango seleccionado"
+            />
+
+            <x-dashboard.kpi-card 
+                title="Salidas (Periodo)" 
+                :value="number_format($stats['total_outputs'], 0)" 
+                icon="arrow-down-circle" 
+                color="red" 
+                secondary-text="Unidades despachadas en el rango seleccionado"
+            />
+
+        </div>
+
+        {{-- Layout principal: Gráficos (Izquierda) + Sidebar (Derecha) --}}
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-                        
+            
             {{-- Columna principal: Gráficos (2/3 del ancho) --}}
             <div class="xl:col-span-2 space-y-6">
                 
-                {{-- 1. Flujo de Inventario --}}
+                {{-- 1. Flujo de Inventario (full width) --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between mb-6">
                         <div>
-                            <h3 class="text-sm font-bold text-gray-900">Flujo de Inventario</h3>
-                            <p class="text-xs text-gray-500 mt-0.5">Últimos 7 días</p>
+                            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Flujo de Inventario</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Entradas vs Salidas</p>
                         </div>
-                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full">Semanal</span>
+                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-full">
+                            {{ ucfirst($filters['current_range']) }}
+                        </span>
                     </div>
-                    <div class="h-[280px]">
-                        <canvas id="chart-movements"></canvas>
-                    </div>
+                    <div id="chart-movements" class="min-h-[350px] w-full"></div>
                 </div>
 
-                {{-- Grid de gráficos secundarios --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {{-- 2. Stock por Almacén --}}
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="text-sm font-bold text-gray-900 mb-4">Stock por Almacén</h3>
-                        <div class="h-[240px] relative">
-                            <canvas id="chart-warehouses"></canvas>
-                        </div>
-                    </div>
+                {{-- 2. Stock por Almacén (full width) --}}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Stock por Almacén</h3>
+                    <div id="chart-warehouses" class="min-h-[350px] w-full"></div>
+                </div>
 
-                    {{-- 3. Mayor Rotación --}}
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="text-sm font-bold text-gray-900 mb-4">Mayor Rotación</h3>
-                        <div class="h-[240px]">
-                            <canvas id="chart-top-products"></canvas>
-                        </div>
-                    </div>
+                {{-- 3. Mayor Rotación (full width) --}}
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-6">Mayor Rotación</h3>
+                    <div id="chart-top-products" class="min-h-[350px] w-full"></div>
                 </div>
             </div>
 
@@ -84,8 +160,8 @@
                     <div class="space-y-3">
                         @forelse($recentMovements as $mv)
                             <div class="flex items-start gap-3 pb-3 border-b border-gray-50 last:border-0 last:pb-0">
-                                <div class="flex-shrink-0 p-2 rounded-lg {{ $mv->quantity > 0 ? 'bg-green-50' : 'bg-red-50' }}">
-                                    @if($mv->quantity > 0)
+                                <div class="flex-shrink-0 p-2 rounded-lg {{ $mv->type === 'input' ? 'bg-green-50' : 'bg-red-50' }}">
+                                    @if($mv->type === 'input')
                                         <x-heroicon-s-arrow-up-circle class="w-5 h-5 text-green-600"/>
                                     @else
                                         <x-heroicon-s-arrow-down-circle class="w-5 h-5 text-red-600"/>
@@ -105,8 +181,8 @@
                                 </div>
                                 
                                 <div class="flex-shrink-0 text-right">
-                                    <span class="font-mono font-bold text-sm {{ $mv->quantity > 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $mv->quantity > 0 ? '+' : '' }}{{ number_format(abs($mv->quantity), 0) }}
+                                    <span class="font-mono font-bold text-sm {{ $mv->type === 'input' ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ $mv->type === 'input' ? '+' : '-' }}{{ number_format(abs($mv->quantity), 0) }}
                                     </span>
                                 </div>
                             </div>
@@ -120,62 +196,256 @@
                 </div>
 
                 {{-- Lista de Stock Bajo/Crítico --}}
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-bold text-gray-900">Estado de Inventario</h3>
-                        <span class="px-2 py-0.5 bg-red-100 text-red-600 text-[10px] font-bold uppercase rounded">Crítico</span>
-                    </div>
+                @if($stats['low_stock'] > 0)
+                    <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl border border-red-100 p-6">
+                        <div class="flex items-center gap-2 mb-3">
+                            <x-heroicon-s-exclamation-triangle class="w-5 h-5 text-red-600"/>
+                            <h3 class="text-sm font-bold text-red-900">Alertas de Stock</h3>
+                        </div>
+                        <p class="text-sm text-red-700 mb-4">
+                            {{ $stats['low_stock'] }} {{ Str::plural('producto', $stats['low_stock']) }} 
+                            {{ $stats['low_stock'] === 1 ? 'requiere' : 'requieren' }} reabastecimiento
+                        </p>
+                        
+                        <div class="space-y-3 mb-4">
+                            @foreach($lowStockProducts as $stock)
+                                <div class="flex items-center justify-between bg-white/60 rounded-lg p-2">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-xs font-semibold text-gray-800 truncate">
+                                                {{ $stock->product->name }}
+                                            </p>
+                                            @if($stock->quantity <= 0)
+                                                <span class="flex-shrink-0 inline-block px-1.5 py-0.5 text-[9px] font-black bg-red-600 text-white rounded animate-pulse">
+                                                    AGOTADO
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-[10px] text-gray-500">
+                                            {{ $stock->warehouse->name }}
+                                        </p>
+                                    </div>
+                                    <div class="flex flex-col items-end ml-2">
+                                        <span class="text-sm font-bold {{ $stock->quantity <= 0 ? 'text-red-600' : 'text-orange-600' }}">
+                                            {{ number_format($stock->quantity, 0) }}
+                                        </span>
+                                        <p class="text-[9px] text-gray-400 font-medium italic">Min: {{ number_format($stock->min_stock, 0) }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
 
-                    <div class="space-y-4">
-                        @forelse($lowStockProducts as $stock)
-                            <div class="flex items-center justify-between group">
+                        <button @click="$dispatch('open-modal', 'register-input')" 
+                                class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 transition">
+                            <x-heroicon-s-plus-circle class="w-4 h-4"/>
+                            Reponer inventario ahora
+                        </button>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Sección completa: Productos Bajo en Stock (si necesitas más espacio) --}}
+        @if($stats['low_stock'] > 5)
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+                <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-red-50/50">
+                    <div class="flex items-center gap-2">
+                        <x-heroicon-s-exclamation-triangle class="w-5 h-5 text-red-600"/>
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Productos Críticos en Stock</h3>
+                    </div>
+                    <span class="px-2.5 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">
+                        {{ $stats['low_stock'] }} productos
+                    </span>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        @foreach($lowStockProducts as $stock)
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-red-300 transition">
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2">
-                                        <p class="text-sm font-medium text-gray-800 truncate group-hover:text-indigo-600 transition-colors">
+                                        <p class="text-sm font-semibold text-gray-900 truncate">
                                             {{ $stock->product->name }}
                                         </p>
                                         @if($stock->quantity <= 0)
-                                            <span class="flex-shrink-0 inline-block px-1.5 py-0.5 text-[9px] font-black bg-red-600 text-white rounded animate-pulse">
+                                            <span class="flex-shrink-0 px-1.5 py-0.5 text-[9px] font-black bg-red-600 text-white rounded animate-pulse">
                                                 AGOTADO
                                             </span>
                                         @endif
                                     </div>
-                                    <p class="text-xs text-gray-400">
+                                    <p class="text-xs text-gray-500 mt-0.5">
                                         {{ $stock->warehouse->name }}
                                     </p>
                                 </div>
-                                
-                                <div class="flex flex-col items-end ml-4">
-                                    <span class="text-sm font-bold {{ $stock->quantity <= 0 ? 'text-red-600' : 'text-orange-500' }}">
+                                <div class="flex flex-col items-end ml-3">
+                                    <span class="text-lg font-bold {{ $stock->quantity <= 0 ? 'text-red-600' : 'text-orange-600' }}">
                                         {{ number_format($stock->quantity, 0) }}
                                     </span>
                                     <p class="text-[10px] text-gray-400 font-medium italic">Min: {{ number_format($stock->min_stock, 0) }}</p>
                                 </div>
                             </div>
-                        @empty
-                            <div class="text-center py-6">
-                                <x-heroicon-o-check-badge class="w-10 h-10 text-green-400 mx-auto mb-2"/>
-                                <p class="text-xs text-gray-500">Todo el stock está niveles normales</p>
-                            </div>
-                        @endforelse
+                        @endforeach
                     </div>
-
-                    @if($lowStockProducts->count() > 0)
-                        <div class="mt-5 pt-4 border-t border-gray-50">
-                            <button @click="$dispatch('open-modal', 'register-production')" 
-                                    class="w-full flex items-center justify-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition">
-                                <x-heroicon-s-plus-circle class="w-4 h-4"/>
-                                Reponer inventario ahora
-                            </button>
-                        </div>
-                    @endif
                 </div>
             </div>
-        </div>
+        @endif
     </div>
-    @include('inventory.dashboard.charts')
 
-    
-    @include('inventory.dashboard.modals.production')
-    @include('inventory.dashboard.modals.transfer')
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let movementsChart, warehousesChart, productsChart;
+
+            setTimeout(() => {
+                const data = {
+                    history: {
+                        labels: {!! json_encode($charts['history']['labels']) !!},
+                        inputs: {!! json_encode($charts['history']['inputs']) !!},
+                        outputs: {!! json_encode($charts['history']['outputs']) !!}
+                    },
+                    distribution: {
+                        labels: {!! json_encode($charts['distribution']['labels']) !!},
+                        values: {!! json_encode($charts['distribution']['values']) !!}
+                    },
+                    top_products: {
+                        labels: {!! json_encode($charts['top_products']['labels']) !!},
+                        values: {!! json_encode($charts['top_products']['values']) !!}
+                    }
+                };
+
+                // 1. Gráfico de Flujo (Área)
+                const movementsEl = document.querySelector("#chart-movements");
+                if (movementsEl) {
+                    movementsChart = new ApexCharts(movementsEl, {
+                        series: [
+                            { name: 'Entradas', data: data.history.inputs.map(Number) },
+                            { name: 'Salidas', data: data.history.outputs.map(Number) }
+                        ],
+                        chart: { type: 'area', height: 350, toolbar: { show: false }, zoom: { enabled: false } },
+                        colors: ['#10B981', '#EF4444'],
+                        stroke: { curve: 'smooth', width: 3 },
+                        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.45, opacityTo: 0.05 } },
+                        dataLabels: { enabled: false },
+                        xaxis: { categories: data.history.labels },
+                        yaxis: { labels: { formatter: (val) => val.toLocaleString() } },
+                        legend: { position: 'top', horizontalAlign: 'right', fontSize: '12px' },
+                        tooltip: { theme: 'light' }
+                    });
+                    movementsChart.render();
+                }
+
+                // 2. Gráfico de Distribución (Donut) - Full width
+                const warehousesEl = document.querySelector("#chart-warehouses");
+                if (warehousesEl) {
+                    warehousesChart = new ApexCharts(warehousesEl, {
+                        series: data.distribution.values.map(Number),
+                        chart: { type: 'donut', height: 350 },
+                        labels: data.distribution.labels,
+                        colors: ['#6366F1', '#10B981', '#F59E0B', '#3B82F6', '#EC4899'],
+                        legend: { position: 'bottom', fontSize: '11px', markers: { width: 8, height: 8 } },
+                        plotOptions: { 
+                            pie: { 
+                                donut: { 
+                                    size: '70%',
+                                    labels: {
+                                        show: true,
+                                        total: {
+                                            show: true,
+                                            label: 'Total',
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            color: '#1f2937'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%' }
+                    });
+                    warehousesChart.render();
+                }
+
+                // 3. Top Productos (Barras) - Full width
+                const productsEl = document.querySelector("#chart-top-products");
+                if (productsEl) {
+                    productsChart = new ApexCharts(productsEl, {
+                        series: [{ name: 'Movimientos', data: data.top_products.values.map(Number) }],
+                        chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                        plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true, barHeight: '60%' } },
+                        colors: ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'],
+                        xaxis: { categories: data.top_products.labels },
+                        yaxis: { labels: { maxWidth: 200 } },
+                        dataLabels: { 
+                            enabled: true, 
+                            textAnchor: 'start',
+                            offsetX: 10,
+                            style: { fontSize: '11px', fontWeight: 600, colors: ['#fff'] } 
+                        },
+                        legend: { show: false }
+                    });
+                    productsChart.render();
+                }
+            }, 150);
+
+            window.addEventListener('resize-charts', () => {
+                if(movementsChart) movementsChart.windowResizeHandler();
+                if(warehousesChart) warehousesChart.windowResizeHandler();
+                if(productsChart) productsChart.windowResizeHandler();
+            });
+        });
+    </script>
+    @endpush
+
+    {{-- Modal de Entrada de Inventario --}}
+    <x-modal name="register-input" maxWidth="md">
+        <x-form-header 
+            title="Registrar Entrada de Inventario" 
+            subtitle="Incrementar stock por compra, producción o devolución" />
+
+        <form action="{{ route('inventory.movements.store') }}" method="POST" class="p-6">
+            @csrf
+            <input type="hidden" name="type" value="input">
+
+            <div class="space-y-4">
+                <div>
+                    <x-input-label for="input_product_id" value="Producto" />
+                    <select name="product_id" id="input_product_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm" required>
+                        <option value="">Seleccione el producto...</option>
+                        @foreach($products as $product)
+                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <x-input-label for="input_warehouse_id" value="Almacén de Destino" />
+                    <select name="warehouse_id" id="input_warehouse_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm" required>
+                        <option value="">Seleccione almacén...</option>
+                        @foreach($warehouses as $wh)
+                            <option value="{{ $wh->id }}">{{ $wh->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <x-input-label for="input_quantity" value="Cantidad" />
+                    <x-text-input id="input_quantity" name="quantity" type="number" step="0.01" min="0.01"
+                        class="mt-1 block w-full" placeholder="0.00" required />
+                    <p class="mt-1 text-[10px] text-indigo-500 italic font-medium">Se sumará al stock actual del almacén</p>
+                </div>
+
+                <div>
+                    <x-input-label for="input_description" value="Notas" />
+                    <textarea name="description" id="input_description" rows="2" 
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm" 
+                        placeholder="Ej: Compra factura #1234, Producción lote #105" required></textarea>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <x-secondary-button x-on:click="$dispatch('close')">Cancelar</x-secondary-button>
+                <x-primary-button class="bg-indigo-600">Registrar Entrada</x-primary-button>
+            </div>
+        </form>
+    </x-modal>
 </x-app-layout>
