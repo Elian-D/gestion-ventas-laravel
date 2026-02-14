@@ -1,0 +1,55 @@
+<x-data-table.filter-container formId="pos-sessions-filters">
+    <div class="w-full lg:flex-1">
+        {{-- En sesiones no solemos usar búsqueda de texto libre pesada, pero dejamos el espacio por si se busca en notas --}}
+        <x-data-table.search 
+            formId="pos-sessions-filters" 
+            placeholder="Buscar por notas u observaciones..." 
+        />
+    </div>
+
+    <div class="w-full lg:w-auto flex flex-wrap items-center justify-end gap-2">
+        <x-data-table.per-page-selector formId="pos-sessions-filters" />
+
+        <x-data-table.filter-dropdown>
+            {{-- Filtro de Terminal --}}
+            <x-data-table.filter-select label="Terminal" name="terminal_id" formId="pos-sessions-filters">
+                <option value="">Todas las terminales</option>
+                @foreach($terminals as $terminal)
+                    <option value="{{ $terminal->id }}">{{ $terminal->name }}</option>
+                @endforeach
+            </x-data-table.filter-select>
+
+            {{-- Filtro de Cajero --}}
+            <x-data-table.filter-select label="Cajero(a)" name="user_id" formId="pos-sessions-filters">
+                <option value="">Todos los usuarios</option>
+                @foreach($users as $user)
+                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </x-data-table.filter-select>
+
+            {{-- Filtro de Estado --}}
+            <x-data-table.filter-select label="Estado" name="status" formId="pos-sessions-filters">
+                <option value="">Todos los estados</option>
+                @foreach($statuses as $key => $label)
+                    <option value="{{ $key }}">{{ $label }}</option>
+                @endforeach
+            </x-data-table.filter-select>
+
+            {{-- Rango de Fecha de Apertura --}}
+            <x-data-table.filter-datetime-range 
+                label="Fecha de Apertura" 
+                formId="pos-sessions-filters" 
+                nameFrom="from_date"
+                nameTo="to_date"
+            />
+        </x-data-table.filter-dropdown>
+
+        <x-data-table.column-selector 
+            :allColumns="$allColumns" 
+            :visibleColumns="$visibleColumns" 
+            :defaultDesktop="$defaultDesktop"
+            :defaultMobile="$defaultMobile"
+            formId="pos-sessions-filters" 
+        />
+    </div>
+</x-data-table.filter-container>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Sales\PosTerminals;
+namespace App\Services\Sales\Pos\PosTerminals;
 
 use App\Models\Sales\Pos\PosTerminal;
 use Illuminate\Support\Facades\DB;

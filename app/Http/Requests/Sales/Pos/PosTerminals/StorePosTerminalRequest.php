@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Sales\PosTerminals;
+namespace App\Http\Requests\Sales\Pos\PosTerminals;
 
 use Illuminate\Foundation\Http\FormRequest;
 

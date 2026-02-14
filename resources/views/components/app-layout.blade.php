@@ -146,6 +146,7 @@
                         Puntos de Venta
                         <x-slot name="submenu">
                             <x-sidebar.subitem href="/admin/sales/pos/terminals">Terminales</x-sidebar.subitem>
+                            <x-sidebar.subitem href="/admin/sales/pos/sessions">Sesiones</x-sidebar.subitem>
                         </x-slot>
                     </x-sidebar.dropdown>
                 </x-sidebar.group>

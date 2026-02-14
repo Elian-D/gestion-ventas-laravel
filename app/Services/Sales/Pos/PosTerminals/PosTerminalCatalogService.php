@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Sales\PosTerminals;
+namespace App\Services\Sales\Pos\PosTerminals;
 
 use App\Models\Clients\Client;
 use App\Models\Inventory\Warehouse;

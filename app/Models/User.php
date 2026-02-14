@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Sales\Pos\PosSession;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -75,5 +77,26 @@ class User extends Authenticatable
         }
         
         return $initials;
+    }
+
+    /**
+     * Relación con las sesiones de punto de venta.
+     */
+    public function posSessions(): HasMany
+    {
+        return $this->hasMany(PosSession::class);
+    }
+
+    /**
+     * Scope para filtrar usuarios que son cajeros o tienen acceso al POS.
+     * Útil para el CatalogService.
+     */
+    public function scopeCashiers($query)
+    {
+        // Si usas permisos específicos:
+        return $query->permission('pos sessions manage');
+        
+        // O si prefieres por rol:
+        // return $query->role('cajero');
     }
 }
