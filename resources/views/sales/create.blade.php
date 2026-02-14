@@ -77,24 +77,39 @@
                         </div>
                     </div>
 
-                    {{-- FILA 2: COMPROBANTE Y MÉTODO (Dinámicos) --}}
+                    {{-- FILA 2: COMPROBANTE Y MÉTODO --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- NCF --}}
                         <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/50 flex items-center gap-4">
-                            <div class="flex-1">
-                                <x-input-label value="Comprobante Fiscal" class="mb-1 text-[10px] text-indigo-400 uppercase font-bold" />
-                                <select name="ncf_type_id" x-model="formData.ncf_type_id"
-                                    class="w-full border-none bg-transparent p-0 text-sm font-black text-indigo-900 focus:ring-0">
-                                    <template x-for="type in filteredNcfTypes" :key="type.id">
-                                        <option :value="type.id" x-text="type.name"></option>
-                                    </template>
-                                </select>
-                            </div>
+                            
+                            <template x-if="config.usa_ncf">
+                                <div class="flex-1">
+                                    <x-input-label value="Comprobante Fiscal" class="mb-1 text-[10px] text-indigo-400 uppercase font-bold" />
+                                    <select name="ncf_type_id" x-model="formData.ncf_type_id"
+                                        class="w-full border-none bg-transparent p-0 text-sm font-black text-indigo-900 focus:ring-0">
+                                        <option value="">Seleccione NCF...</option>
+                                        <template x-for="type in filteredNcfTypes" :key="type.id">
+                                            <option :value="type.id" x-text="type.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </template>
+
+                            <template x-if="!config.usa_ncf">
+                                <div class="flex-1">
+                                    <x-input-label value="Tipo de Documento" class="mb-1 text-[10px] text-gray-400 uppercase font-bold" />
+                                    <div class="text-sm font-black text-gray-600 uppercase tracking-tight">
+                                        Documento Interno
+                                    </div>
+                                    <input type="hidden" name="ncf_type_id" value="">
+                                </div>
+                            </template>
+
                             <div class="h-10 w-px bg-indigo-200"></div>
-                            {{-- Método de Pago (Solo si es cash) --}}
+
+                            {{-- Método de Pago --}}
                             <div class="flex-1" x-show="formData.payment_type === 'cash'" x-transition>
                                 <x-input-label value="Método de Pago" class="mb-1 text-[10px] text-indigo-400 uppercase font-bold" />
-                                <select name="tipo_pago_id" x-model="formData.tipo_pago_id"
+                                <select name="tipo_pago_id" x-model="formData.tipo_pago_id" @change="handleTipoPagoChange()"
                                     class="w-full border-none bg-transparent p-0 text-sm font-black text-indigo-900 focus:ring-0">
                                     <option value="">Seleccione...</option>
                                     @foreach($tipo_pagos as $tp)
@@ -102,11 +117,13 @@
                                     @endforeach
                                 </select>
                             </div>
+
                             <div class="flex-1" x-show="formData.payment_type === 'credit'" x-transition>
                                 <p class="text-[10px] text-amber-500 uppercase font-bold">Condición</p>
                                 <p class="text-sm font-black text-amber-700">Cuentas por Cobrar</p>
                             </div>
                         </div>
+
 
                         {{-- INFO BOX DEL CLIENTE (AQUÍ DENTRO) --}}
                         <div class="flex items-center">
@@ -357,6 +374,7 @@
                 config: {
                     tax_rate: {{ general_config()->impuesto->valor ?? 0 }},
                     apply_tax: false,
+                    usa_ncf: {{ general_config()->usa_ncf ? 'true' : 'false' }}
                 },
                 formData: {
                     payment_type: 'cash',
@@ -365,12 +383,16 @@
                     warehouse_id: '',
                     ncf_type_id: '2', // Por defecto Consumidor Final (B02)
                     sale_date: '{{ date("Y-m-d") }}',
+                    
                     cash_received: 0,
                     cash_change: 0,
                 },  
                 totals: { subtotal: 0, tax: 0, total: 0 },  
 
                 init() {
+                    if(!this.config.usa_ncf) { 
+                        this.formData.ncf_type_id = null;
+                    }
                     this.$watch('formData.ncf_type_id', () => this.validateNcfAndClient());
                 },
 
@@ -436,18 +458,19 @@
                     return this.totals.total > parseFloat(this.selectedClient.available || 0);
                 },
 
+                // Modificar isSubmitDisabled para que no bloquee si usa_ncf es false
                 get isSubmitDisabled() {
-                        const hasItems = this.items.length > 0;
-                        const hasTotal = this.totals.total > 0;
-                        
-                        if (this.ncfRequiresRnc) return true; 
+                    const hasItems = this.items.length > 0;
+                    const hasTotal = this.totals.total > 0;
+                    
+                    // Si usa_ncf está activo, validamos RNC, si no, lo ignoramos
+                    if (this.config.usa_ncf && this.ncfRequiresRnc) return true;
 
-                        if (this.formData.payment_type === 'credit') {
-                            // Ahora también bloqueamos si excede el límite
-                            return !hasItems || !this.selectedClient || this.selectedClient.is_moroso || this.exceedsCreditLimit;
-                        }
+                    if (this.formData.payment_type === 'credit') {
+                        return !hasItems || !this.selectedClient || this.selectedClient.is_moroso || this.exceedsCreditLimit;
+                    }
 
-                        return !hasItems || !hasTotal;
+                    return !hasItems || !hasTotal;
                 },
 
                 addItem() {
@@ -474,14 +497,18 @@
                     this.calculateTotals();
                 },
 
-                        // Lógica al cambiar tipo de venta (Contado/Crédito)
+                // Lógica al cambiar tipo de venta (Contado/Crédito)
                 handlePaymentTypeChange() {
                     if (this.formData.payment_type === 'credit') {
-                        this.formData.tipo_pago_id = null;
+                        // ERROR: No debe ser null. Debe ser el ID del tipo de pago "Crédito"
+                        // Busca el ID real en tu tabla tipo_pagos donde slug = 'credito'
+                        const tipoCredito = this.tipo_pagos.find(tp => tp.slug === 'credito' || tp.nombre.toLowerCase().includes('crédito'));
+                        this.formData.tipo_pago_id = tipoCredito ? tipoCredito.id : null; 
+                        
                         this.formData.cash_received = 0;
                         this.formData.cash_change = 0;
                     } else {
-                        this.formData.tipo_pago_id = '1'; // Reset a efectivo al volver a contado
+                        this.formData.tipo_pago_id = '1'; // Efectivo
                     }
                     this.validateNcfAndClient();
                 },
