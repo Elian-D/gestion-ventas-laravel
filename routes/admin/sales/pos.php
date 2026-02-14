@@ -26,6 +26,18 @@ Route::prefix('pos')->name('pos.')->group(function () {
         Route::delete('/{id}/force-delete', [PosTerminalController::class, 'borrarDefinitivo'])->name('force-delete');
     });
 
-
-
+    // Gestión de Sesiones (Turnos de Caja)
+    Route::prefix('sessions')->name('sessions.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'index'])->name('index');
+        Route::get('/{pos_session}', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'show'])->name('show');
+        
+        // Apertura
+        Route::post('/open', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'store'])->name('store');
+        
+        // Cierre (Acción de negocio específica)
+        Route::patch('/{pos_session}/close', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'close'])->name('close');
+        
+        // Edición administrativa
+        Route::put('/{pos_session}', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'update'])->name('update');
+    });
 });

@@ -14,6 +14,9 @@ class SalePosPermissionsSeeder extends Seeder
             'create pos terminals',
             'edit pos terminals',
             'delete pos terminals', // SoftDelete por seguridad técnica
+
+            'pos sessions manage',
+            'pos sessions history',
         ];
 
         foreach ($permissions as $permission) {
