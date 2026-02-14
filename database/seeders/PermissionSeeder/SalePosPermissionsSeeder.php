@@ -17,6 +17,9 @@ class SalePosPermissionsSeeder extends Seeder
 
             'pos sessions manage',
             'pos sessions history',
+
+            'pos cash movements create', 
+            'pos cash movements history'
         ];
 
         foreach ($permissions as $permission) {

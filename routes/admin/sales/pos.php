@@ -3,6 +3,8 @@
 use App\Http\Controllers\Sales\Pos\PosTerminalController;
 use Illuminate\Support\Facades\Route;
 
+    use App\Http\Controllers\Sales\Pos\PosCashMovementController;
+
 Route::prefix('pos')->name('pos.')->group(function () {
     
     // CRUD Terminales
@@ -40,4 +42,8 @@ Route::prefix('pos')->name('pos.')->group(function () {
         // Edición administrativa
         Route::put('/{pos_session}', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'update'])->name('update');
     });
+
+
+    Route::get('/cash-movements', [PosCashMovementController::class, 'index'])->name('cash-movements.index');
+    Route::post('/cash-movements', [PosCashMovementController::class, 'store'])->name('cash-movements.store');
 });
