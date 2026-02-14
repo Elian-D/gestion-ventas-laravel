@@ -62,9 +62,10 @@ class PosSessionService
                 throw new \Exception("La sesión ya se encuentra cerrada.");
             }
 
-            // Aquí en el futuro sumaremos ventas y movimientos de cash_movements
-            // Por ahora, cerramos con el balance proporcionado.
-            
+            // Podrías guardar la diferencia calculada en una columna extra si lo deseas
+            // $expected = $session->expected_cash;
+            // $difference = $data['closing_balance'] - $expected;
+
             return $session->update([
                 'closed_at'       => now(),
                 'closing_balance' => $data['closing_balance'],

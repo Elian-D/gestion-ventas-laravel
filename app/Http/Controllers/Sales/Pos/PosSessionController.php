@@ -82,16 +82,18 @@ class PosSessionController extends Controller
         }
     }
 
-    /**
-     * Detalle de la sesión (Reporte X / Arqueo).
-     */
     public function show(PosSession $posSession)
     {
         $this->authorize('pos sessions history');
         
-        $posSession->load(['terminal', 'user']);
+        // Cargamos los movimientos y el usuario de cada movimiento
+        $posSession->load(['terminal', 'user', 'cashMovements.user']);
         
-        return view('sales.pos.sessions.show', compact('posSession'));
+        // Calculamos totales de movimientos manuales
+        $cashIn = $posSession->cashMovements->where('type', 'in')->sum('amount');
+        $cashOut = $posSession->cashMovements->where('type', 'out')->sum('amount');
+        
+        return view('sales.pos.sessions.show', compact('posSession', 'cashIn', 'cashOut'));
     }
     /**
      * Acción de Cierre (Patch).
