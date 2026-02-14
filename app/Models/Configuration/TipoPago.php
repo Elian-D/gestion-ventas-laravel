@@ -11,9 +11,36 @@ class TipoPago extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['nombre', 'estado', 'accounting_account_id']; // Actualizado
+    // Constantes para lógica de negocio (Slugs)
+    const EFECTIVO = 'efectivo';
+    const TRANSFERENCIA = 'transferencia';
+    const TARJETA = 'tarjeta';
+    const CHEQUE = 'cheque';
+    const CREDITO = 'credito'; // Para ventas que generan CxC
 
-    protected $casts = ['estado' => 'boolean'];
+    protected $fillable = ['nombre', 'slug', 'estado', 'accounting_account_id'];
+
+        protected $casts = ['estado' => 'boolean'];
+
+    // Lista de métodos que el sistema necesita para funcionar
+    public static function getSystemMethods(): array
+    {
+        return [self::EFECTIVO, self::TRANSFERENCIA, self::TARJETA, self::CHEQUE, self::CREDITO];
+    }
+
+    /**
+     * Helper para verificar si es efectivo sin importar el nombre o ID
+     */
+    public function isCash(): bool {
+        return $this->slug === self::EFECTIVO;
+    }
+
+    public function isSystemProtected(): bool
+    {
+        // Lista de slugs que no se pueden borrar ni editar nombre
+        $protected = ['efectivo', 'transferencia-bancaria', 'cheque', 'tarjeta-de-creditodebito', 'credito'];
+        return in_array($this->slug, $protected);
+    }
 
     // Scopes para filtrar por estado
     public function scopeActivo($query)
