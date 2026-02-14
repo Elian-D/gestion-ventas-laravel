@@ -5,7 +5,8 @@ namespace App\Http\Requests\Sales;
 use App\Models\Sales\Sale;
 use App\Models\Inventory\InventoryStock;
 use App\Models\Clients\Client;
-use App\Models\Sales\Ncf\NcfType; // Importante
+use App\Models\Sales\Ncf\NcfType; 
+use App\Models\Configuration\ConfiguracionGeneral; // Importante
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,13 +19,22 @@ class StoreSaleRequest extends FormRequest
 
     public function rules(): array
     {
+        // Obtenemos la configuración actual
+        $config = general_config();
+        $usaNcf = $config?->usa_ncf ?? false;
+
         return [
             'client_id'    => ['required', 'exists:clients,id'],
             'warehouse_id' => ['required', 'exists:warehouses,id'],
-            'ncf_type_id'  => ['required', 'exists:ncf_types,id'], // Campo obligatorio ahora
+            
+            // Si usa_ncf es false, el campo es opcional
+            'ncf_type_id'  => [
+                $usaNcf ? 'required' : 'nullable', 
+                'exists:ncf_types,id'
+            ], 
+            
             'sale_date'    => ['required', 'date', 'after_or_equal:today', 'before_or_equal:today'],
             'payment_type' => ['required', Rule::in([Sale::PAYMENT_CASH, Sale::PAYMENT_CREDIT])],
-            // NUEVA REGLA:
             'tipo_pago_id' => [
                 Rule::requiredIf($this->payment_type === Sale::PAYMENT_CASH), 
                 'nullable', 
@@ -50,13 +60,17 @@ class StoreSaleRequest extends FormRequest
 
             // 1. Cargar datos necesarios una sola vez para optimizar
             $client = Client::with('estadoCliente.categoria')->find($this->client_id);
+            $config = general_config();
             $ncfType = NcfType::find($this->ncf_type_id);
 
-            // --- VALIDACIÓN DE NCF VS CLIENTE ---
-            if ($ncfType && $client) {
-                // Si es Crédito Fiscal (B01 / E31), el tax_id (RNC) es obligatorio
-                if (in_array($ncfType->code, ['01', '31']) && empty($client->tax_id)) {
-                    $validator->errors()->add('ncf_type_id', "El tipo de NCF {$ncfType->name} requiere que el cliente tenga un RNC registrado.");
+        // --- VALIDACIÓN DE NCF (Solo si el sistema lo requiere) ---
+            if ($config?->usa_ncf && $this->ncf_type_id) {
+                $ncfType = NcfType::find($this->ncf_type_id);
+                if ($ncfType && $client) {
+                    // Validar RNC para Crédito Fiscal (01) o Regímenes Especiales
+                    if (in_array($ncfType->code, ['01', '31']) && empty($client->tax_id)) {
+                        $validator->errors()->add('ncf_type_id', "El tipo {$ncfType->nombre} requiere que el cliente tenga un RNC/Cédula.");
+                    }
                 }
             }
 

@@ -164,7 +164,10 @@
                         Roles
                     </x-sidebar.item>
 
-                    {{-- Configuración ahora incluye NCF --}}
+                    @php
+                        $config = \App\Models\Configuration\ConfiguracionGeneral::actual();
+                    @endphp
+
                     <x-sidebar.dropdown 
                         id="configuracion" 
                         icon="heroicon-s-cog-6-tooth" 
@@ -174,14 +177,17 @@
                         <x-slot name="submenu">
                             <x-sidebar.subitem href="/admin/config">General</x-sidebar.subitem>
                             
-                            @can('view ncf sequences')
-                                <div class="h-px bg-gray-700/30 my-1.5"></div>
-                                <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">NCF (Fiscal)</div>
-                                <x-sidebar.subitem href="/admin/sales/ncf/dashboard">Dashboard NCF</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/sales/ncf/sequences">Secuencias NCF</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/sales/ncf/logs">Historial NCF</x-sidebar.subitem>
-                                <x-sidebar.subitem href="/admin/sales/ncf/types">Tipos NCF</x-sidebar.subitem>
-                            @endcan
+                            {{-- Solo mostrar si la empresa usa NCF --}}
+                            @if($config->usa_ncf)
+                                @can('view ncf sequences')
+                                    <div class="h-px bg-gray-700/30 my-1.5"></div>
+                                    <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-wider">NCF (Fiscal)</div>
+                                    <x-sidebar.subitem href="/admin/sales/ncf/dashboard">Dashboard NCF</x-sidebar.subitem>
+                                    <x-sidebar.subitem href="/admin/sales/ncf/sequences">Secuencias NCF</x-sidebar.subitem>
+                                    <x-sidebar.subitem href="/admin/sales/ncf/logs">Historial NCF</x-sidebar.subitem>
+                                    <x-sidebar.subitem href="/admin/sales/ncf/types">Tipos NCF</x-sidebar.subitem>
+                                @endcan
+                            @endif
                         </x-slot>
                     </x-sidebar.dropdown>
                 </x-sidebar.group>

@@ -35,6 +35,36 @@
                 </td>
             @endif
 
+            {{-- Terminal POS --}}
+            @if(in_array('pos_terminal_id', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-600">
+                    @if($sale->pos_terminal_id)
+                        <div class="flex items-center">
+                            <div class="p-1 bg-blue-50 rounded mr-2">
+                                <x-heroicon-s-computer-desktop class="w-3.5 h-3.5 text-blue-500" />
+                            </div>
+                            <span class="font-medium text-gray-700">{{ $sale->posTerminal->name }}</span>
+                        </div>
+                    @else
+                        <span class="text-gray-400 italic text-xs italic">Ventanilla/Admin</span>
+                    @endif
+                </td>
+            @endif
+
+            {{-- Sesión POS --}}
+            @if(in_array('pos_session_id', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-gray-600 text-center">
+                    @if($sale->pos_session_id)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-[10px] font-mono font-bold ring-1 ring-inset ring-gray-200">
+                            #{{ $sale->pos_session_id }}
+                        </span>
+                    @else
+                        <span class="text-gray-300">-</span>
+                    @endif
+                </td>
+            @endif
+
+
             {{-- Tipo de Pago --}}
             @if(in_array('payment_type', $visibleColumns))
                 <td class="px-6 py-4">

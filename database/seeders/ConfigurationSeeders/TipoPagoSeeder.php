@@ -5,6 +5,8 @@ namespace Database\Seeders\ConfigurationSeeders;
 use App\Models\Configuration\TipoPago;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
 
 class TipoPagoSeeder extends Seeder
 {
@@ -19,12 +21,14 @@ class TipoPagoSeeder extends Seeder
             ['nombre' => 'Tarjeta de Crédito/Débito', 'account_id' => $cajaId],
             ['nombre' => 'Depósito Bancario', 'account_id' => $cajaId],
             ['nombre' => 'Nota de Crédito Aplicada', 'account_id' => null], 
+            ['nombre' => 'Crédito', 'account_id' => null], // Añadido para la CxC
         ];
 
         foreach ($tiposPago as $tipo) {
             TipoPago::updateOrCreate(
-                ['nombre' => $tipo['nombre']],
+                ['slug' => Str::slug($tipo['nombre'])], // Buscamos por slug, no por nombre
                 [
+                    'nombre' => $tipo['nombre'],
                     'estado' => true,
                     'accounting_account_id' => $tipo['account_id']
                 ]

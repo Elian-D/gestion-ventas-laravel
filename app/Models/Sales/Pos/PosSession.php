@@ -2,6 +2,7 @@
 
 namespace App\Models\Sales\Pos;
 
+use App\Models\Sales\Sale;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -74,6 +75,11 @@ class PosSession extends Model
     public function cashMovements(): HasMany
     {
         return $this->hasMany(PosCashMovement::class);
+    }
+
+        public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class, 'pos_session_id');
     }
 
     // --- Scopes ---

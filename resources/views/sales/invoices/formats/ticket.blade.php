@@ -20,8 +20,14 @@
         ? $ncfLog->sequence->expiry_date->format('d/m/Y') 
         : null;
     
-    // Verificamos si la venta está cancelada (asumiendo estado 'cancelled')
     $isCancelled = $sale->status === 'canceled';
+
+    // Lógica para Multipay
+    $payments = $sale->payments;
+    $isMultiPay = $payments->count() > 1;
+
+    // NUEVO: Determinar si mostramos info fiscal
+    $mostrarFiscal = $config->usa_ncf && $sale->ncf;
 @endphp
 
 <!DOCTYPE html>
@@ -68,7 +74,6 @@
         .table-header { border-bottom: 1.5px solid #000; }
         .total-row { font-size: 14px; }
 
-        /* Estilo para el aviso de cancelación */
         .cancelled-banner {
             border: 2px solid #000;
             padding: 5px;
@@ -78,11 +83,6 @@
         .cancelled-text {
             font-size: 18px;
             display: block;
-        }
-        .cancellation-reason {
-            font-size: 10px;
-            margin-top: 3px;
-            text-transform: none; /* Los motivos a veces son largos, mejor lectura normal */
         }
     </style>
 </head>
@@ -95,16 +95,18 @@
                 {{ $config->direccion }}<br>
                 TEL: {{ $config->telefono }}<br>
                 {{ $taxLabel }}: {{ $config->tax_id }}<br>
-                <span style="font-size: 9px;">COMPROBANTE AUTORIZADO POR LA DGII</span>
+                {{-- Solo mostrar si NCF está activo --}}
+                @if($mostrarFiscal)
+                    <span style="font-size: 9px;">COMPROBANTE AUTORIZADO POR LA DGII</span>
+                @endif
             </div>
         </div>
 
-        {{-- Alerta de Cancelación --}}
         @if($isCancelled)
             <div class="cancelled-banner">
                 <span class="cancelled-text">*** CANCELADA ***</span>
-                <div class="cancellation-reason">
-                    MOTIVO: {{ $sale->ncfLog->cancellation_reason ?? 'SIN MOTIVO REGISTRADO' }}
+                <div class="cancellation-reason" style="font-size: 10px; margin-top: 3px; text-transform: none;">
+                    MOTIVO: {{ $ncfLog->cancellation_reason ?? 'SIN MOTIVO REGISTRADO' }}
                 </div>
             </div>
         @endif
@@ -118,9 +120,10 @@
                 </tr>
             </table>
 
-            @if($sale->ncf)
+            {{-- Bloque NCF: Solo si existe y está habilitado --}}
+            @if($mostrarFiscal)
                 <div style="margin-top: 4px;">
-                    <span style="font-size: 11px; display:block;">{{ $sale->ncfLog->type->name ?? 'COMPROBANTE' }}</span>
+                    <span style="font-size: 11px; display:block;">{{ $ncfLog->type->name ?? 'COMPROBANTE' }}</span>
                     <div class="ncf-row">
                         {{ $ncfLog?->type?->is_electronic ? 'E-NCF:' : 'NCF:' }} {{ $sale->ncf }} 
                         @if($vencimientoNcf)
@@ -131,19 +134,20 @@
             @endif
         </div>
 
-        {{-- 3. DATOS DEL CLIENTE --}}
+        {{-- 3. DATOS DEL CLIENTE Y TPV --}}
         <div class="info-section small-spacer">
             <div style="border-top: 0.5px solid #000; margin-bottom: 4px;"></div>
             CLIENTE: {{ substr($client->name, 0, 30) }}<br>
             @if($client->tax_id)
                 {{ $taxLabel }}: {{ $client->tax_id }}<br>
             @endif
-            @if($client->address) DIR: {{ substr($client->address, 0, 35) }}<br> @endif
             
             <div style="margin-top: 4px;">
                 VENDEDOR: {{ $sale->user->name ?? 'SISTEMA' }}<br>
-                {{-- NUEVO: Campo de Método de Pago discreto --}}
-                METODO PAGO: {{ $sale->tipoPago->nombre ?? ($sale->payment_type === 'cash' ? 'EFECTIVO' : 'CREDITO') }}<br>
+                @if($sale->pos_terminal_id)
+                    TPV: {{ $sale->posTerminal->name }}<br>
+                @endif
+                {{ $isMultiPay ? 'METODOS DE PAGO:' : 'METODO PAGO:' }} {{ $isMultiPay ? 'MIXTO' : ($sale->tipoPago->nombre ?? 'EFECTIVO') }}<br>
                 FECHA: {{ $sale->created_at->format('d/m/Y G:i A') }}
                 @if($vencimientoPago)
                     <br>VENCE PAGO: {{ $vencimientoPago }}
@@ -182,7 +186,7 @@
         <div class="spacer">
             @php
                 $subtotalCalculado = $sale->items->sum('subtotal'); 
-                $taxCalculado = $sale->tax > 0 ? $sale->tax : ($sale->total_amount - $subtotalCalculado);
+                $taxCalculado = $sale->tax_amount > 0 ? $sale->tax_amount : ($sale->total_amount - $subtotalCalculado);
             @endphp
             <table style="border-top: 1px solid #000; padding-top: 4px;">
                 <tr>
@@ -200,10 +204,21 @@
             </table>
         </div>
 
-        {{-- 6. PAGO O FIRMA --}}
-        <div class="spacer">
+        {{-- 6. DESGLOSE DE PAGOS (Multipay Ready) --}}
+        <div class="spacer" style="border-top: 0.5px dashed #000; padding-top: 6px;">
+            @if($isMultiPay)
+                @foreach($payments as $payment)
+                    <table>
+                        <tr>
+                            <td style="font-size: 11px;">{{ $payment->tipoPago->nombre }}:</td>
+                            <td class="right" style="font-size: 11px;">{{ $currency }}{{ number_format($payment->amount, 2) }}</td>
+                        </tr>
+                    </table>
+                @endforeach
+            @endif
+
             @if($sale->payment_type === 'cash')
-                <table>
+                <table style="{{ $isMultiPay ? 'margin-top: 4px; border-top: 0.5px solid #000; padding-top: 2px;' : '' }}">
                     <tr>
                         <td>RECIBIDO:</td>
                         <td class="right">{{ $currency }}{{ number_format($sale->cash_received ?? 0, 2) }}</td>
@@ -213,7 +228,7 @@
                         <td class="right">{{ $currency }}{{ number_format($sale->cash_change ?? 0, 2) }}</td>
                     </tr>
                 </table>
-            @else
+            @elseif($sale->payment_type === 'credit')
                 <div class="center" style="padding-top: 15px;">
                     <p style="font-size: 10px;">ACEPTO LOS TÉRMINOS DE PAGO.</p>
                     <div style="border-top: 1.5px solid #000; width: 85%; margin: 35px auto 5px auto;"></div>

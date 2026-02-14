@@ -1,6 +1,5 @@
 <x-data-table.filter-container formId="pos-sessions-filters">
     <div class="w-full lg:flex-1">
-        {{-- En sesiones no solemos usar búsqueda de texto libre pesada, pero dejamos el espacio por si se busca en notas --}}
         <x-data-table.search 
             formId="pos-sessions-filters" 
             placeholder="Buscar por notas u observaciones..." 
@@ -11,33 +10,45 @@
         <x-data-table.per-page-selector formId="pos-sessions-filters" />
 
         <x-data-table.filter-dropdown>
-            {{-- Filtro de Terminal --}}
-            <x-data-table.filter-select label="Terminal" name="terminal_id" formId="pos-sessions-filters">
-                <option value="">Todas las terminales</option>
-                @foreach($terminals as $terminal)
-                    <option value="{{ $terminal->id }}">{{ $terminal->name }}</option>
-                @endforeach
-            </x-data-table.filter-select>
 
-            {{-- Filtro de Cajero --}}
-            <x-data-table.filter-select label="Cajero(a)" name="user_id" formId="pos-sessions-filters">
-                <option value="">Todos los usuarios</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                @endforeach
-            </x-data-table.filter-select>
+            {{-- GRUPO 1: Filtros Principales --}}
+            <x-data-table.filter-group title="Filtros Principales">
 
-            {{-- Filtro de estados --}}
-            <x-data-table.filter-toggle label="Estado" name="status" 
-                :options="['' => 'Todos', 'open' => 'Abierta', 'closed' => 'Cerrada']" formId="pos-sessions-filters" />
+                <x-data-table.filter-select label="Terminal" name="terminal_id" formId="pos-sessions-filters">
+                    <option value="">Todas las terminales</option>
+                    @foreach($terminals as $terminal)
+                        <option value="{{ $terminal->id }}">{{ $terminal->name }}</option>
+                    @endforeach
+                </x-data-table.filter-select>
 
-            {{-- Rango de Fecha de Apertura --}}
-            <x-data-table.filter-datetime-range 
-                label="Fecha de Apertura" 
-                formId="pos-sessions-filters" 
-                nameFrom="from_date"
-                nameTo="to_date"
-            />
+                <x-data-table.filter-select label="Cajero(a)" name="user_id" formId="pos-sessions-filters">
+                    <option value="">Todos los usuarios</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                    @endforeach
+                </x-data-table.filter-select>
+
+                <x-data-table.filter-toggle 
+                    label="Estado" 
+                    name="status" 
+                    :options="['' => 'Todos', 'open' => 'Abierta', 'closed' => 'Cerrada']" 
+                    formId="pos-sessions-filters" 
+                />
+
+            </x-data-table.filter-group>
+
+            {{-- GRUPO 2: Rangos --}}
+            <x-data-table.filter-group title="Rangos de Búsqueda" collapsed>
+
+                <x-data-table.filter-datetime-range 
+                    label="Fecha de Apertura" 
+                    formId="pos-sessions-filters" 
+                    nameFrom="from_date"
+                    nameTo="to_date"
+                />
+
+            </x-data-table.filter-group>
+
         </x-data-table.filter-dropdown>
 
         <x-data-table.column-selector 

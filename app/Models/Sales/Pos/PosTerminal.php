@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Models\Sales\Pos;
+namespace App\Models\Sales\Pos;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -8,6 +8,7 @@ use App\Models\Inventory\Warehouse;
 use App\Models\Accounting\AccountingAccount;
 use App\Models\Sales\Ncf\NcfType;
 use App\Models\Clients\Client;
+use App\Models\Sales\Sale;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PosTerminal extends Model
@@ -50,6 +51,11 @@ class PosTerminal extends Model
     public function defaultClient()
     {
         return $this->belongsTo(Client::class, 'default_client_id');
+    }
+
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class, 'pos_terminal_id');
     }
 
     // Una terminal puede tener muchas sesiones (aperturas/cierres)
