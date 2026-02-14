@@ -8,6 +8,7 @@ use App\Models\Inventory\Warehouse;
 use App\Models\Accounting\AccountingAccount;
 use App\Models\Sales\Ncf\NcfType;
 use App\Models\Clients\Client;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PosTerminal extends Model
 {
@@ -52,8 +53,10 @@ class PosTerminal extends Model
     }
 
     // Una terminal puede tener muchas sesiones (aperturas/cierres)
-    // public function sessions()
-    // {
-    //     return $this->hasMany(PosSession::class); // Se creará en la siguiente rama
-    // }
+
+    public function sessions(): HasMany
+    {
+        // El segundo parámetro es la columna real en la tabla pos_sessions
+        return $this->hasMany(PosSession::class, 'terminal_id');
+    }
 }
