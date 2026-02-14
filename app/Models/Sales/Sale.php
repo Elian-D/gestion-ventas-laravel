@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 use App\Models\Clients\Client;
+use App\Models\Configuration\ConfiguracionGeneral;
 use App\Models\Configuration\TipoPago;
 use App\Models\Inventory\Warehouse;
 use App\Models\Sales\Ncf\NcfLog;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Sales\Pos\PosSession; 
+use App\Models\Sales\Pos\PosTerminal; 
 
 class Sale extends Model
 {
@@ -27,10 +30,13 @@ class Sale extends Model
         'total_amount',
         'payment_type',
         'tipo_pago_id',
-        'cash_received', // Nuevo
-        'cash_change',   // Nuevo
+        'cash_received', 
+        'cash_change',   
         'status',
         'notes',
+        // NUEVOS CAMPOS POS
+        'pos_session_id',
+        'pos_terminal_id',
     ];
 
     protected $casts = [
@@ -98,9 +104,27 @@ class Sale extends Model
             'user:id,name', 
             'warehouse:id,name',
             'tipoPago:id,nombre',
+            'posSession',    // <--- NUEVO
+            'posTerminal',   // <--- NUEVO
+            'payments.tipoPago', // <--- NUEVO (Para ver los métodos de pago usados)
             'items', // Cargamos todos los campos de los items (precio, cantidad)
             'items.product:id,name,sku' // Cargamos el producto de cada item
         ]);
+    }
+
+    public function requiresNcf(): bool
+    {
+        $config = general_config();
+        
+        // Si el sistema no usa NCF, nada lo requiere.
+        if (!$config?->usa_ncf) return false;
+
+        // Si el cliente NO es Consumidor Final (ID != 1) o tiene RNC, requiere NCF fiscal.
+        if ($this->client_id != 1 || !empty($this->client?->tax_id)) {
+            return true;
+        }
+
+        return false;
     }
 
     
@@ -113,6 +137,37 @@ class Sale extends Model
         return $this->ncfLog?->full_ncf;
     }
 
+    /**
+     * Accesor para saber si la venta se originó en el POS
+     */
+    public function getIsPosSaleAttribute(): bool
+    {
+        return !is_null($this->pos_session_id);
+    }
+
+    /**
+     * Relación con la sesión de POS
+     */
+    public function posSession(): BelongsTo 
+    { 
+        return $this->belongsTo(PosSession::class, 'pos_session_id'); 
+    }
+
+    /**
+     * Relación con la terminal de POS
+     */
+    public function posTerminal(): BelongsTo 
+    { 
+        return $this->belongsTo(PosTerminal::class, 'pos_terminal_id'); 
+    }
+
+    /**
+     * Relación con el detalle de pagos (Multipay)
+     */
+    public function payments(): HasMany 
+    { 
+        return $this->hasMany(SalePayment::class); 
+    }
     // Relaciones
     public function tipoPago(): BelongsTo { return $this->belongsTo(TipoPago::class, 'tipo_pago_id'); } // NUEVA
     public function items(): HasMany { return $this->hasMany(SaleItem::class); }
