@@ -27,13 +27,9 @@
                 @endforeach
             </x-data-table.filter-select>
 
-            {{-- Filtro de Estado --}}
-            <x-data-table.filter-select label="Estado" name="status" formId="pos-sessions-filters">
-                <option value="">Todos los estados</option>
-                @foreach($statuses as $key => $label)
-                    <option value="{{ $key }}">{{ $label }}</option>
-                @endforeach
-            </x-data-table.filter-select>
+            {{-- Filtro de estados --}}
+            <x-data-table.filter-toggle label="Estado" name="status" 
+                :options="['' => 'Todos', 'open' => 'Abierta', 'closed' => 'Cerrada']" formId="pos-sessions-filters" />
 
             {{-- Rango de Fecha de Apertura --}}
             <x-data-table.filter-datetime-range 

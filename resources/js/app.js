@@ -30,4 +30,5 @@ import './pages/ncf-logs'
 import './pages/nfc-types'
 import './pages/terminals'
 import './pages/pos-sessions'
+import './pages/pos-cash-movements'
 

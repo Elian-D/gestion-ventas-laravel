@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PosSession extends Model
 {
@@ -70,6 +71,11 @@ class PosSession extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function cashMovements(): HasMany
+    {
+        return $this->hasMany(PosCashMovement::class);
+    }
+
     // --- Scopes ---
 
     public function scopeOpen($query)
@@ -82,5 +88,31 @@ class PosSession extends Model
     public function isOpen(): bool
     {
         return $this->status === self::STATUS_OPEN;
+    }
+
+    // Atributos virtuales para facilitar el arqueo
+    public function getCashMovementsInTotalAttribute(): float
+    {
+        return (float) $this->cashMovements()->where('type', 'in')->sum('amount');
+    }
+
+    public function getCashMovementsOutTotalAttribute(): float
+    {
+        return (float) $this->cashMovements()->where('type', 'out')->sum('amount');
+    }
+
+    public function getExpectedCashAttribute(): float
+    {
+        // Fondo Inicial + Ventas (próximamente) + Entradas Manuales - Salidas Manuales
+        $cashSales = $this->cash_sales ?? 0; // Ajustar cuando tengas el módulo de ventas
+        return ($this->opening_balance + $cashSales + $this->cash_movements_in_total) - $this->cash_movements_out_total;
+    }
+
+    // Helper para obtener el neto de movimientos
+    public function getNetCashMovementsAttribute()
+    {
+        $in = $this->cashMovements()->where('type', PosCashMovement::TYPE_IN)->sum('amount');
+        $out = $this->cashMovements()->where('type', PosCashMovement::TYPE_OUT)->sum('amount');
+        return $in - $out;
     }
 }

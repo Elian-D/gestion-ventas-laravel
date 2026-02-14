@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Filters\Accounting\PaymentsFilters;
+namespace App\Filters\Sales\Pos\CashMovementFilters;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use App\Filters\Contracts\FilterInterface;
 use Illuminate\Support\Carbon;
 
-class PaymentDateFilter implements FilterInterface 
+class CashMovementDateFilter implements FilterInterface 
 {
     public function __construct(protected Request $request) {}
 
@@ -18,14 +18,14 @@ class PaymentDateFilter implements FilterInterface
 
         return $query
             ->when($from, function($q) use ($from) {
-                // Si el input trae hora (T), startOfMinute lo respeta. 
-                // Si solo trae fecha, startOfDay es el default.
+                // Parseamos y aseguramos el inicio del minuto (00 segundos)
                 $date = Carbon::parse($from)->startOfMinute(); 
-                return $q->where('payment_date', '>=', $date->toDateTimeString());
+                return $q->where('created_at', '>=', $date->toDateTimeString());
             })
             ->when($to, function($q) use ($to) {
+                // Parseamos y aseguramos el final del minuto (59 segundos)
                 $date = Carbon::parse($to)->endOfMinute();
-                return $q->where('payment_date', '<=', $date->toDateTimeString());
+                return $q->where('created_at', '<=', $date->toDateTimeString());
             });
     }
 }

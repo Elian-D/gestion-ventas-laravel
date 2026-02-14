@@ -18,10 +18,10 @@ class PosSessionDateFilter implements FilterInterface
 
         return $query
             ->when($from, function($q) use ($from) {
-                return $q->whereDate('opened_at', '>=', Carbon::parse($from));
+                return $q->where('opened_at', '>=', Carbon::parse($from)->startOfMinute());
             })
             ->when($to, function($q) use ($to) {
-                return $q->whereDate('opened_at', '<=', Carbon::parse($to));
+                return $q->where('opened_at', '<=', Carbon::parse($to)->endOfMinute());
             });
     }
 }

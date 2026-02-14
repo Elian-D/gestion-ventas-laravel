@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Models\Sales\Pos\PosCashMovement;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -85,6 +87,14 @@ class User extends Authenticatable
     public function posSessions(): HasMany
     {
         return $this->hasMany(PosSession::class);
+    }
+
+    /**
+     * Relación con los movimientos de caja realizados por el usuario.
+     */
+    public function posCashMovements(): HasMany
+    {
+        return $this->hasMany(PosCashMovement::class);
     }
 
     /**
