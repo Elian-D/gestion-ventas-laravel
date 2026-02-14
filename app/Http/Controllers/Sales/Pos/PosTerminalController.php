@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Sales\Pos;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sales\Pos\PosTerminal;
-use App\Http\Requests\Sales\PosTerminals\StorePosTerminalRequest;
-use App\Http\Requests\Sales\PosTerminals\UpdatePosTerminalRequest;
-use App\Services\Sales\PosTerminals\PosTerminalService;
-use App\Services\Sales\PosTerminals\PosTerminalCatalogService;
+use App\Http\Requests\Sales\Pos\PosTerminals\StorePosTerminalRequest;
+use App\Http\Requests\Sales\Pos\PosTerminals\UpdatePosTerminalRequest;
+use App\Services\Sales\Pos\PosTerminals\PosTerminalService;
+use App\Services\Sales\Pos\PosTerminals\PosTerminalCatalogService;
 use App\Tables\SalesTables\Pos\PosTerminalTable;
 use App\Traits\SoftDeletesTrait;
 use Illuminate\Http\Request;
