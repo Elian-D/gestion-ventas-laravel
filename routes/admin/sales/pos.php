@@ -1,12 +1,26 @@
 <?php
 
 use App\Http\Controllers\Sales\Pos\PosTerminalController;
+
 use Illuminate\Support\Facades\Route;
 
     use App\Http\Controllers\Sales\Pos\PosCashMovementController;
+use App\Http\Controllers\Sales\Pos\PosConfigController;
 
 Route::prefix('pos')->name('pos.')->group(function () {
     
+    // CONFIGURACIÓN GLOBAL (Fase 1)
+        // Usamos solo edit/update porque es un registro único
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::get('/', [PosConfigController::class, 'edit'])
+                ->name('edit')
+                ->middleware('permission:pos config view');
+                
+            Route::put('/', [PosConfigController::class, 'update'])
+                ->name('update')
+                ->middleware('permission:pos config update');
+        });
+
     // CRUD Terminales
     Route::prefix('terminals')->name('terminals.')->group(function () {
         Route::get('/', [PosTerminalController::class, 'index'])->name('index');
