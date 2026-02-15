@@ -66,7 +66,10 @@ class PosTerminalController extends Controller
      */
     public function create()
     {
-        return view('sales.pos.terminals.create', $this->catalogService->getForForm());
+        return view('sales.pos.terminals.create', array_merge(
+        ['posTerminal' => new \App\Models\Sales\Pos\PosTerminal()], // Objeto vacío
+        $this->catalogService->getForForm()
+    ));
     }
 
     /**

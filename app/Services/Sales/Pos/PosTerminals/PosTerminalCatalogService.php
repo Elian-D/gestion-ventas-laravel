@@ -16,6 +16,10 @@ class PosTerminalCatalogService
      */
     public function getForForm(): array
     {
+        // Obtenemos la configuración global una sola vez
+        $globalConfig = \App\Models\Sales\Pos\PosSetting::getSettings();
+        $modoFiscal = general_config()?->esModoFiscal();
+        
         return [
             // 1. Almacenes: Para vincular el stock a la terminal
             'warehouses' => Warehouse::select('id', 'name', 'type')
@@ -31,7 +35,7 @@ class PosTerminalCatalogService
                 ->get(),
 
             // 3. Tipos de NCF: Solo aquellos que tienen secuencias activas y disponibles
-            'ncf_types' => NcfType::whereHas('sequences', function($q) {
+            'ncf_types' => $modoFiscal ? NcfType::whereHas('sequences', function($q) {
                     $q->where('status', NcfSequence::STATUS_ACTIVE)
                       ->where('expiry_date', '>=', now())
                       ->whereColumn('current', '<', 'to');
@@ -41,7 +45,10 @@ class PosTerminalCatalogService
                 ->map(fn($type) => [
                     'id'   => $type->id,
                     'name' => "[{$type->code}] {$type->name}",
-                ]),
+                ])->values() : [],
+
+            'global_client_name' => $globalConfig->defaultCustomer?->name ?? 'Consumidor Final',
+            'global_printer_format' => $globalConfig->receipt_size,
 
             // 4. Clientes por defecto: Priorizando Consumidor Final
             'clients' => Client::select('id', 'name', 'tax_id')

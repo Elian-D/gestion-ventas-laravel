@@ -19,7 +19,10 @@ class SalePosPermissionsSeeder extends Seeder
             'pos sessions history',
 
             'pos cash movements create', 
-            'pos cash movements history'
+            'pos cash movements history',
+
+            'pos config view', 
+            'pos config update'
         ];
 
         foreach ($permissions as $permission) {

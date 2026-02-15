@@ -28,7 +28,7 @@ class UpdatePosTerminalRequest extends FormRequest
             'default_ncf_type_id' => 'nullable|exists:ncf_types,id',
             'default_client_id'   => 'nullable|exists:clients,id',
             'is_mobile'           => 'boolean',
-            'printer_format'      => 'required|in:80mm,58mm',
+            'printer_format'      => 'nullable|in:80mm,58mm', 
             'is_active'           => 'boolean',
         ];
     }

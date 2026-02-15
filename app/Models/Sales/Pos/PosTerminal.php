@@ -65,4 +65,17 @@ class PosTerminal extends Model
         // El segundo parámetro es la columna real en la tabla pos_sessions
         return $this->hasMany(PosSession::class, 'terminal_id');
     }
+    /**
+     * Obtiene una configuración específica resolviendo la jerarquía:
+     * Terminal (si existe) -> Global (fallback)
+     */
+    public function getSetting(string $key)
+    {
+        return match($key) {
+            'printer_format' => $this->printer_format ?? pos_config('receipt_size'),
+            'default_client' => $this->default_client_id ?? pos_config('default_walkin_customer_id'),
+            'auto_print'     => pos_config('auto_print_receipt'), // No sobreescribible por ahora
+            default          => pos_config($key)
+        };
+    }
 }

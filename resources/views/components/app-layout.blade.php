@@ -145,6 +145,7 @@
                     <x-sidebar.dropdown id="pos" icon="heroicon-s-building-storefront" :activeRoutes="['admin/pos*']">
                         Puntos de Venta
                         <x-slot name="submenu">
+                            <x-sidebar.subitem href="/admin/sales/pos/settings">Configuración</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/sales/pos/terminals">Terminales</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/sales/pos/sessions">Sesiones</x-sidebar.subitem>
                             <x-sidebar.subitem href="/admin/sales/pos/cash-movements">Movimientos de Caja</x-sidebar.subitem>
