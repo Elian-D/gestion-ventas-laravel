@@ -10,6 +10,7 @@ use App\Models\Sales\Ncf\NcfType;
 use App\Models\Clients\Client;
 use App\Models\Sales\Sale;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Hash;
 
 class PosTerminal extends Model
 {
@@ -23,13 +24,42 @@ class PosTerminal extends Model
         'default_client_id',
         'is_mobile',
         'printer_format',
-        'is_active'
+        'is_active',
+        'access_pin',   // Añadido
+        'requires_pin'  // Añadido
     ];
 
     protected $casts = [
-        'is_mobile' => 'boolean',
-        'is_active' => 'boolean',
+        'is_mobile'    => 'boolean',
+        'is_active'    => 'boolean',
+        'requires_pin' => 'boolean', // Añadido
     ];
+
+    protected $hidden = [
+        'access_pin', // Ocultar de arrays/JSON para seguridad
+    ];
+
+    // ===== LÓGICA DE SEGURIDAD (PIN) =====
+
+    /**
+     * Mutator para hashear el PIN automáticamente al asignarlo.
+     */
+    protected function setAccessPinAttribute($value)
+    {
+        if (!empty($value)) {
+            $this->attributes['access_pin'] = Hash::make($value);
+        }
+    }
+
+    /**
+     * Verifica si el PIN proporcionado es correcto.
+     */
+    public function verifyPin(string $pin): bool
+    {
+        if (!$this->requires_pin) return true;
+        
+        return Hash::check($pin, $this->access_pin);
+    }
 
     // ===== RELACIONES =====
 
