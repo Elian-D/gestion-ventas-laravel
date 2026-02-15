@@ -27,6 +27,10 @@ class PosTerminalService
     public function update(PosTerminal $terminal, array $data): bool
     {
         return DB::transaction(function () use ($terminal, $data) {
+            // Normalización: Si vienen strings vacíos en campos opcionales, convertirlos a null
+            $data['printer_format'] = $data['printer_format'] ?: null;
+            $data['default_client_id'] = $data['default_client_id'] ?: null;
+
             return $terminal->update($data);
         });
     }

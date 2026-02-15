@@ -38,7 +38,11 @@ return new class extends Migration
 
             // Atributos de Interfaz y Hardware
             $table->boolean('is_mobile')->default(false); // Para lógica Sunmi/Móvil
-            $table->string('printer_format')->default('80mm'); // '80mm' o '58mm'
+            // Cambiamos printer_format a nullable
+            $table->string('printer_format')->nullable();
+            
+            // Añadimos campos que podrían ser específicos
+            $table->boolean('auto_print_receipt')->nullable();
             
             $table->boolean('is_active')->default(true);
             $table->timestamps();
