@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Clients\PosQuickCustomerController;
 use App\Http\Controllers\Sales\Pos\PosTerminalController;
 
 use Illuminate\Support\Facades\Route;
@@ -60,4 +61,5 @@ Route::prefix('pos')->name('pos.')->group(function () {
 
     Route::get('/cash-movements', [PosCashMovementController::class, 'index'])->name('cash-movements.index');
     Route::post('/cash-movements', [PosCashMovementController::class, 'store'])->name('cash-movements.store');
+    Route::post('/quick-customer', [PosQuickCustomerController::class, 'store'])->name('quick-customer.store');
 });
