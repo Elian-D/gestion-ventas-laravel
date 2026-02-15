@@ -71,27 +71,37 @@
                             </div>
                         </section>
 
+                        {{-- Sección: Preferencias de Facturación --}}
                         <section>
                             <h4 class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-blue-50 pb-2">
                                 <x-heroicon-s-document-duplicate class="w-4 h-4"/> Preferencias de Facturación
                             </h4>
                             <div class="space-y-3">
-                                <div class="flex items-center gap-3">
-                                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
-                                        <x-heroicon-s-receipt-percent class="w-4 h-4"/>
+                                {{-- NCF: Solo mostrar si aplica --}}
+                                @if(general_config()?->esModoFiscal())
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                                            <x-heroicon-s-receipt-percent class="w-4 h-4"/>
+                                        </div>
+                                        <div>
+                                            <span class="text-[10px] text-gray-400 uppercase block">NCF por Defecto</span>
+                                            <p class="text-sm font-medium text-gray-700">{{ $item->defaultNcfType->name ?? 'Por defecto del sistema' }}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="text-[10px] text-gray-400 uppercase block">NCF por Defecto</span>
-                                        <p class="text-sm font-medium text-gray-700">{{ $item->defaultNcfType->name ?? 'Sin asignar' }}</p>
-                                    </div>
-                                </div>
+                                @endif
+
                                 <div class="flex items-center gap-3">
                                     <div class="p-2 bg-gray-50 rounded-lg text-gray-400">
                                         <x-heroicon-s-user class="w-4 h-4"/>
                                     </div>
                                     <div>
                                         <span class="text-[10px] text-gray-400 uppercase block">Cliente Genérico</span>
-                                        <p class="text-sm text-gray-600 leading-relaxed">{{ $item->defaultClient->name ?? 'Consumidor Final' }}</p>
+                                        <p class="text-sm text-gray-600 leading-relaxed">
+                                            {{ $item->defaultClient->name ?? pos_config('default_walkin_customer_name') ?? 'Consumidor Final' }}
+                                            @if(is_null($item->default_client_id))
+                                                <span class="text-[9px] text-blue-500 font-bold ml-1">(HEREDADO)</span>
+                                            @endif
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -100,19 +110,28 @@
 
                     {{-- Columna Derecha: Hardware y Auditoría --}}
                     <div class="space-y-6">
+                        {{-- Sección: Configuración de Impresión --}}
                         <section>
                             <h4 class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-amber-50 pb-2">
                                 <x-heroicon-s-printer class="w-4 h-4"/> Configuración de Impresión
                             </h4>
+                            @php 
+                                $currentFormat = $item->printer_format ?? pos_config('receipt_size');
+                            @endphp
                             <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-100">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs text-amber-800 font-medium">Ancho de Papel:</span>
-                                    <span class="text-[10px] font-bold uppercase py-1 px-2 bg-amber-100 text-amber-700 rounded-md">
-                                        {{ $item->printer_format }}
-                                    </span>
+                                    <div class="flex flex-col items-end">
+                                        <span class="text-[10px] font-bold uppercase py-1 px-2 bg-amber-100 text-amber-700 rounded-md">
+                                            {{ $currentFormat }}
+                                        </span>
+                                        @if(is_null($item->printer_format))
+                                            <span class="text-[8px] text-amber-500 mt-1 uppercase font-bold italic">Ajuste Global</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <p class="text-[10px] text-amber-600/70 mt-2 italic leading-tight">
-                                    * Formato optimizado para tiqueteras térmicas de {{ $item->printer_format == '80mm' ? '8cm' : '5.8cm' }}.
+                                    * Formato optimizado para tiqueteras térmicas de {{ $currentFormat == '80mm' ? '8cm' : '5.8cm' }}.
                                 </p>
                             </div>
                         </section>

@@ -33,11 +33,11 @@
         </div>
     </section>
 
-    {{-- Sección 2: Contabilidad y Facturación --}}
+    {{-- Sección 2: Finanzas y Facturación --}}
     <section>
         <div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
             <div class="w-7 h-7 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xs">2</div>
-            <h3 class="font-bold text-gray-800 uppercase text-xs tracking-wider">Finanzas y NCF</h3>
+            <h3 class="font-bold text-gray-800 uppercase text-xs tracking-wider">Finanzas y Operación</h3>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -53,16 +53,41 @@
                 </select>
             </div>
 
-            <div>
-                <x-input-label value="Tipo de NCF por Defecto" />
-                <select name="default_ncf_type_id" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm" required>
-                    <option value="">Seleccione tipo...</option>
-                    @foreach($ncf_types as $ncf)
-                        <option value="{{ $ncf['id'] }}" {{ old('default_ncf_type_id', $posTerminal->default_ncf_type_id ?? '') == $ncf['id'] ? 'selected' : '' }}>
-                            {{ $ncf['name'] }}
+            {{-- Lógica Fiscal Flexible --}}
+            @if(general_config()?->esModoFiscal())
+                <div>
+                    <x-input-label value="Tipo de Comprobante (NCF) por Defecto" />
+                    <select name="default_ncf_type_id" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm">
+                        <option value="">Seleccione tipo...</option>
+                        @foreach($ncf_types as $ncf)
+                            <option value="{{ $ncf['id'] }}" {{ old('default_ncf_type_id', $posTerminal->default_ncf_type_id ?? '') == $ncf['id'] ? 'selected' : '' }}>
+                                {{ $ncf['name'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @else
+                <div class="flex items-center p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <p class="text-[11px] text-amber-700 italic leading-tight">
+                        <strong>Aviso:</strong> El modo fiscal está desactivado en la configuración general. No se requieren NCF para esta terminal.
+                    </p>
+                </div>
+            @endif
+
+            {{-- Cliente con Herencia Global --}}
+            <div class="md:col-span-2">
+                <x-input-label value="Cliente por Defecto (Walk-in)" />
+                <select name="default_client_id" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm">
+                    <option value="" {{ is_null(old('default_client_id', $posTerminal->default_client_id)) ? 'selected' : '' }}>
+                        Heredar de Ajustes POS (Actual: {{ $global_client_name }})
+                    </option>
+                    @foreach($clients as $client)
+                        <option value="{{ $client['id'] }}" {{ old('default_client_id', $posTerminal->default_client_id ?? '') == $client['id'] ? 'selected' : '' }}>
+                            {{ $client['name'] }} @if($client['tax_id'] != 'N/A') — {{ $client['tax_id'] }} @endif
                         </option>
                     @endforeach
                 </select>
+                <p class="mt-1 text-[10px] text-gray-400 italic">Si se deja en "Heredar", el sistema usará el cliente configurado globalmente.</p>
             </div>
         </div>
     </section>
@@ -78,8 +103,14 @@
             <div>
                 <x-input-label value="Formato de Impresión" />
                 <select name="printer_format" class="w-full mt-1 rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 text-sm">
-                    <option value="80mm" {{ old('printer_format', $posTerminal->printer_format ?? '') == '80mm' ? 'selected' : '' }}>Térmica 80mm (Estándar)</option>
-                    <option value="58mm" {{ old('printer_format', $posTerminal->printer_format ?? '') == '58mm' ? 'selected' : '' }}>Térmica 58mm (Portátil)</option>
+                    <option value="" {{ is_null(old('printer_format', $posTerminal->printer_format)) ? 'selected' : '' }}>
+                        Heredar de Ajustes POS (Actual: {{ $global_printer_format }})
+                    </option>
+                    @foreach($printer_formats as $format)
+                        <option value="{{ $format['id'] }}" {{ old('printer_format', $posTerminal->printer_format ?? '') == $format['id'] ? 'selected' : '' }}>
+                            {{ $format['name'] }}
+                        </option>
+                    @endforeach
                 </select>
             </div>
 
@@ -87,7 +118,7 @@
                 <x-input-label value="Estado Operativo" class="mb-0" />
                 <input type="hidden" name="is_active" value="0">
                 <input type="checkbox" name="is_active" value="1" {{ old('is_active', $posTerminal->is_active ?? true) ? 'checked' : '' }} class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 w-5 h-5 cursor-pointer">
-                <span class="text-[10px] text-gray-400 italic">Si se desactiva, no podrá abrir turnos.</span>
+                <span class="text-[10px] text-gray-400 italic">Determina si la terminal está disponible para ventas.</span>
             </div>
         </div>
     </section>

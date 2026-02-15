@@ -38,13 +38,20 @@
 
             @if(in_array('default_ncf_type_id', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-gray-500">
-                    {{ $item->defaultNcfType->name ?? 'S/N' }}
+                    @if(!general_config()?->esModoFiscal())
+                        <span class="text-gray-300 italic text-xs">No Fiscal</span>
+                    @else
+                        {{ $item->defaultNcfType->name ?? 'Global' }}
+                    @endif
                 </td>
             @endif
 
             @if(in_array('default_client_id', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-gray-500">
-                    {{ $item->defaultClient->name ?? 'Consumidor Final' }}
+                    {{ $item->defaultClient->name ?? pos_config('default_walkin_customer_name') ?? 'Consumidor Final' }}
+                    @if(is_null($item->default_client_id))
+                        <span class="text-[9px] text-blue-500 font-bold ml-1">(HEREDADO)</span>
+                    @endif
                 </td>
             @endif
 
@@ -54,11 +61,16 @@
                 </td>
             @endif
 
+            {{-- Columna Formato de Impresión --}}
             @if(in_array('printer_format', $visibleColumns))
                 <td class="px-6 py-4 text-sm">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                    @php $isInherited = is_null($item->printer_format); @endphp
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $isInherited ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-gray-100 text-gray-800 border-gray-200' }} border">
                         <x-heroicon-s-printer class="w-3 h-3 mr-1" />
-                        {{ $item->printer_format }}
+                        {{ $item->printer_format ?? pos_config('receipt_size') }}
+                        @if($isInherited)
+                            <span class="ml-1 text-[9px] opacity-70">(H)</span>
+                        @endif
                     </span>
                 </td>
             @endif
