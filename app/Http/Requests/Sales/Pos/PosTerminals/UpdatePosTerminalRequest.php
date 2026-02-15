@@ -30,6 +30,8 @@ class UpdatePosTerminalRequest extends FormRequest
             'is_mobile'           => 'boolean',
             'printer_format'      => 'nullable|in:80mm,58mm', 
             'is_active'           => 'boolean',
+            'access_pin'   => 'nullable|numeric|digits:4',
+            'requires_pin' => 'boolean',
         ];
     }
 }

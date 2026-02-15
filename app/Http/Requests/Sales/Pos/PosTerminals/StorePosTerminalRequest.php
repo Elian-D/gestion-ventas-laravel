@@ -22,6 +22,8 @@ class StorePosTerminalRequest extends FormRequest
             'is_mobile'           => 'boolean',
             'printer_format'      => 'nullable|in:80mm,58mm', // Null = Heredar Global
             'is_active'           => 'boolean',
+            'access_pin'   => 'required|numeric|digits:4',
+            'requires_pin' => 'boolean',
         ];
     }
 
@@ -33,6 +35,9 @@ class StorePosTerminalRequest extends FormRequest
             'warehouse_id.required'    => 'Debe asignar un almacén para el descuento de stock.',
             'cash_account_id.required' => 'Debe vincular una cuenta contable de caja.',
             'printer_format.in'        => 'El formato seleccionado no es válido (80mm o 58mm).',
+            'access_pin.required'      => 'Es obligatorio definir un PIN de acceso de 4 dígitos.',
+            'access_pin.numeric'       => 'El PIN debe ser solo números.',
+            'access_pin.digits'        => 'El PIN debe tener exactamente 4 dígitos.',
         ];
     }
 }
