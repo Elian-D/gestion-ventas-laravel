@@ -15,49 +15,51 @@ class CreateAccountingEntryForMovement
     public function handle(CashMovementRegistered $event): void
     {
         $movement = $event->movement;
-        $session = $movement->session;
+
+        // Idempotencia: No duplicar asientos
+        if ($movement->accounting_entry_id) return;
 
         try {
-            // 1. Obtener Cuenta de la Terminal (o la de Caja general por defecto)
-            $terminalAccountId = $session->terminal->cash_account_id 
+            $session = $movement->session;
+            $terminal = $session->terminal;
+            
+            // Prioridad: 1. Cuenta de la Terminal, 2. Fallback a Caja General (1.1.01)
+            $terminalAccount = $terminal->cash_account_id 
                 ?? AccountingAccount::where('code', '1.1.01')->value('id');
 
-            // 2. Obtener Cuenta de Gastos (o contrapartida)
-            $expenseAccountId = AccountingAccount::where('code', '5.3')->value('id');
-
-            if (!$terminalAccountId || !$expenseAccountId) {
-                Log::error("Error Contable: Cuentas no encontradas para movimiento POS #{$movement->id}");
-                return;
+            if (!$terminalAccount) {
+                throw new \Exception("No se encontró una cuenta contable de destino para la terminal #{$terminal->id}");
             }
 
-            // 3. Definir Items según el tipo
-            $items = [];
-            if ($movement->isEntry()) { // TYPE_IN
+            // La contrapartida (Gasto, Ingreso, etc.)
+            $contraAccount = $movement->accounting_account_id;
+
+            if ($movement->isEntry()) {
+                // ENTRADA: Aumenta Activo (Caja) / Aumenta Pasivo o Capital o Ingreso (Contra)
                 $items = [
-                    ['accounting_account_id' => $terminalAccountId, 'debit' => $movement->amount, 'credit' => 0, 'note' => $movement->reason],
-                    ['accounting_account_id' => $expenseAccountId, 'debit' => 0, 'credit' => $movement->amount, 'note' => 'Ajuste entrada']
+                    ['accounting_account_id' => $terminalAccount, 'debit' => $movement->amount, 'credit' => 0],
+                    ['accounting_account_id' => $contraAccount, 'debit' => 0, 'credit' => $movement->amount],
                 ];
-            } else { // TYPE_OUT
+            } else {
+                // SALIDA: Aumenta Gasto o disminuye Pasivo (Contra) / Disminuye Activo (Caja)
                 $items = [
-                    ['accounting_account_id' => $expenseAccountId, 'debit' => $movement->amount, 'credit' => 0, 'note' => $movement->reason],
-                    ['accounting_account_id' => $terminalAccountId, 'debit' => 0, 'credit' => $movement->amount, 'note' => "Salida terminal: {$session->terminal->name}"]
+                    ['accounting_account_id' => $contraAccount, 'debit' => $movement->amount, 'credit' => 0],
+                    ['accounting_account_id' => $terminalAccount, 'debit' => 0, 'credit' => $movement->amount],
                 ];
             }
 
-            // 4. Crear Asiento
             $entry = $this->journalService->create([
                 'entry_date'  => now(),
                 'reference'   => "POS-MOV-{$movement->id}",
-                'description' => "Movimiento POS: {$movement->reason}",
+                'description' => "Movimiento POS {$session->terminal->name}(#{$session->id}): {$movement->reason}",
                 'status'      => JournalEntry::STATUS_POSTED,
                 'items'       => $items
             ]);
 
-            // 5. Vincular el asiento al movimiento
             $movement->update(['accounting_entry_id' => $entry->id]);
 
         } catch (\Exception $e) {
-            Log::error("Fallo al crear asiento contable para movimiento POS: " . $e->getMessage());
+            Log::error("Error contable POS #{$movement->id}: " . $e->getMessage());
         }
     }
 }
