@@ -33,4 +33,9 @@ class PosAccessController extends Controller
             'status' => 'success'
         ]);
     }
+
+    public function lock(PosTerminal $pos_terminal) // Debe llamarse igual que en la ruta {pos_terminal}
+    {
+        return view('sales.pos.lock', ['terminal' => $pos_terminal]);
+    }
 }

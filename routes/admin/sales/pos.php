@@ -59,6 +59,10 @@ Route::prefix('pos')->name('pos.')->group(function () {
         Route::put('/{pos_session}', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'update'])->name('update');
     });
 
+    // Ruta para la vista de bloqueo
+    Route::get('/terminal/{pos_terminal}/lock', [PosAccessController::class, 'lock'])
+        ->name('lock');
+
     Route::post('/verify-pin', [PosAccessController::class, 'verify'])
         ->name('verify-pin')
         ->middleware('throttle:pos-pin');
