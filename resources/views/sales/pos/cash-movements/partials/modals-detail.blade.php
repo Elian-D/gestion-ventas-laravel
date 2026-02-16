@@ -102,6 +102,19 @@
                         </div>
                     @endif
 
+                    {{-- Añadir esto dentro del grid de Auditoría del Modal --}}
+                    <div>
+                        <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                            <x-heroicon-s-building-library class="w-3 h-3"/> Cuenta Contable
+                        </h4>
+                        @if($movement->account)
+                            <p class="text-xs font-bold text-gray-700">{{ $movement->account->name }}</p>
+                            <p class="text-[10px] font-mono text-indigo-500">{{ $movement->account->code }}</p>
+                        @else
+                            <p class="text-xs text-gray-400 italic">Sin cuenta asignada</p>
+                        @endif
+                    </div>
+
                     <div class="mt-6 flex justify-end">
                         <x-secondary-button x-on:click="$dispatch('close')" class="w-full sm:w-auto justify-center">
                             Cerrar Detalle

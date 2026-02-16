@@ -69,6 +69,18 @@
                 </td>
             @endif
 
+            {{-- Balance Esperado --}}
+            @if(in_array('expected_balance', $visibleColumns))
+                <td class="px-6 py-4 text-sm text-right text-gray-600">
+                    @if($session->status === \App\Models\Sales\Pos\PosSession::STATUS_CLOSED)
+                        <span class="text-[10px] text-gray-400 mr-1">$</span>{{ number_format($session->expected_balance, 2) }}
+                    @else
+                        <span class="text-gray-300 italic text-[10px]">Calculando...</span>
+                    @endif
+                </td>
+            @endif
+
+            {{-- Balance Final (Arqueo Real) --}}
             @if(in_array('closing_balance', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-right font-bold text-gray-900">
                     @if($session->status === \App\Models\Sales\Pos\PosSession::STATUS_CLOSED)
@@ -79,13 +91,13 @@
                 </td>
             @endif
 
-            {{-- Diferencia --}}
+            {{-- Diferencia (La Verdad de la BD) --}}
             @if(in_array('difference', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-right">
                     @if($session->status === \App\Models\Sales\Pos\PosSession::STATUS_CLOSED)
-                        @php $diff = $session->closing_balance - ($session->opening_balance + ($session->cash_sales ?? 0)); @endphp
-                        <span class="{{ $diff >= 0 ? 'text-green-600' : 'text-red-600' }} font-bold">
-                            <span class="text-[10px] font-normal mr-1">$</span>{{ number_format($diff, 2) }}
+                        {{-- Usamos directamente el campo difference de la migración --}}
+                        <span class="{{ $session->difference >= 0 ? ($session->difference == 0 ? 'text-gray-500' : 'text-green-600') : 'text-red-600' }} font-bold">
+                            <span class="text-[10px] font-normal mr-1">$</span>{{ number_format($session->difference, 2) }}
                         </span>
                     @else
                         <span class="text-gray-300">---</span>
