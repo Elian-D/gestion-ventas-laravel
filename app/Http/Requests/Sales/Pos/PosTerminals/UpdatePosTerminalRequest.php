@@ -29,8 +29,16 @@ class UpdatePosTerminalRequest extends FormRequest
             'is_mobile'           => 'boolean',
             'printer_format'      => 'nullable|in:80mm,58mm', 
             'is_active'           => 'boolean',
-            'access_pin' => 'nullable|numeric|digits:4',
             'requires_pin' => 'boolean',
+            'access_pin'   => [
+                'nullable',
+                'numeric',
+                'digits:4',
+                // Obligatorio si se activa 'requires_pin' y la terminal NO tiene un PIN previo
+                Rule::requiredIf(function () use ($terminal) {
+                    return $this->requires_pin && is_null($terminal->access_pin);
+                }),
+            ],
         ];
     }
 }

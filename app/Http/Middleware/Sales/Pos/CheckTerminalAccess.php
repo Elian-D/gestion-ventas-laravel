@@ -53,15 +53,14 @@ class CheckTerminalAccess
      */
     private function redirectToPin($terminalId)
     {
-        $message = 'Se requiere el PIN de acceso para esta terminal o la sesión ha expirado.';
-
         if (request()->expectsJson()) {
-            return response()->json(['message' => $message, 'require_pin' => true], 403);
+            return response()->json([
+                'message' => 'Sesión de terminal expirada.', 
+                'require_pin' => true
+            ], 403);
         }
 
-        // Aquí rediriges a donde tengas tu modal o pantalla de bloqueo
-        return redirect()->route('pos.sessions.index')
-            ->with('terminal_id_locked', $terminalId)
-            ->with('warning', $message);
+        // Redirigir directamente a la pantalla de bloqueo estilizada
+        return redirect()->route('sales.pos.lock', ['pos_terminal' => $terminalId]);
     }
 }

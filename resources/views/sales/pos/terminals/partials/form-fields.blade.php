@@ -180,12 +180,6 @@
                             @input="$el.value = $el.value.replace(/[^0-9]/g, '')"
                         />
                     </div>
-
-                    @if(isset($posTerminal))
-                        <p class="text-[10px] text-center text-blue-600 mt-3 font-medium italic">
-                             Deje vacío para mantener el PIN actual
-                        </p>
-                    @endif
                 </div>
             </div>
         </div>
