@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Clients\PosQuickCustomerController;
+use App\Http\Controllers\Sales\Pos\PosAccessController;
 use App\Http\Controllers\Sales\Pos\PosTerminalController;
 
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,9 @@ Route::prefix('pos')->name('pos.')->group(function () {
         Route::put('/{pos_session}', [App\Http\Controllers\Sales\Pos\PosSessionController::class, 'update'])->name('update');
     });
 
+    Route::post('/verify-pin', [PosAccessController::class, 'verify'])
+        ->name('verify-pin')
+        ->middleware('throttle:pos-pin');
 
     Route::get('/cash-movements', [PosCashMovementController::class, 'index'])->name('cash-movements.index');
     Route::post('/cash-movements', [PosCashMovementController::class, 'store'])->name('cash-movements.store');
