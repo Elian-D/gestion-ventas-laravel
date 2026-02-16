@@ -47,7 +47,7 @@ class PosSessionCatalogService
                 ->whereDoesntHave('sessions', function ($query) {
                     $query->where('status', PosSession::STATUS_OPEN);
                 })
-                ->select('id', 'name', 'warehouse_id')
+                ->select('id', 'name', 'warehouse_id', 'requires_pin')
                 ->get(),
             
             'income_accounts' => $incomeAccounts,
