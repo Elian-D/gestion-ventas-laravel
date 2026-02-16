@@ -16,14 +16,14 @@ class StorePosTerminalRequest extends FormRequest
         return [
             'name'                => 'required|string|max:100|unique:pos_terminals,name',
             'warehouse_id'        => 'required|exists:warehouses,id',
-            'cash_account_id'     => 'required|exists:accounting_accounts,id',
             'default_ncf_type_id' => 'nullable|exists:ncf_types,id',
-            'default_client_id'   => 'nullable|exists:clients,id', // Null = Heredar Global
+            'default_client_id'   => 'nullable|exists:clients,id',
             'is_mobile'           => 'boolean',
-            'printer_format'      => 'nullable|in:80mm,58mm', // Null = Heredar Global
+            'printer_format'      => 'nullable|in:80mm,58mm',
             'is_active'           => 'boolean',
-            'access_pin'   => 'required|numeric|digits:4',
-            'requires_pin' => 'boolean',
+            'requires_pin'        => 'boolean',
+            // PIN obligatorio solo si requires_pin es true
+            'access_pin'          => 'required_if:requires_pin,true|nullable|numeric|digits:4',
         ];
     }
 
