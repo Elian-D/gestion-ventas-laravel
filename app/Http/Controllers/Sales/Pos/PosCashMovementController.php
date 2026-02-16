@@ -47,7 +47,7 @@ class PosCashMovementController extends Controller
                 'defaultDesktop' => PosCashMovementTable::defaultDesktop(),
                 'defaultMobile'  => PosCashMovementTable::defaultMobile(),
             ],
-            $this->catalogService->getForFilters()
+            $this->catalogService->getForForm()
         ));
     }
 

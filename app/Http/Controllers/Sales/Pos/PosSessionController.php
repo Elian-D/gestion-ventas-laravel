@@ -86,14 +86,22 @@ class PosSessionController extends Controller
     {
         $this->authorize('pos sessions history');
         
-        // Cargamos los movimientos y el usuario de cada movimiento
-        $posSession->load(['terminal', 'user', 'cashMovements.user']);
+        // Cargamos relaciones necesarias incluyendo la cuenta contable de cada movimiento
+        $posSession->load(['terminal', 'user', 'cashMovements.user', 'cashMovements.account']);
         
-        // Calculamos totales de movimientos manuales
         $cashIn = $posSession->cashMovements->where('type', 'in')->sum('amount');
         $cashOut = $posSession->cashMovements->where('type', 'out')->sum('amount');
         
-        return view('sales.pos.sessions.show', compact('posSession', 'cashIn', 'cashOut'));
+        // Obtenemos las cuentas del catálogo para el modal de movimientos
+        $catalog = $this->catalogService->getForForm();
+        
+        return view('sales.pos.sessions.show', array_merge(
+            compact('posSession', 'cashIn', 'cashOut'),
+            [
+                'income_accounts' => $catalog['income_accounts'],
+                'expense_accounts' => $catalog['expense_accounts']
+            ]
+        ));
     }
     /**
      * Acción de Cierre (Patch).
