@@ -20,8 +20,9 @@ return new class extends Migration
                 ->constrained('warehouses')
                 ->onDelete('restrict');
 
-            // Relación con el Catálogo de Cuentas (Cuenta de Activo/Caja específica)
+        // Cambiado a nullable para que el proceso automatizado funcione
             $table->foreignId('cash_account_id')
+                ->nullable() 
                 ->constrained('accounting_accounts')
                 ->onDelete('restrict');
 

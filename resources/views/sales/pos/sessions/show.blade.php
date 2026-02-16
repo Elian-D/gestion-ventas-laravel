@@ -101,25 +101,27 @@
                             </div>
                             
                             @php 
-                                $expected = ($posSession->opening_balance + ($posSession->cash_sales ?? 0) + $cashIn) - $cashOut; 
+                                // Si está cerrada, usamos la verdad grabada. Si está abierta, calculamos.
+                                $displayExpected = $posSession->isOpen() 
+                                    ? ($posSession->opening_balance + ($posSession->cash_sales ?? 0) + $cashIn) - $cashOut
+                                    : $posSession->expected_balance;
                             @endphp
 
                             <div class="flex justify-between p-5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-100 mt-4">
                                 <span class="font-bold">(=) Monto Esperado en Caja</span>
-                                <span class="text-lg font-mono font-black">${{ number_format($expected, 2) }}</span>
+                                <span class="text-lg font-mono font-black">${{ number_format($displayExpected, 2) }}</span>
                             </div>
                         </div>
 
                         {{-- Resultado del Arqueo --}}
                         <div class="flex flex-col justify-center items-center p-8 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                            @if($posSession->status === 'closed')
+                            @if($posSession->isClosed())
                                 <p class="text-[10px] uppercase font-black text-gray-400 mb-2">Monto Real Reportado</p>
                                 <h4 class="text-4xl font-black text-gray-900 mb-4">${{ number_format($posSession->closing_balance, 2) }}</h4>
                                 
-                                @php $diff = $posSession->closing_balance - $expected; @endphp
-                                
-                                <div class="inline-flex items-center px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest {{ $diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                    {{ $diff == 0 ? 'Caja Cuadrada' : ($diff > 0 ? 'Sobrante' : 'Faltante') }} de ${{ number_format(abs($diff), 2) }}
+                                {{-- ¡USAMOS LA COLUMNA DIRECTA! --}}
+                                <div class="inline-flex items-center px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest {{ $posSession->difference >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                    {{ $posSession->difference == 0 ? 'Caja Cuadrada' : ($posSession->difference > 0 ? 'Sobrante' : 'Faltante') }} de ${{ number_format(abs($posSession->difference), 2) }}
                                 </div>
                             @else
                                 <div class="text-center">

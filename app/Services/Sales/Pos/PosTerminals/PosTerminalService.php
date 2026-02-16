@@ -13,9 +13,12 @@ class PosTerminalService
     public function create(array $data): PosTerminal
     {
         return DB::transaction(function () use ($data) {
-            $data['is_mobile'] = $data['is_mobile'] ?? false;
-            $data['is_active'] = $data['is_active'] ?? true;
-            $data['requires_pin'] = $data['requires_pin'] ?? true; // Valor por defecto
+            $data['requires_pin'] = isset($data['requires_pin']); // Convertir a boolean
+            
+            // Si no requiere PIN, nos aseguramos de que se guarde nulo
+            if (!$data['requires_pin']) {
+                $data['access_pin'] = null;
+            }
 
             return PosTerminal::create($data);
         });

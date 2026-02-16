@@ -24,13 +24,12 @@ class UpdatePosTerminalRequest extends FormRequest
                 Rule::unique('pos_terminals')->ignore($terminal->id)
             ],
             'warehouse_id'        => 'required|exists:warehouses,id',
-            'cash_account_id'     => 'required|exists:accounting_accounts,id',
             'default_ncf_type_id' => 'nullable|exists:ncf_types,id',
             'default_client_id'   => 'nullable|exists:clients,id',
             'is_mobile'           => 'boolean',
             'printer_format'      => 'nullable|in:80mm,58mm', 
             'is_active'           => 'boolean',
-            'access_pin'   => 'nullable|numeric|digits:4',
+            'access_pin' => 'nullable|numeric|digits:4',
             'requires_pin' => 'boolean',
         ];
     }

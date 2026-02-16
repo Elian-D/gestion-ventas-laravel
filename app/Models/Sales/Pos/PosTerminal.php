@@ -11,6 +11,7 @@ use App\Models\Clients\Client;
 use App\Models\Sales\Sale;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class PosTerminal extends Model
 {
@@ -38,6 +39,57 @@ class PosTerminal extends Model
     protected $hidden = [
         'access_pin', // Ocultar de arrays/JSON para seguridad
     ];
+
+    /**
+     * Eventos del Modelo
+     */
+    protected static function booted()
+    {
+        static::created(function (PosTerminal $terminal) {
+            // Generar cuenta contable de efectivo si no se especificó una
+            if (!$terminal->cash_account_id) {
+                $terminal->createAccountingAccount();
+            }
+        });
+    }
+
+    /**
+     * Crea la subcuenta contable automáticamente bajo Caja y Bancos (1.1.01)
+     */
+    public function createAccountingAccount(): void
+    {
+        DB::transaction(function () {
+            // 1. Localizar la cuenta padre (Caja y Bancos)
+            $parent = AccountingAccount::where('code', '1.1.01')->first();
+            if (!$parent) return;
+
+            // 2. Determinar el nuevo código correlativo
+            $lastChild = AccountingAccount::where('parent_id', $parent->id)
+                ->orderBy('code', 'desc')
+                ->first();
+
+            if (!$lastChild) {
+                $newCode = $parent->code . '.01';
+            } else {
+                $parts = explode('.', $lastChild->code);
+                $lastPart = (int) end($parts);
+                $newCode = $parent->code . '.' . str_pad($lastPart + 1, 2, '0', STR_PAD_LEFT);
+            }
+
+            // 3. Crear la cuenta
+            $account = AccountingAccount::create([
+                'parent_id'     => $parent->id,
+                'code'          => $newCode,
+                'name'          => 'Caja: ' . $this->name,
+                'type'          => AccountingAccount::TYPE_ASSET,
+                'level'         => $parent->level + 1,
+                'is_selectable' => true,
+            ]);
+
+            // 4. Asignar a la terminal
+            $this->updateQuietly(['cash_account_id' => $account->id]);
+        });
+    }
 
     // ===== LÓGICA DE SEGURIDAD (PIN) =====
 

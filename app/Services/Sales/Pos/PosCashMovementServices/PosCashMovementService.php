@@ -17,25 +17,23 @@ class PosCashMovementService
     public function store(array $data): PosCashMovement
     {
         return DB::transaction(function () use ($data) {
-            // 1. Validar Sesión
             $session = PosSession::findOrFail($data['pos_session_id']);
             
             if (!$session->isOpen()) {
                 throw new Exception("No se pueden registrar movimientos en una caja cerrada.");
             }
 
-            // 2. Crear el registro del movimiento
             $movement = PosCashMovement::create([
-                'pos_session_id' => $session->id,
-                'user_id'        => Auth::id(),
-                'type'           => $data['type'],
-                'amount'         => $data['amount'],
-                'reason'         => $data['reason'],
-                'reference'      => $data['reference'] ?? null,
-                'metadata'       => $data['metadata'] ?? null,
+                'pos_session_id'        => $session->id,
+                'user_id'               => Auth::id(),
+                'accounting_account_id' => $data['accounting_account_id'], // <--- AGREGADO
+                'type'                  => $data['type'],
+                'amount'                => $data['amount'],
+                'reason'                => $data['reason'],
+                'reference'             => $data['reference'] ?? null,
+                'metadata'              => $data['metadata'] ?? null,
             ]);
 
-            // 3. DISPARAR EVENTO (Toda la lógica contable vive ahora en el Listener)
             event(new CashMovementRegistered($movement));
 
             return $movement;

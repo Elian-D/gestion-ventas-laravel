@@ -8,7 +8,8 @@
         method="POST" 
         class="p-6"
         x-data="{ 
-            expected: {{ $session->expected_cash }},
+            {{-- Inyectamos el valor que viene del Service a través del controlador o una variable --}}
+            expected: {{ $session->calculateExpected() }}, 
             real: '',
             get difference() { 
                 return this.real === '' ? 0 : (parseFloat(this.real) - this.expected).toFixed(2);
@@ -18,21 +19,24 @@
         @method('PATCH')
         
         <div class="bg-gray-50 rounded-2xl p-5 mb-6 border border-gray-100 space-y-3 shadow-sm">
+            {{-- Cambiamos las etiquetas para que sean claras --}}
             <div class="flex justify-between text-xs font-medium text-gray-500">
                 <span>(+) Fondo Inicial:</span>
                 <span class="font-mono font-bold text-gray-700">${{ number_format($session->opening_balance, 2) }}</span>
             </div>
+            {{-- Usamos las relaciones directas del modelo --}}
             <div class="flex justify-between text-xs font-medium text-blue-600">
                 <span>(+) Entradas Manuales:</span>
-                <span class="font-mono font-bold">${{ number_format($session->cash_movements_in_total, 2) }}</span>
+                <span class="font-mono font-bold">${{ number_format($session->cashMovements()->in()->sum('amount'), 2) }}</span>
             </div>
             <div class="flex justify-between text-xs font-medium text-red-500">
                 <span>(-) Salidas/Gastos:</span>
-                <span class="font-mono font-bold">(${{ number_format($session->cash_movements_out_total, 2) }})</span>
+                <span class="font-mono font-bold">(${{ number_format($session->cashMovements()->out()->sum('amount'), 2) }})</span>
             </div>
             <div class="pt-3 border-t border-dashed border-gray-200 flex justify-between items-center">
                 <span class="text-sm font-black text-indigo-900 uppercase">Monto Esperado:</span>
-                <span class="font-mono text-xl font-black text-indigo-600">${{ number_format($session->expected_cash, 2) }}</span>
+                {{-- Reflejamos lo que Alpine usará --}}
+                <span class="font-mono text-xl font-black text-indigo-600" x-text="'$' + expected.toLocaleString()"></span>
             </div>
         </div>
 

@@ -38,9 +38,40 @@
                 </td>
             @endif
 
+            {{-- Asiento Contable --}}
+            @if(in_array('accounting_entry_id', $visibleColumns))
+                <td class="px-6 py-4 text-sm">
+                    @if($movement->accounting_entry_id)
+                        <div class="flex items-center text-blue-600 font-medium hover:underline cursor-pointer">
+                            <x-heroicon-s-document-text class="w-4 h-4 mr-1 opacity-70" />
+                            #{{ $movement->accounting_entry_id }}
+                        </div>
+                    @else
+                        <span class="text-gray-300 italic text-[10px]">No generado</span>
+                    @endif
+                </td>
+            @endif
+
+            @if(in_array('accounting_account_id', $visibleColumns))
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex flex-col">
+                        @if($movement->account)
+                            <span class="text-sm font-bold text-gray-800">
+                                {{ $movement->account->name }}
+                            </span>
+                            <span class="text-[10px] font-mono text-gray-400">
+                                {{ $movement->account->code }}
+                            </span>
+                        @else
+                            <span class="text-xs text-gray-400 italic">No asignada</span>
+                        @endif
+                    </div>
+                </td>
+            @endif
+
             {{-- Tipo de Movimiento con Estilos del Modelo --}}
             @if(in_array('type', $visibleColumns))
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 whitespace-nowrap">
                     @php
                         $style = \App\Models\Sales\Pos\PosCashMovement::getTypeStyles()[$movement->type] ?? 'bg-gray-100 text-gray-800';
                         $icon = \App\Models\Sales\Pos\PosCashMovement::getTypeIcons()[$movement->type] ?? 'heroicon-s-minus';
@@ -55,7 +86,7 @@
 
             {{-- Monto --}}
             @if(in_array('amount', $visibleColumns))
-                <td class="px-6 py-4 text-sm font-bold">
+                <td class="px-6 py-4 text-sm font-bold whitespace-nowrap">
                     <span class="{{ $movement->type === 'in' ? 'text-green-600' : 'text-amber-600' }}">
                         {{ $movement->type === 'in' ? '+' : '-' }} ${{ number_format($movement->amount, 2) }}
                     </span>
@@ -73,20 +104,6 @@
             @if(in_array('reference', $visibleColumns))
                 <td class="px-6 py-4 text-sm text-gray-500 italic">
                     {{ $movement->reference ?? 'Sin referencia' }}
-                </td>
-            @endif
-
-            {{-- Asiento Contable --}}
-            @if(in_array('accounting_entry_id', $visibleColumns))
-                <td class="px-6 py-4 text-sm">
-                    @if($movement->accounting_entry_id)
-                        <div class="flex items-center text-blue-600 font-medium hover:underline cursor-pointer">
-                            <x-heroicon-s-document-text class="w-4 h-4 mr-1 opacity-70" />
-                            #{{ $movement->accounting_entry_id }}
-                        </div>
-                    @else
-                        <span class="text-gray-300 italic text-[10px]">No generado</span>
-                    @endif
                 </td>
             @endif
 

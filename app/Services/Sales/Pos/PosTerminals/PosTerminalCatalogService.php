@@ -26,14 +26,6 @@ class PosTerminalCatalogService
                 ->orderBy('name')
                 ->get(),
 
-            // 2. Cuentas Contables: Solo cuentas que pueden recibir pagos (Caja/Bancos)
-            // Filtramos por el código 1.1 (Activos Corrientes / Disponibilidades)
-            'cash_accounts' => AccountingAccount::where('code', 'like', '1.1.03.0%')
-                ->where('is_selectable', true) // Asegura que no sea una cuenta padre/cabecera
-                ->select('id', 'name', 'code')
-                ->orderBy('code')
-                ->get(),
-
             // 3. Tipos de NCF: Solo aquellos que tienen secuencias activas y disponibles
             'ncf_types' => $modoFiscal ? NcfType::whereHas('sequences', function($q) {
                     $q->where('status', NcfSequence::STATUS_ACTIVE)

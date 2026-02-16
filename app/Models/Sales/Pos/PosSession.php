@@ -96,6 +96,15 @@ class PosSession extends Model
         return $this->status === self::STATUS_OPEN;
     }
 
+    public function isClosed(): bool {
+        return $this->status === self::STATUS_CLOSED;
+    }
+
+    // Para usarlo en el modal de cierre antes de que exista el valor en la DB
+    public function calculateExpected(): float {
+        return app(\App\Services\Sales\Pos\PosSessionServices\PosSessionService::class)->calculateExpected($this);
+    }
+
     // Atributos virtuales para facilitar el arqueo
     public function getCashMovementsInTotalAttribute(): float
     {

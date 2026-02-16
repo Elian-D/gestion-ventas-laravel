@@ -16,6 +16,7 @@ class PosCashMovement extends Model
     protected $fillable = [
         'pos_session_id',
         'user_id',
+        'accounting_account_id',
         'accounting_entry_id',
         'type',
         'amount',
@@ -72,6 +73,12 @@ class PosCashMovement extends Model
     public function accountingEntry(): BelongsTo
     {
         return $this->belongsTo(JournalEntry::class, 'accounting_entry_id');
+    }
+
+    // --- Nueva Relación ---
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Accounting\AccountingAccount::class, 'accounting_account_id');
     }
 
     // --- Scopes ---
