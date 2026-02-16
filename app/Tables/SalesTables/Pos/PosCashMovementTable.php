@@ -11,15 +11,16 @@ class PosCashMovementTable
     {
         return [
             'id'                  => 'ID',
+            'created_at'          => 'Fecha/Hora',
             'pos_session_id'      => 'Sesión',
             'user_id'             => 'Usuario/Cajero',
             'accounting_entry_id' => 'Asiento Contable',
+            'accounting_account_id' => 'Cuenta Contable', // <--- AGREGADO
             'type'                => 'Tipo',
             'amount'              => 'Monto',
             'reason'              => 'Motivo/Razón',
             'reference'           => 'Referencia',
             'metadata'            => 'Metadatos',
-            'created_at'          => 'Fecha/Hora',
         ];
     }
 

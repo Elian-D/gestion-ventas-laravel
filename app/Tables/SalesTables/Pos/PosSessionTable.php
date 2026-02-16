@@ -18,7 +18,8 @@ class PosSessionTable
             'closed_at'       => 'Fecha Cierre',
             'opening_balance' => 'Balance Inicial',
             'closing_balance' => 'Balance Final (Arqueo)',
-            'difference'      => 'Diferencia', // Calculada en caliente o en DB
+            'expected_balance' => 'Balance Esperado',
+            'difference'      => 'Diferencia', // <--- NUEVO
             'notes'           => 'Notas/Observaciones',
             'created_at'      => 'Fecha Registro',
         ];
